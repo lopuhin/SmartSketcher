@@ -80,16 +80,17 @@ public class MainSurfaceView extends SurfaceView
 	
 	
 	class MainSurfaceViewThread extends Thread {
-		private ArrayList<Shape> shapes;
+		public Sheet sheet;
 		private ArrayList<Point> lastSegment;
-		private boolean done;
 		private Paint paint;
+		
+		private boolean done;
 		
 		MainSurfaceViewThread() {
 			super();
 			done = false;
 			lastSegment = new ArrayList<Point>();
-			shapes = new ArrayList<Shape>();
+			sheet = new Sheet();
 			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			paint.setColor(Color.WHITE);
 		}
@@ -110,12 +111,7 @@ public class MainSurfaceView extends SurfaceView
 		public void draw(Canvas canvas) {
 			// clear canvas
 			canvas.drawRGB(0, 0, 0);
-			// draw shapes
-			synchronized (shapes) {
-				for (Shape sh: shapes) {
-					sh.draw(canvas, paint);
-				}	
-			}
+			sheet.draw(canvas, paint);
 			// draw last segment
 			Point prevPoint = null;
 			synchronized (lastSegment) {
@@ -136,10 +132,8 @@ public class MainSurfaceView extends SurfaceView
 		
 		public void finishSegment() {
 			synchronized (lastSegment) {
-				synchronized (shapes) {
-					shapes.add(new Curve(lastSegment));
-					lastSegment.clear();	
-				}
+				sheet.addShape(new Curve(lastSegment));
+				lastSegment.clear();
 			}
 		}
 		

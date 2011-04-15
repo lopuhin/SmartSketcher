@@ -18,9 +18,10 @@ public class Curve extends Shape {
 		}
 	}
 	
-	public void draw(Canvas canvas, Paint paint) {
+	public void draw(Canvas canvas, Paint paint, Sheet sheet) {
 		Point prevPoint = null;
 		for (Point p: points) {
+			p = sheet.toScreen(p);
 			if (prevPoint != null) {
 				canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
 			}
