@@ -138,6 +138,7 @@ public class MainSurfaceView extends SurfaceView
  
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
+		// TODO linked list of segments to convert to shapes
 		private ArrayList<PointF> lastSegment;
 		private Paint paint;
 		
@@ -195,6 +196,7 @@ public class MainSurfaceView extends SurfaceView
 		}
 		
 		public void finishSegment() {
+			// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
 			synchronized (lastSegment) {
 				sheet.addShape(new Curve(lastSegment, sheet));
 				lastSegment.clear();

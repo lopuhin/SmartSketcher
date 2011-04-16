@@ -1,0 +1,24 @@
+* Obvious features
+** DONE Start bugtracker
+   CLOSED: [2011-04-16 Sat 21:27]
+** DONE Basic drawing
+   CLOSED: [2011-04-16 Sat 14:00]
+   Draw paths as series of straight lines
+** DONE Zooming and moving with multitouch
+   CLOSED: [2011-04-16 Sat 16:00]
+** TODO Undo/redo
+** TODO Eraser
+** TODO Save in native (vector) format
+   The easiest option may be just xml file - but only after smoothing is done, I think
+** TODO Export current view to image
+** TODO Choose line width and color, degree of smoothness
+
+* Big but doable features
+** TODO Smoothing
+   Using [[http://en.wikipedia.org/wiki/B%C3%A9zier_curve][Bezier curves]], found an [[http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.9193&rep=rep1&type=pdf][article]] about curve approximation (saved to Dropbox)
+** TODO Create and edt text (via keyboard input)
+
+* Difficult features
+** TODO Simple symbol recognition
+   Recognize letters, dot... but it is hard and it is maybe out of the scope of current project
+  
