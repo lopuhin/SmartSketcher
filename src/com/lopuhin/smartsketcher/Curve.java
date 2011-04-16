@@ -7,7 +7,9 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 public class Curve extends Shape {
-	private PointF[] points;
+	protected PointF[] points;
+	
+	Curve() {}
 	
 	Curve(ArrayList<PointF> pointsList, Sheet sheet) {
 		points = new PointF[pointsList.size()];

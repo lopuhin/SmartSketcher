@@ -23,7 +23,7 @@ public class Sheet {
 			shapes.add(sh);
 		}
 	}
-	
+		
 	public void draw(Canvas canvas, Paint paint) {
 		// draw shapes
 		synchronized (shapes) {
