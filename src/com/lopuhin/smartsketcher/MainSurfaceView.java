@@ -68,12 +68,11 @@ public class MainSurfaceView extends SurfaceView
 					final float dZoom = touchSpacing / prevTouchSpacing;
 					sheet.viewZoom = prevViewZoom * dZoom;
 					final Point touchCenter = touchCenter(event);
-					final float coef = (dZoom - 1) / (dZoom * sheet.viewZoom);
 					sheet.viewPos = new Point(
-							Math.round(prevViewPos.x + touchCenter.x * coef + 
-									1 / sheet.viewZoom * (prevTouchCenter.x - touchCenter.x)),
-							Math.round(prevViewPos.y + touchCenter.y * coef + 
-									1 / sheet.viewZoom * (prevTouchCenter.y - touchCenter.y)));
+							Math.round(prevViewPos.x + 
+									(prevTouchCenter.x - touchCenter.x / dZoom) / sheet.viewZoom),
+							Math.round(prevViewPos.y + 
+									(prevTouchCenter.y - touchCenter.y / dZoom) / sheet.viewZoom));
 					prevViewZoom = sheet.viewZoom;
 					prevViewPos = sheet.viewPos;
 					prevTouchSpacing = touchSpacing;
