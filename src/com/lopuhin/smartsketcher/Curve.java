@@ -9,11 +9,11 @@ import android.graphics.Point;
 public class Curve extends Shape {
 	private Point[] points;
 	
-	Curve(ArrayList<Point> pointsList) {
+	Curve(ArrayList<Point> pointsList, Sheet sheet) {
 		points = new Point[pointsList.size()];
 		int i = 0;
 		for (Point p: pointsList) {
-			points[i] = p;
+			points[i] = sheet.toSheet(p);
 			i += 1;
 		}
 	}

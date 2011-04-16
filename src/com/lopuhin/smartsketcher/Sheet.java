@@ -35,12 +35,16 @@ public class Sheet {
 	
 	public Point toScreen(Point p) {
 		// return Point with the screen coordinates of p
-		return new Point(p.x, p.y);
+		return new Point(
+				Math.round(viewZoom * (p.x - viewPos.x)), 
+				Math.round(viewZoom * (p.y - viewPos.y)));
 	}
 	
 	public Point toSheet(Point p) {
 		// return Point with the sheet coordinates of p
-		return new Point(p.x, p.y);
+		return new Point(
+				viewPos.x + Math.round(p.x / viewZoom), 
+				viewPos.y + Math.round(p.y / viewZoom));
 	}
 	
 	

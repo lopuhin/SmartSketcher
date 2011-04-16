@@ -132,7 +132,7 @@ public class MainSurfaceView extends SurfaceView
 		
 		public void finishSegment() {
 			synchronized (lastSegment) {
-				sheet.addShape(new Curve(lastSegment));
+				sheet.addShape(new Curve(lastSegment, sheet));
 				lastSegment.clear();
 			}
 		}
