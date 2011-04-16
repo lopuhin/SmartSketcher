@@ -4,23 +4,23 @@ import java.util.ArrayList;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.PointF;
 
 public class Curve extends Shape {
-	private Point[] points;
+	private PointF[] points;
 	
-	Curve(ArrayList<Point> pointsList, Sheet sheet) {
-		points = new Point[pointsList.size()];
+	Curve(ArrayList<PointF> pointsList, Sheet sheet) {
+		points = new PointF[pointsList.size()];
 		int i = 0;
-		for (Point p: pointsList) {
+		for (PointF p: pointsList) {
 			points[i] = sheet.toSheet(p);
 			i += 1;
 		}
 	}
 	
 	public void draw(Canvas canvas, Paint paint, Sheet sheet) {
-		Point prevPoint = null;
-		for (Point p: points) {
+		PointF prevPoint = null;
+		for (PointF p: points) {
 			p = sheet.toScreen(p);
 			if (prevPoint != null) {
 				canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);

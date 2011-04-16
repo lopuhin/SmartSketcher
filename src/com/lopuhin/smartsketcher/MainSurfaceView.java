@@ -10,7 +10,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.PointF;
 
 
 public class MainSurfaceView extends SurfaceView 
@@ -21,7 +21,7 @@ public class MainSurfaceView extends SurfaceView
 	
 	// initial configuration, when user starts dragging with two fingers
 	private float prevTouchSpacing, prevViewZoom;
-	private Point prevTouchCenter, prevViewPos;
+	private PointF prevTouchCenter, prevViewPos;
 	
 	private SurfaceHolder holder;
 	private MainSurfaceViewThread mainSurfaceViewThread;
@@ -43,7 +43,7 @@ public class MainSurfaceView extends SurfaceView
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
 		if (mainSurfaceViewThread != null) {
-			final Point mainPoint = new Point((int)event.getX(), (int)event.getY());
+			final PointF mainPoint = new PointF(event.getX(), event.getY());
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
 			case (MotionEvent.ACTION_DOWN) :
 				mode = DRAW_MODE;
@@ -56,7 +56,7 @@ public class MainSurfaceView extends SurfaceView
 					mainSurfaceViewThread.discardSegment();
 					final Sheet sheet = mainSurfaceViewThread.sheet; 
 					prevViewZoom = sheet.viewZoom;
-					prevViewPos = new Point(sheet.viewPos.x, sheet.viewPos.y);
+					prevViewPos = new PointF(sheet.viewPos.x, sheet.viewPos.y);
 					prevTouchSpacing = dst;
 					prevTouchCenter = touchCenter(event);
 				}
@@ -67,12 +67,10 @@ public class MainSurfaceView extends SurfaceView
 					final float touchSpacing = touchSpacing(event); 
 					final float dZoom = touchSpacing / prevTouchSpacing;
 					sheet.viewZoom = prevViewZoom * dZoom;
-					final Point touchCenter = touchCenter(event);
-					sheet.viewPos = new Point(
-							Math.round(prevViewPos.x + 
-									(prevTouchCenter.x - touchCenter.x / dZoom) / sheet.viewZoom),
-							Math.round(prevViewPos.y + 
-									(prevTouchCenter.y - touchCenter.y / dZoom) / sheet.viewZoom));
+					final PointF touchCenter = touchCenter(event);
+					sheet.viewPos = new PointF(
+							prevViewPos.x +	(prevTouchCenter.x - touchCenter.x / dZoom) / sheet.viewZoom,
+							prevViewPos.y + (prevTouchCenter.y - touchCenter.y / dZoom) / sheet.viewZoom);
 					prevViewZoom = sheet.viewZoom;
 					prevViewPos = sheet.viewPos;
 					prevTouchSpacing = touchSpacing;
@@ -132,15 +130,15 @@ public class MainSurfaceView extends SurfaceView
 		return FloatMath.sqrt(x * x + y * y);
 	}
 	
-	private Point touchCenter(MotionEvent event) {
-		return new Point(
-			Math.round((event.getX(0) + event.getX(1)) / 2),
-			Math.round((event.getY(0) + event.getY(1)) / 2));
+	private PointF touchCenter(MotionEvent event) {
+		return new PointF(
+			(event.getX(0) + event.getX(1)) / 2,
+			(event.getY(0) + event.getY(1)) / 2);
 	}
  
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
-		private ArrayList<Point> lastSegment;
+		private ArrayList<PointF> lastSegment;
 		private Paint paint;
 		
 		private boolean done;
@@ -148,7 +146,7 @@ public class MainSurfaceView extends SurfaceView
 		MainSurfaceViewThread() {
 			super();
 			done = false;
-			lastSegment = new ArrayList<Point>();
+			lastSegment = new ArrayList<PointF>();
 			sheet = new Sheet();
 			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			paint.setColor(Color.BLACK);
@@ -179,9 +177,9 @@ public class MainSurfaceView extends SurfaceView
 			canvas.drawRGB(255, 255, 255);
 			sheet.draw(canvas, paint);
 			// draw last segment
-			Point prevPoint = null;
+			PointF prevPoint = null;
 			synchronized (lastSegment) {
-				for (Point p: lastSegment) {
+				for (PointF p: lastSegment) {
 					if (prevPoint != null) {
 						canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
 					}
@@ -190,7 +188,7 @@ public class MainSurfaceView extends SurfaceView
 			}
 		}
 		
-		public void addPoint(Point p) {
+		public void addPoint(PointF p) {
 			synchronized (lastSegment) {
 				mainSurfaceViewThread.lastSegment.add(p);
 			}

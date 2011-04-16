@@ -4,18 +4,18 @@ import java.util.ArrayList;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Point;
+import android.graphics.PointF;
 
 public class Sheet {
 
 	private ArrayList<Shape> shapes;
 	public float viewZoom;  // zoom of the visible screen
-	public Point viewPos; // upper left corner of the visible screen
+	public PointF viewPos; // upper left corner of the visible screen
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
 		viewZoom = 1.0f;
-		viewPos = new Point(0, 0);
+		viewPos = new PointF(0.0f, 0.0f);
 	}
 	
 	public void addShape(Shape sh) {
@@ -33,18 +33,18 @@ public class Sheet {
 		}
 	}
 	
-	public Point toScreen(Point p) {
+	public PointF toScreen(PointF p) {
 		// return Point with the screen coordinates of p
-		return new Point(
-				Math.round(viewZoom * (p.x - viewPos.x)), 
-				Math.round(viewZoom * (p.y - viewPos.y)));
+		return new PointF(
+				viewZoom * (p.x - viewPos.x), 
+				viewZoom * (p.y - viewPos.y));
 	}
 	
-	public Point toSheet(Point p) {
+	public PointF toSheet(PointF p) {
 		// return Point with the sheet coordinates of p
-		return new Point(
-				viewPos.x + Math.round(p.x / viewZoom), 
-				viewPos.y + Math.round(p.y / viewZoom));
+		return new PointF(
+				viewPos.x + p.x / viewZoom, 
+				viewPos.y + p.y / viewZoom);
 	}
 	
 	
