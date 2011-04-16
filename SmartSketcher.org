@@ -6,6 +6,11 @@
    Draw paths as series of straight lines
 ** DONE Zooming and moving with multitouch
    CLOSED: [2011-04-16 Sat 16:00]
+** TODO Fix last segment blinking
+** TODO Optimize drawing thread
+   Stop drawing thread when idle, do not redraw everything then draing new path, etc.
+** TODO Be a well-behaving application
+   Restore state, maybe something else (check by real install to the device)  
 ** TODO Undo/redo
 ** TODO Eraser
 ** TODO Save in native (vector) format
