@@ -9,8 +9,8 @@ import android.graphics.Point;
 public class Sheet {
 
 	private ArrayList<Shape> shapes;
-	private float viewZoom;  // zoom of the visible screen
-	private Point viewPos; // upper left corner of the visible screen
+	public float viewZoom;  // zoom of the visible screen
+	public Point viewPos; // upper left corner of the visible screen
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();

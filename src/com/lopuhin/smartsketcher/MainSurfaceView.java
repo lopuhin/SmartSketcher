@@ -2,6 +2,7 @@ package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
 
+import android.util.FloatMath;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -15,6 +16,13 @@ import android.graphics.Point;
 public class MainSurfaceView extends SurfaceView 
 	implements SurfaceHolder.Callback {
 	
+	private int mode;
+	private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
+	
+	// initial configuration, when user starts dragging with two fingers
+	private float prevTouchSpacing, prevViewZoom;
+	private Point prevTouchCenter, prevViewPos;
+	
 	private SurfaceHolder holder;
 	private MainSurfaceViewThread mainSurfaceViewThread;
 	private boolean hasSurface;
@@ -25,6 +33,7 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	private void init() {
+		mode = DRAW_MODE;
 		// Create a new SurfaceHolder and assign this class as its callback.
 		holder = getHolder();
 		holder.addCallback(this);
@@ -33,12 +42,52 @@ public class MainSurfaceView extends SurfaceView
 	
 	@Override
 	public boolean onTouchEvent(MotionEvent event) {
-		int action = event.getAction();
 		if (mainSurfaceViewThread != null) {
-			mainSurfaceViewThread.addPoint((int)event.getX(), (int)event.getY());
-			switch (action) {
+			final Point mainPoint = new Point((int)event.getX(), (int)event.getY());
+			switch (event.getAction() & MotionEvent.ACTION_MASK) {
+			case (MotionEvent.ACTION_DOWN) :
+				mode = DRAW_MODE;
+				mainSurfaceViewThread.addPoint(mainPoint);
+				break;
+			case (MotionEvent.ACTION_POINTER_DOWN) :
+				final float dst = touchSpacing(event); 
+				if (dst > 5f) {
+					mode = ZOOM_MODE;
+					mainSurfaceViewThread.discardSegment();
+					final Sheet sheet = mainSurfaceViewThread.sheet; 
+					prevViewZoom = sheet.viewZoom;
+					prevViewPos = new Point(sheet.viewPos.x, sheet.viewPos.y);
+					prevTouchSpacing = dst;
+					prevTouchCenter = touchCenter(event);
+				}
+				break;
+			case (MotionEvent.ACTION_MOVE) :
+				if (mode == ZOOM_MODE) {
+					final Sheet sheet = mainSurfaceViewThread.sheet;
+					final float touchSpacing = touchSpacing(event); 
+					final float dZoom = touchSpacing / prevTouchSpacing;
+					sheet.viewZoom = prevViewZoom * dZoom;
+					final Point touchCenter = touchCenter(event);
+					final float coef = (dZoom - 1) / (dZoom * sheet.viewZoom);
+					sheet.viewPos = new Point(
+							Math.round(prevViewPos.x + touchCenter.x * coef + 
+									1 / sheet.viewZoom * (prevTouchCenter.x - touchCenter.x)),
+							Math.round(prevViewPos.y + touchCenter.y * coef + 
+									1 / sheet.viewZoom * (prevTouchCenter.y - touchCenter.y)));
+					prevViewZoom = sheet.viewZoom;
+					prevViewPos = sheet.viewPos;
+					prevTouchSpacing = touchSpacing;
+					prevTouchCenter = touchCenter;
+				} else if (mode == DRAW_MODE) {
+					mainSurfaceViewThread.addPoint(mainPoint);
+				}
+				break;	
 			case (MotionEvent.ACTION_UP) :
-				mainSurfaceViewThread.finishSegment();
+				if (mode == DRAW_MODE) {
+					mainSurfaceViewThread.addPoint(mainPoint);
+					mainSurfaceViewThread.finishSegment();
+				}
+				mode = IDLE_MODE;
 				break;
 			}
 		}
@@ -78,7 +127,18 @@ public class MainSurfaceView extends SurfaceView
 			mainSurfaceViewThread.onWindowResize(w, h);
 	}
 	
+	private float touchSpacing(MotionEvent event) {
+		final float x = event.getX(0) - event.getX(1);
+		final float y = event.getY(0) - event.getY(1);
+		return FloatMath.sqrt(x * x + y * y);
+	}
 	
+	private Point touchCenter(MotionEvent event) {
+		return new Point(
+			Math.round((event.getX(0) + event.getX(1)) / 2),
+			Math.round((event.getY(0) + event.getY(1)) / 2));
+	}
+ 
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
 		private ArrayList<Point> lastSegment;
@@ -92,9 +152,16 @@ public class MainSurfaceView extends SurfaceView
 			lastSegment = new ArrayList<Point>();
 			sheet = new Sheet();
 			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			paint.setColor(Color.WHITE);
+			paint.setColor(Color.BLACK);
+			paint.setStrokeWidth(1.0f);
 		}
 		
+		public void discardSegment() {
+			synchronized (lastSegment) {
+				lastSegment.clear();
+			}
+		}
+
 		@Override
 		public void run() {
 			SurfaceHolder surfaceHolder = holder;
@@ -109,8 +176,8 @@ public class MainSurfaceView extends SurfaceView
 		}
 
 		public void draw(Canvas canvas) {
-			// clear canvas
-			canvas.drawRGB(0, 0, 0);
+			// clear canvas with white color
+			canvas.drawRGB(255, 255, 255);
 			sheet.draw(canvas, paint);
 			// draw last segment
 			Point prevPoint = null;
@@ -124,9 +191,9 @@ public class MainSurfaceView extends SurfaceView
 			}
 		}
 		
-		public void addPoint(int x, int y) {
+		public void addPoint(Point p) {
 			synchronized (lastSegment) {
-				mainSurfaceViewThread.lastSegment.add(new Point(x, y));
+				mainSurfaceViewThread.lastSegment.add(p);
 			}
 		}
 		
