@@ -33,7 +33,7 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	private void init() {
-		mode = DRAW_MODE;
+		mode = IDLE_MODE;
 		// Create a new SurfaceHolder and assign this class as its callback.
 		holder = getHolder();
 		holder.addCallback(this);
@@ -198,7 +198,7 @@ public class MainSurfaceView extends SurfaceView
 		public void finishSegment() {
 			// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
 			synchronized (lastSegment) {
-				sheet.addShape(new Curve(lastSegment, sheet));
+				sheet.addShape(new BezierCurve(lastSegment, sheet));
 				lastSegment.clear();
 			}
 		}
