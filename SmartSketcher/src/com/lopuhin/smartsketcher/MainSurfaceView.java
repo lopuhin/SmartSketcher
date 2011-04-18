@@ -197,7 +197,8 @@ public class MainSurfaceView extends SurfaceView
 		
 		public void finishSegment() {
 			// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
-			synchronized (lastSegment) {
+			synchronized (lastSegment) { // TODO - do not block for long, just copy
+				sheet.addShape(new Curve(lastSegment, sheet));
 				sheet.addShape(new BezierCurve(lastSegment, sheet));
 				lastSegment.clear();
 			}

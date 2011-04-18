@@ -5,17 +5,27 @@ import java.util.ArrayList;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.util.FloatMath;
+import android.util.Log;
 
 public class BezierCurve extends Curve {
 	
+	private final static String TAG = "BezierCurve";
+
 	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
 		// creating approximation of pointsList with cubic Bezier curve
+		final int nPoints = pointsList.size();
 		final PointF p0 = pointsList.get(0);
-		final PointF p3 = pointsList.get(pointsList.size() - 1); 
-		// TODO translate points to local coordinate system (to calculate fitting error)
-		// TODO calculate tangent vectors
-		final PointF tangent1 = new PointF(1.0f, -1.0f); 
-		final PointF tangent2 = new PointF(-1.0f, -1.0f);
+		final PointF p3 = pointsList.get(nPoints - 1); 
+		// TODO translate points to local coordinate system (to calculate fitting error faster)
+		final int nTangentPoints = 10; // TODO - choose depending on distance?
+		final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
+		final PointF tangent1 = normalized(
+				findTangent(p0, pointsList, 1, nTangentPoints - 1), tangentNorm); 
+		final PointF tangent2 = normalized(
+				findTangent(p3, pointsList, nPoints - nTangentPoints, nPoints - 2), tangentNorm);
+		Log.d(TAG , "tangent1: " + tangent1.x + ", " + tangent1.y);
+		Log.d(TAG, "tangent2: " + tangent2.x + ", " + tangent2.y);
 		final Fn fitting_fn  = new Fn() {
 			public float value(float c) {
 				// fitting error - squared max distance from approximating curve to points array
@@ -42,7 +52,8 @@ public class BezierCurve extends Curve {
 				return maxDst2;
 			}
 		};
-		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 100.0f, 0.1f);
+		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 3.0f, 0.05f);
+		Log.d(TAG, "solution: c = " + c);
 		final PointF p1 = new PointF(p0.x + c * tangent1.x, p0.y + c * tangent1.y);
 		final PointF p2 = new PointF(p3.x + c * tangent2.x, p3.y + c * tangent2.y);
 		points = new PointF[4];
@@ -60,6 +71,33 @@ public class BezierCurve extends Curve {
 			i += 1;
 		}
 		return point;
+	}
+	
+	private static PointF findTangent(final PointF at, final ArrayList<PointF> points, final int startIndex, final int endIndex) {
+		// tangent vector at point at, approximated using points from startIndex to endIndex
+		PointF tangent = new PointF();
+		for (int i = startIndex; i <= endIndex; i++ ) {
+			final PointF p = points.get(i);
+			// TODO - less weight for points farther away
+			final PointF v = normalized(new PointF(p.x - at.x, p.y - at.y), 1.0f);
+			tangent.x += v.x;
+			tangent.y += v.y;
+		}
+		return normalized(tangent, 1.0f);
+	}
+	
+	private static float norm(final PointF p) {
+		return FloatMath.sqrt(p.x * p.x + p.y * p.y);
+	}
+	
+	private static PointF normalized(final PointF p, final float newNorm) {
+		final float norm = norm(p);
+		if (norm < 0.0001f) {
+			return new PointF();
+		} else {
+			final float coef = newNorm / norm; 
+			return new PointF(p.x * coef, p.y * coef);
+		}
 	}
 	
 	public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
