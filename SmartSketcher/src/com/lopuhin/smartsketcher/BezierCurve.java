@@ -16,8 +16,8 @@ public class BezierCurve extends Curve {
 		// TODO calculate tangent vectors
 		final PointF tangent1 = new PointF(1.0f, -1.0f); 
 		final PointF tangent2 = new PointF(-1.0f, -1.0f);
-		final IFn fitting_fn  = new IFn() {
-			public float fn(float c) {
+		final Fn fitting_fn  = new Fn() {
+			public float value(float c) {
 				// fitting error - squared max distance from approximating curve to points array
 				final PointF p1 = new PointF(p0.x + c * tangent1.x, p0.y + c * tangent1.y);
 				final PointF p2 = new PointF(p3.x + c * tangent2.x, p3.y + c * tangent2.y);
