@@ -2,8 +2,22 @@ package com.lopuhin.smartsketcher;
 
 import android.util.Log;
 
-public class NewtonSolve {
+public class Solve {
 	private static final String TAG = "NewtonSolve";
+	
+	public final static float minimizeByStepping(final Fn fn, float initial, float max, float step) {
+		float minValue = fn.value(initial);
+		float minX = initial;
+		float value;
+		for (float x = initial; x <= max; x += step) {
+			value = fn.value(x);
+			if (value < minValue) {
+				minValue = value;
+				minX = x;
+			}
+		}
+		return minX;
+	}
 	
 	public final static float minimize(final Fn fn, float initial) {
 		// TODO - check for minimum?

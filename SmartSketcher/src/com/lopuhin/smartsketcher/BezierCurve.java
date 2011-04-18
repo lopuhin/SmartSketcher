@@ -42,7 +42,7 @@ public class BezierCurve extends Curve {
 				return maxDst2;
 			}
 		};
-		final float c = NewtonSolve.minimize(fitting_fn, 0.0f);
+		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 100.0f, 0.1f);
 		final PointF p1 = new PointF(p0.x + c * tangent1.x, p0.y + c * tangent1.y);
 		final PointF p2 = new PointF(p3.x + c * tangent2.x, p3.y + c * tangent2.y);
 		points = new PointF[4];
