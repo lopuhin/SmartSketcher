@@ -8,23 +8,40 @@ import android.graphics.PointF;
 import android.util.FloatMath;
 import android.util.Log;
 
-public class BezierCurve extends Curve {
+public class BezierCurve extends Shape {
+	protected PointF[] points;
 	
 	private final static String TAG = "BezierCurve";
 
 	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
 		// creating approximation of pointsList with cubic Bezier curve
-		final int nPoints = pointsList.size();
-		final PointF p0 = pointsList.get(0);
-		final PointF p3 = pointsList.get(nPoints - 1); 
+		this(pointsList, 0, pointsList.size() - 1, sheet);
+	}
+	
+	BezierCurve(final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
+		// creating approximation of pointsList from startIndex to endIndex with cubic Bezier curve
+		final PointF p0 = pointsList.get(startIndex);
+		final PointF p3 = pointsList.get(endIndex); 
 		// TODO translate points to local coordinate system (to calculate fitting error faster)
-		final int nTangentPoints = 10; // TODO - choose depending on distance?
+		final int nTangentPoints = 10; // TODO - choose depending on distance!
 		final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
-		final PointF tangent1 = normalized(
-				findTangent(p0, pointsList, 1, nTangentPoints - 1), tangentNorm); 
-		final PointF tangent2 = normalized(
-				findTangent(p3, pointsList, nPoints - nTangentPoints, nPoints - 2), tangentNorm);
-		Log.d(TAG , "tangent1: " + tangent1.x + ", " + tangent1.y);
+		PointF t1 = findTangent(p0, pointsList, startIndex + 1, startIndex + nTangentPoints);
+		if (startIndex > 0) { // use points on the both sides of p0
+			final PointF t1Outer = findTangent(
+					p0, pointsList, Math.max(0, startIndex - nTangentPoints), startIndex - 1);
+			t1.x -= t1Outer.x;
+			t1.y -= t1Outer.y;
+		}
+		final PointF tangent1 = normalized(t1, tangentNorm);
+		PointF t2 = findTangent(p3, pointsList, endIndex - nTangentPoints, endIndex - 1);
+		if (endIndex < pointsList.size() - 1) { // use points on the both sides of p3
+			final PointF t2Outer = findTangent(
+					p3, pointsList, endIndex + 1, Math.min(pointsList.size() - 1, endIndex + nTangentPoints));
+			t2.x -= t2Outer.x;
+			t2.y -= t2Outer.y;
+		}
+		final PointF tangent2 = normalized(t2, tangentNorm);
+		Log.d(TAG, "tangent1: " + tangent1.x + ", " + tangent1.y);
 		Log.d(TAG, "tangent2: " + tangent2.x + ", " + tangent2.y);
 		final Fn fitting_fn  = new Fn() {
 			public float value(float c) {
@@ -38,7 +55,8 @@ public class BezierCurve extends Curve {
 					// TODO - find closest from the pointsList
 					// FIXME - slow, but works without coordinate transformation
 					float minDst2 = -1.0f;
-					for (PointF p: pointsList) {
+					for (int i = startIndex; i <= endIndex; i++) {
+						final PointF p = pointsList.get(i);
 						final float dx = p.x - curvePoint.x, dy = p.y - curvePoint.y;
 						final float dst2 = dx * dx + dy * dy;
 						if (minDst2 < 0.0f || dst2 < minDst2) {
@@ -52,7 +70,7 @@ public class BezierCurve extends Curve {
 				return maxDst2;
 			}
 		};
-		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 3.0f, 0.05f);
+		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
 		Log.d(TAG, "solution: c = " + c);
 		final PointF p1 = new PointF(p0.x + c * tangent1.x, p0.y + c * tangent1.y);
 		final PointF p2 = new PointF(p3.x + c * tangent2.x, p3.y + c * tangent2.y);
