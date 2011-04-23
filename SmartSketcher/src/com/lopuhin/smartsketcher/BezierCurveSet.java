@@ -13,7 +13,7 @@ public class BezierCurveSet extends Shape {
 	
 	BezierCurveSet(final ArrayList<PointF> pointsList, final Sheet sheet) {
 		curves = new ArrayList<BezierCurve>();
-		ArrayList<Integer> splitCurveIndices = splitCurveInices(pointsList);
+		ArrayList<Integer> splitCurveIndices = splitCurveIndices(pointsList);
 		int prevIndex = 0;
 		for (int index: splitCurveIndices) {
 			curves.add(new BezierCurve(pointsList, prevIndex, index, sheet));
@@ -22,8 +22,9 @@ public class BezierCurveSet extends Shape {
 		curves.add(new BezierCurve(pointsList, prevIndex, pointsList.size() - 1, sheet));
 	}
 	
-	private static ArrayList<Integer> splitCurveInices(ArrayList<PointF> pointsList) {
-		// return indices of points that should be the on-curve control points of Bezier curves
+	private static ArrayList<Integer> splitCurveIndices(ArrayList<PointF> pointsList) {
+		// return indices of points that should be the on-curve control points of Bezier curves,
+		// not including first and last points of pointsList
 		ArrayList<Integer> indices = new ArrayList<Integer>();
 		indices.add(pointsList.size() / 2);
 		return indices;

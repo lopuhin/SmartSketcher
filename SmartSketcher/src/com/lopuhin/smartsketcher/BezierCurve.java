@@ -82,7 +82,8 @@ public class BezierCurve extends Shape {
 		// TODO translate points to local coordinate system (to calculate fitting error faster)
 		final int nTangentPoints = 10; // TODO - choose depending on distance!
 		final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
-		PointF t1 = findTangent(p0, startIndex + 1, startIndex + nTangentPoints, pointsList);
+		PointF t1 = findTangent(
+				p0, startIndex + 1, Math.min(pointsList.size()- 1, startIndex + nTangentPoints), pointsList);
 		if (startIndex > 0) { // use points on the both sides of p0
 			final PointF t1Outer = findTangent(
 					p0, Math.max(0, startIndex - nTangentPoints), startIndex - 1, pointsList);
@@ -90,7 +91,8 @@ public class BezierCurve extends Shape {
 			t1.y -= t1Outer.y;
 		}
 		final PointF tangent1 = normalized(t1, tangentNorm);
-		PointF t2 = findTangent(p3, endIndex - nTangentPoints, endIndex - 1, pointsList);
+		PointF t2 = findTangent(
+				p3, Math.max(0, endIndex - nTangentPoints), endIndex - 1, pointsList);
 		if (endIndex < pointsList.size() - 1) { // use points on the both sides of p3
 			final PointF t2Outer = findTangent(
 					p3, endIndex + 1, Math.min(pointsList.size() - 1, endIndex + nTangentPoints), pointsList);

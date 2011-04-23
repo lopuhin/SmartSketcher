@@ -3,6 +3,7 @@ package com.lopuhin.smartsketcher;
 import java.util.ArrayList;
 
 import android.util.FloatMath;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -26,6 +27,8 @@ public class MainSurfaceView extends SurfaceView
 	private SurfaceHolder holder;
 	private MainSurfaceViewThread mainSurfaceViewThread;
 	private boolean hasSurface;
+	
+	private final static String TAG = "MainSurfaceView";
 	
 	MainSurfaceView(Context context) {
 		super(context);
