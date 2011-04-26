@@ -9,20 +9,25 @@ import android.view.View;
 
 
 public class SmartSketcher extends Activity {
-	private MainSurfaceView mainView;
+	private MainSurfaceView mainSurfaceView;
+	private FileHelper fileHelper;
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        mainView = new MainSurfaceView(this);
-        setContentView(mainView);
-        mainView.resume();
-        registerForContextMenu(mainView);
+        mainSurfaceView = new MainSurfaceView(this);
+        setContentView(mainSurfaceView);
+        fileHelper = new FileHelper(mainSurfaceView);
+        mainSurfaceView.resume();
+        registerForContextMenu(mainSurfaceView);
     }
     
     static final private int
     	UNDO_ITEM = Menu.FIRST, 
-    	REDO_ITEM = Menu.FIRST + 1;
+    	REDO_ITEM = Menu.FIRST + 1,
+    	SAVE_ITEM = Menu.FIRST + 2;
+    
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -30,7 +35,9 @@ public class SmartSketcher extends Activity {
 
     	menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
     	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
-
+    	/*menu.add(0, SAVE_ITEM, 0, R.string.save).setIcon(
+				android.R.drawable.ic_menu_save);*/
+    	menu.add(0, SAVE_ITEM, 0, "Save");
     	return true;
     }
     
@@ -43,6 +50,9 @@ public class SmartSketcher extends Activity {
     		return true;
     	case (REDO_ITEM) :
     		// TODO
+    		return true;
+    	case (SAVE_ITEM) :
+    		fileHelper.saveToSD();
     		return true;
     	}
     	return false;

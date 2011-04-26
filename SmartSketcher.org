@@ -6,7 +6,8 @@
    Draw paths as series of straight lines
 ** DONE Zooming and moving with multitouch
    CLOSED: [2011-04-16 Sat 16:00]
-** TODO Fix crashing!!!
+** DONE Fix crashing!!!
+   CLOSED: [2011-04-24 Sun 20:34]
 ** TODO Fix last segment blinking
 ** TODO Fix curve endings
    Sometimes Bezier curve does not reach end points of original path

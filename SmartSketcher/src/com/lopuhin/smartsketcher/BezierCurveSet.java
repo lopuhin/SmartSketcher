@@ -1,6 +1,10 @@
 package com.lopuhin.smartsketcher;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.XMLFormatter;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -37,4 +41,10 @@ public class BezierCurveSet extends Shape {
 		}
 	}
 
+	public void toXml(XmlSerializer s) throws IOException {
+		for (BezierCurve curve: curves) {
+			curve.toXml(s);
+		}
+	}
+	
 }

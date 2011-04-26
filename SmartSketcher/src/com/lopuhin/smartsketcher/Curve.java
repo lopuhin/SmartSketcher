@@ -1,6 +1,9 @@
 package com.lopuhin.smartsketcher;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -35,5 +38,17 @@ public class Curve extends Shape {
 			prevPoint = p;
 		}	
 	}
+	
+	public void toXml(XmlSerializer s) throws IOException {
+		s.startTag("", "Curve");
+			for (PointF point: points) {
+				s.startTag("", "point");
+					s.attribute("", "x", String.format("%f", point.x));
+					s.attribute("", "y", String.format("%f", point.y));
+				s.endTag("", "point");
+			}
+		s.endTag("", "Curve");
+	}
+
 	
 }

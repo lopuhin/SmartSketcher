@@ -3,4 +3,8 @@
     <string name="app_name">Smart Sketcher</string>
     <string name="undo">Undo</string>
     <string name="redo">Redo</string>
+    <string name="sd_card_is_not_available">SD card is not available</string>
+    <string name="saving_to_sd_please_wait">Saving to SD, please wait</string>
+    <string name="send_image_to">Send image to</string>
+    <string name="save">Save</string>
 </resources>

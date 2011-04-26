@@ -139,6 +139,10 @@ public class MainSurfaceView extends SurfaceView
 			(event.getY(0) + event.getY(1)) / 2);
 	}
  
+	public Sheet getSheet() {
+		return mainSurfaceViewThread.sheet;
+	}
+	
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
 		// TODO linked list of segments to convert to shapes

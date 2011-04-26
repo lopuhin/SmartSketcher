@@ -1,6 +1,9 @@
 package com.lopuhin.smartsketcher;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
@@ -23,6 +26,17 @@ public class BezierCurve extends Shape {
 			}
 			prevPoint = currPoint;
 		}	
+	}
+	
+	public void toXml(XmlSerializer s) throws IOException {
+		s.startTag("", "BezierCurve");
+			for (PointF point: points) {
+				s.startTag("", "point");
+					s.attribute("", "x", String.format("%f", point.x));
+					s.attribute("", "y", String.format("%f", point.y));
+				s.endTag("", "point");
+			}
+		s.endTag("", "BezierCurve");
 	}
 	
 	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
