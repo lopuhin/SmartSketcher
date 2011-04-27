@@ -97,10 +97,10 @@ public class FileHelper {
 	}
 
 	void share() {
+		// TODO  - test
 		if (!isStorageAvailable()) {
 			return;
 		}
-
 		new SaveTask() {
 			protected void onPostExecute(File file) {
 				isSaved = true;
@@ -120,7 +120,6 @@ public class FileHelper {
 		if (!isStorageAvailable()) {
 			return;
 		}
-
 		new SaveTask().execute();
 	}
 

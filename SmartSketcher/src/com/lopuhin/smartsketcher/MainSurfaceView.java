@@ -2,6 +2,7 @@ package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
 
+import android.os.SystemClock;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -145,8 +146,9 @@ public class MainSurfaceView extends SurfaceView
 	
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
-		// TODO linked list of segments to convert to shapes
+		// TODO linked list of segments to convert to shapes?
 		private ArrayList<PointF> lastSegment;
+		private ArrayList<Long> lastSegmentTimes;
 		private Paint paint;
 		
 		private boolean done;
@@ -155,6 +157,7 @@ public class MainSurfaceView extends SurfaceView
 			super();
 			done = false;
 			lastSegment = new ArrayList<PointF>();
+			lastSegmentTimes = new ArrayList<Long>();
 			sheet = new Sheet();
 			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			paint.setColor(Color.BLACK);
@@ -164,6 +167,9 @@ public class MainSurfaceView extends SurfaceView
 		public void discardSegment() {
 			synchronized (lastSegment) {
 				lastSegment.clear();
+			}
+			synchronized (lastSegmentTimes) {
+				lastSegmentTimes.clear();
 			}
 		}
 
@@ -197,17 +203,25 @@ public class MainSurfaceView extends SurfaceView
 		}
 		
 		public void addPoint(PointF p) {
+			final long t = System.currentTimeMillis();
 			synchronized (lastSegment) {
-				mainSurfaceViewThread.lastSegment.add(p);
+				lastSegment.add(p);
+			}
+			synchronized (lastSegmentTimes) {
+				lastSegmentTimes.add(t);
 			}
 		}
 		
 		public void finishSegment() {
 			// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
 			synchronized (lastSegment) { // TODO - do not block for long, just copy
-				sheet.addShape(new Curve(lastSegment, sheet));
-				sheet.addShape(new BezierCurveSet(lastSegment, sheet));
-				lastSegment.clear();
+				synchronized (lastSegmentTimes) {
+					assert lastSegment.size() == lastSegmentTimes.size();
+					sheet.addShape(new Curve(lastSegment, sheet));
+					sheet.addShape(new BezierCurveSet(lastSegment, lastSegmentTimes, sheet));
+					lastSegment.clear();	
+					lastSegmentTimes.clear();
+				}
 			}
 		}
 		
