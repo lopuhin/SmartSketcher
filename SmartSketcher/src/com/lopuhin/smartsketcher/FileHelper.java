@@ -106,7 +106,7 @@ public class FileHelper {
 				isSaved = true;
 				Uri uri = Uri.fromFile(file);
 				Intent i = new Intent(Intent.ACTION_SEND);
-				i.setType("image/png");
+				i.setType("text/xml");
 				i.putExtra(Intent.EXTRA_STREAM, uri);
 				context.startActivity(Intent.createChooser(
 						i, context.getString(R.string.send_image_to)));
@@ -127,6 +127,7 @@ public class FileHelper {
 	File saveSheet() {
 		File newFile = getUniqueFilePath(getSDDir());
 		saveSheet(newFile);
+		// FIXME - no need to do it here, as it is only a picture?
 		notifyMediaScanner(newFile);
 		return newFile;
 	}
