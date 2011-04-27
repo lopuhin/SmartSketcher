@@ -15,7 +15,8 @@ public class BezierCurve extends Shape {
 	protected PointF[] points;
 	
 	private final static String TAG = "BezierCurve";
-
+	private float fittingError;
+	
 	public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
 		// TODO - decide how many steps to use depending on the scale
 		PointF prevPoint = null;
@@ -51,12 +52,19 @@ public class BezierCurve extends Shape {
 		final PointF[] tangents = findTangents(p0, p3, startIndex, endIndex, pointsList);
 		final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
 		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
+		// TODO - normalize by length
+		fittingError = fitting_fn.value(c) / (endIndex - startIndex);
 		Log.d(TAG, "solution: c = " + c);
 		final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
 		final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
 		points = new PointF[]{p0, p1, p2, p3};
 	}
 
+	public float getFittingError() {
+		// normalized fitting error
+		return fittingError;
+	}
+	
 	private static Fn getFittingFn(final PointF p0, final PointF p3, final PointF[] tangents,
 			final int startIndex, final int endIndex, final ArrayList<PointF> pointsList) {
 		// function that measures maximum squared distance from curve to path points

@@ -32,8 +32,9 @@ public class BezierCurveSet extends Shape {
 	private static ArrayList<Integer> splitCurveIndices(
 			ArrayList<PointF> pointsList, ArrayList<Long> pointsTimes) {
 		// return indices of points that should be the on-curve control points of Bezier curves,
-		// not including first and last points of pointsList
+		// not including first and last points of pointsList, based on speed and curvature
 		ArrayList<Integer> indices = new ArrayList<Integer>();
+		// first split based on speed
 		final float[] speeds = getSpeeds(pointsList, pointsTimes);
 		final float slowSpeed = 0.2f * getAvarage(speeds);
 		float speed;
@@ -50,7 +51,6 @@ public class BezierCurveSet extends Shape {
 				if (slowRegStart > 0) {
 					index = (i + slowRegStart) / 2;
 					indices.add(index);
-					Log.d(TAG, "adding slow index " + index);
 				}
 				slowRegStart = null;
 			}
@@ -74,7 +74,6 @@ public class BezierCurveSet extends Shape {
 	private static float[] getSpeeds(
 			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes) {
 		float[] speeds = new float[pointsList.size() - 1];
-		float sumSpeed = 0;
 		float dt, ds, dx, dy;
 		PointF p1, p2;
 		for(int i = 0; i < speeds.length; i++ ) {
@@ -85,7 +84,7 @@ public class BezierCurveSet extends Shape {
 			if (dt > 0) {
 				speeds[i] = ds / dt;
 			} else { // should never happen, really 
-				speeds[i] = sumSpeed; // large number
+				speeds[i] = 100; // large number
 			}
 		}
 		return speeds;
