@@ -19,8 +19,11 @@
    Restore state, maybe something else (check by real install to the device)  
 ** TODO Undo/redo
 ** TODO Eraser
-** TODO Save in native (vector) format
-   The easiest option may be just xml file - but only after smoothing is done, I think
+** DONE Save in native (vector) format
+   CLOSED: [2011-04-27 Wed 11:00]
+   The easiest option may be just xml file - but only after smoothing is done, I think.
+   Done by saving to xml - direct mapping from objects to xml.
+** TODO Load saved drawings   
 ** TODO Export current view to image
 ** TODO Choose line width and color, degree of smoothness
 
