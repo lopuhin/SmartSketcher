@@ -89,7 +89,7 @@ public class FileHelper {
 	private boolean isStorageAvailable() {
 		String externalStorageState = Environment.getExternalStorageState();
 		if (!externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
-			Toast.makeText(context, "SD card is not available", // FIXME R.string.sd_card_is_not_available,
+			Toast.makeText(context, R.string.sd_card_is_not_available,
 					Toast.LENGTH_SHORT).show();
 			return false;
 		}
@@ -139,16 +139,17 @@ public class FileHelper {
 
 	private class SaveTask extends AsyncTask<Void, Void, File> {
 		private ProgressDialog dialog = ProgressDialog.show(context, "",
-				"Saving..." /* context.getString(R.string.saving_to_sd_please_wait)*/, true);
+				context.getString(R.string.saving_to_sd_please_wait), true);
 
 		protected File doInBackground(Void... none) {
-			mainSurfaceView.pause();
+			// TODO - pause?
+			//mainSurfaceView.pause();
 			return saveSheet();
 		}
 
 		protected void onPostExecute(File file) {
 			dialog.hide();
-			mainSurfaceView.resume();
+			//mainSurfaceView.resume();
 		}
 	}
 

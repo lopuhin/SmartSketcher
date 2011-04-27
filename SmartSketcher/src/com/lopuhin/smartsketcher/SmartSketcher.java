@@ -35,9 +35,8 @@ public class SmartSketcher extends Activity {
 
     	menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
     	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
-    	/*menu.add(0, SAVE_ITEM, 0, R.string.save).setIcon(
-				android.R.drawable.ic_menu_save);*/
-    	menu.add(0, SAVE_ITEM, 0, "Save");
+    	menu.add(0, SAVE_ITEM, 0, R.string.save).setIcon(
+				android.R.drawable.ic_menu_save);
     	return true;
     }
     

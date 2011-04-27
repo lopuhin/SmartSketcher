@@ -9,13 +9,16 @@ import org.xmlpull.v1.XmlSerializer;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.util.Log;
 import android.util.Xml;
 
 public class Sheet {
 
-	private ArrayList<Shape> shapes;
 	public float viewZoom;  // zoom of the visible screen
 	public PointF viewPos; // upper left corner of the visible screen
+	
+	private ArrayList<Shape> shapes;
+	private final static String TAG = "Sheet";
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
@@ -42,9 +45,10 @@ public class Sheet {
 				for (Shape shape: shapes) {
 					shape.toXml(s);
 				}
-			s.endTag("", "sheet");
+			s.endTag("", "Sheet");
 			s.endDocument();
 		} catch (Exception e) {
+			Log.e(TAG, "error saving sheet", e);
 			throw new RuntimeException(e);
 		} 	
 	}
