@@ -15,20 +15,45 @@ public class BezierCurveSet extends Shape {
 	private ArrayList<BezierCurve> curves;
 
 	private final static String TAG = "BezierCurveSet";
+	private final static float maxFittingError = 3.0f;
+	private final static float slowSpeedCoef = 0.2f;
 	
 	BezierCurveSet(
 			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes, 
 			final Sheet sheet) {
 		curves = new ArrayList<BezierCurve>();
 		ArrayList<Integer> splitCurveIndices = splitCurveIndices(pointsList, pointsTimes);
+		splitCurveIndices.add(pointsList.size() - 1);
 		int prevIndex = 0;
 		for (int index: splitCurveIndices) {
-			curves.add(new BezierCurve(pointsList, prevIndex, index, sheet));
+			for (BezierCurve c: recursiveSplitting(pointsList, prevIndex, index, sheet)) {
+				curves.add(c);
+			}
 			prevIndex = index;
 		}
-		curves.add(new BezierCurve(pointsList, prevIndex, pointsList.size() - 1, sheet));
 	}
 	
+	private static ArrayList<BezierCurve> recursiveSplitting(
+			ArrayList<PointF> pointsList, int startIndex, int endIndex, Sheet sheet) {
+		// return curves, approximating this part of points, splitting recursively
+		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
+		BezierCurve initialCurve = new BezierCurve(pointsList, startIndex, endIndex, sheet);
+		Log.d(TAG, "Fitting from " + startIndex + " to " + endIndex + ": error: " + 
+				initialCurve.getFittingError());
+		if (endIndex - startIndex > 1 && initialCurve.getFittingError() > maxFittingError) {
+			final int midIndex = (endIndex + startIndex) / 2;
+			for (BezierCurve c: recursiveSplitting(pointsList, startIndex, midIndex, sheet)) {
+				curves.add(c);	
+			}
+			for (BezierCurve c: recursiveSplitting(pointsList, midIndex, endIndex, sheet)) {
+				curves.add(c);	
+			}
+		} else {
+			curves.add(initialCurve);
+		}
+		return curves;
+	}
+
 	private static ArrayList<Integer> splitCurveIndices(
 			ArrayList<PointF> pointsList, ArrayList<Long> pointsTimes) {
 		// return indices of points that should be the on-curve control points of Bezier curves,
@@ -36,7 +61,7 @@ public class BezierCurveSet extends Shape {
 		ArrayList<Integer> indices = new ArrayList<Integer>();
 		// first split based on speed
 		final float[] speeds = getSpeeds(pointsList, pointsTimes);
-		final float slowSpeed = 0.2f * getAvarage(speeds);
+		final float slowSpeed = slowSpeedCoef * getAvarage(speeds);
 		float speed;
 		int index;
 		Integer slowRegStart = null;
