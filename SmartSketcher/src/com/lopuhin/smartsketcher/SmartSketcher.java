@@ -26,7 +26,8 @@ public class SmartSketcher extends Activity {
     static final private int
     	UNDO_ITEM = Menu.FIRST, 
     	REDO_ITEM = Menu.FIRST + 1,
-    	SAVE_ITEM = Menu.FIRST + 2;
+    	SAVE_ITEM = Menu.FIRST + 2,
+    	OPEN_ITEM = Menu.FIRST + 3;
     
     
     @Override
@@ -37,6 +38,7 @@ public class SmartSketcher extends Activity {
     	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
     	menu.add(0, SAVE_ITEM, 0, R.string.save).setIcon(
 				android.R.drawable.ic_menu_save);
+    	menu.add(0, OPEN_ITEM, 0, R.string.open);
     	return true;
     }
     
@@ -53,6 +55,10 @@ public class SmartSketcher extends Activity {
     	case (SAVE_ITEM) :
     		fileHelper.saveToSD();
     		return true;
+    	case (OPEN_ITEM) :
+    		mainSurfaceView.setSheet(fileHelper.getSavedSheet());
+    		return true;
+    	
     	}
     	return false;
     }

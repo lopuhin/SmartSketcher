@@ -3,6 +3,7 @@ package com.lopuhin.smartsketcher;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.w3c.dom.Node;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;

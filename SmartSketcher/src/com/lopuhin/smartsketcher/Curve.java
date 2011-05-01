@@ -3,6 +3,9 @@ package com.lopuhin.smartsketcher;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
@@ -13,6 +16,16 @@ import android.graphics.PointF;
 public class Curve extends Shape {
 	protected PointF[] points;
 	
+	Curve(ArrayList<PointF> pointsList) {
+		points = new PointF[pointsList.size()];
+		int i = 0;
+		for (PointF p: pointsList) {
+			points[i] = p;
+			i += 1;
+		}
+	}
+	
+	// TODO - make static method
 	Curve(ArrayList<PointF> pointsList, Sheet sheet) {
 		points = new PointF[pointsList.size()];
 		int i = 0;
@@ -50,5 +63,17 @@ public class Curve extends Shape {
 		s.endTag("", "Curve");
 	}
 
+	public static Curve fromXml(Node node) throws IOException {
+		ArrayList<PointF> points = new ArrayList<PointF>();
+		NodeList pointNodes = node.getChildNodes();
+		for (int i = 0; i < pointNodes.getLength(); i++ ) {
+			Node pointNode = pointNodes.item(i);
+			NamedNodeMap attr = pointNode.getAttributes();
+			points.add(new PointF(
+					Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
+					Float.parseFloat(attr.getNamedItem("y").getNodeValue())));
+		}
+		return new Curve(points);
+	}
 	
 }

@@ -4,6 +4,13 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
@@ -27,7 +34,30 @@ public class Sheet {
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {
-		return new Sheet(); // TODO
+		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+		Sheet sheet = new Sheet();
+		try {
+			DocumentBuilder builder = factory.newDocumentBuilder();
+			Document dom = builder.parse(fis);
+            Element root = dom.getDocumentElement();
+            NodeList shapeNodes = root.getChildNodes();
+            for (int i = 0; i < shapeNodes.getLength(); i++) {
+            	Node node = shapeNodes.item(i);
+            	String nodeName = node.getNodeName();
+            	Shape shape = null;
+            	if (nodeName == "BezierCurve") {
+            		shape = BezierCurve.fromXml(node);
+            	} else if (nodeName == "BezierCurve") {
+            		shape = Curve.fromXml(node);
+            	}
+            	if (shape != null) {
+            		sheet.addShape(shape);
+            	}
+            }
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+		return sheet;
 	}
 	
 	public void saveToFile(FileOutputStream fos) {

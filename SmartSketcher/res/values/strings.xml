@@ -7,4 +7,5 @@
     <string name="saving_to_sd_please_wait">Saving to SD, please wait</string>
     <string name="send_image_to">Send image to</string>
     <string name="save">Save</string>
+    <string name="open">Open</string>
 </resources>

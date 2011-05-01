@@ -144,6 +144,9 @@ public class MainSurfaceView extends SurfaceView
 		return mainSurfaceViewThread.sheet;
 	}
 	
+	public void setSheet(Sheet sheet) {
+		mainSurfaceViewThread.sheet = sheet;
+	}
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
 		// TODO linked list of segments to convert to shapes?

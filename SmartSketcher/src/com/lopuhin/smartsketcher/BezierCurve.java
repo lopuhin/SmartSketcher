@@ -3,6 +3,9 @@ package com.lopuhin.smartsketcher;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
@@ -16,6 +19,42 @@ public class BezierCurve extends Shape {
 	
 	private final static String TAG = "BezierCurve";
 	private float fittingError;
+	
+	BezierCurve(final ArrayList<PointF> pointsList) {
+		points = new PointF[pointsList.size()];
+		int i = 0;
+		for (PointF p: pointsList) {
+			points[i] = p;
+			i += 1;
+		}
+	}
+	
+	// TODO - make static methods, not constructors
+	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
+		// creating approximation of pointsList with cubic Bezier curve
+		this(pointsList, 0, pointsList.size() - 1, sheet);
+	}
+	
+	BezierCurve(final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
+		// TODO - use sheet!!!
+		// creating approximation of pointsList from startIndex to endIndex with cubic Bezier curve
+		final PointF p0 = pointsList.get(startIndex);
+		final PointF p3 = pointsList.get(endIndex);
+		final PointF[] tangents = findTangents(p0, p3, startIndex, endIndex, pointsList);
+		final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
+		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
+		// TODO - normalize by length
+		fittingError = fitting_fn.value(c) / (endIndex - startIndex);
+		Log.d(TAG, "solution: c = " + c);
+		final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
+		final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
+		points = new PointF[]{p0, p1, p2, p3};
+	}
+
+	public float getFittingError() {
+		// normalized fitting error
+		return fittingError;
+	}
 	
 	public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
 		// TODO - decide how many steps to use depending on the scale
@@ -40,29 +79,17 @@ public class BezierCurve extends Shape {
 		s.endTag("", "BezierCurve");
 	}
 	
-	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
-		// creating approximation of pointsList with cubic Bezier curve
-		this(pointsList, 0, pointsList.size() - 1, sheet);
-	}
-	
-	BezierCurve(final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
-		// creating approximation of pointsList from startIndex to endIndex with cubic Bezier curve
-		final PointF p0 = pointsList.get(startIndex);
-		final PointF p3 = pointsList.get(endIndex);
-		final PointF[] tangents = findTangents(p0, p3, startIndex, endIndex, pointsList);
-		final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
-		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
-		// TODO - normalize by length
-		fittingError = fitting_fn.value(c) / (endIndex - startIndex);
-		Log.d(TAG, "solution: c = " + c);
-		final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
-		final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
-		points = new PointF[]{p0, p1, p2, p3};
-	}
-
-	public float getFittingError() {
-		// normalized fitting error
-		return fittingError;
+	public static BezierCurve fromXml(Node node) throws IOException {
+		ArrayList<PointF> points = new ArrayList<PointF>();
+		NodeList pointNodes = node.getChildNodes();
+		for (int i = 0; i < pointNodes.getLength(); i++ ) {
+			Node pointNode = pointNodes.item(i);
+			NamedNodeMap attr = pointNode.getAttributes();
+			points.add(new PointF(
+					Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
+					Float.parseFloat(attr.getNamedItem("y").getNodeValue())));
+		}
+		return new BezierCurve(points);
 	}
 	
 	private static Fn getFittingFn(final PointF p0, final PointF p3, final PointF[] tangents,
