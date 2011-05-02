@@ -155,6 +155,10 @@ public class MainSurfaceView extends SurfaceView
 	public void setSheet(Sheet sheet) {
 		this.sheet = sheet;
 	}
+	
+	public void clearSheet() {
+		this.sheet = new Sheet();
+	}
 
 	private void addPoint(PointF p) {
 		final long t = System.currentTimeMillis();
