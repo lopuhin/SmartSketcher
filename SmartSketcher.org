@@ -14,9 +14,9 @@
 ** TODO Create curves in a separate thread
 ** TODO Start using javadoc   
 ** TODO Optimize drawing thread
-   Stop drawing thread when idle, do not redraw everything then draing new path, etc.
+   Stop drawing thread when idle, do not redraw everything when draing new path, etc.
 ** TODO Be a well-behaving application
-   Restore state, maybe something else (check by real install to the device)  
+   Restore state, maybe something else: check by real install to the device and running a lot of apps, to force killing by OS
 ** TODO Undo/redo
 ** TODO Eraser
 ** DONE Save in native (vector) format

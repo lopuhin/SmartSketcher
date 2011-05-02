@@ -29,6 +29,10 @@ public class MainSurfaceView extends SurfaceView
 	private MainSurfaceViewThread mainSurfaceViewThread;
 	private boolean hasSurface;
 	
+	private Sheet sheet;
+	private ArrayList<PointF> lastSegment;
+	private ArrayList<Long> lastSegmentTimes;
+	
 	private final static String TAG = "MainSurfaceView";
 	
 	MainSurfaceView(Context context) {
@@ -42,6 +46,9 @@ public class MainSurfaceView extends SurfaceView
 		holder = getHolder();
 		holder.addCallback(this);
 		hasSurface = false;
+		sheet = new Sheet();
+		lastSegment = new ArrayList<PointF>();
+		lastSegmentTimes = new ArrayList<Long>();
 	}
 	
 	@Override
@@ -51,14 +58,13 @@ public class MainSurfaceView extends SurfaceView
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
 			case (MotionEvent.ACTION_DOWN) :
 				mode = DRAW_MODE;
-				mainSurfaceViewThread.addPoint(mainPoint);
+				addPoint(mainPoint);
 				break;
 			case (MotionEvent.ACTION_POINTER_DOWN) :
 				final float dst = touchSpacing(event); 
 				if (dst > 5f) {
 					mode = ZOOM_MODE;
-					mainSurfaceViewThread.discardSegment();
-					final Sheet sheet = mainSurfaceViewThread.sheet; 
+					discardSegment();
 					prevViewZoom = sheet.viewZoom;
 					prevViewPos = new PointF(sheet.viewPos.x, sheet.viewPos.y);
 					prevTouchSpacing = dst;
@@ -67,7 +73,6 @@ public class MainSurfaceView extends SurfaceView
 				break;
 			case (MotionEvent.ACTION_MOVE) :
 				if (mode == ZOOM_MODE) {
-					final Sheet sheet = mainSurfaceViewThread.sheet;
 					final float touchSpacing = touchSpacing(event); 
 					final float dZoom = touchSpacing / prevTouchSpacing;
 					sheet.viewZoom = prevViewZoom * dZoom;
@@ -80,13 +85,13 @@ public class MainSurfaceView extends SurfaceView
 					prevTouchSpacing = touchSpacing;
 					prevTouchCenter = touchCenter;
 				} else if (mode == DRAW_MODE) {
-					mainSurfaceViewThread.addPoint(mainPoint);
+					addPoint(mainPoint);
 				}
 				break;	
 			case (MotionEvent.ACTION_UP) :
 				if (mode == DRAW_MODE) {
-					mainSurfaceViewThread.addPoint(mainPoint);
-					mainSurfaceViewThread.finishSegment();
+					addPoint(mainPoint);
+					finishSegment();
 				}
 				mode = IDLE_MODE;
 				break;
@@ -114,8 +119,11 @@ public class MainSurfaceView extends SurfaceView
 	
 	public void surfaceCreated(SurfaceHolder holder) {
 		hasSurface = true;
-		if (mainSurfaceViewThread != null)
+		if (mainSurfaceViewThread == null) {
+			resume();
+		} else {
 			mainSurfaceViewThread.start();
+		}
 	}
 	
 	public void surfaceDestroyed(SurfaceHolder holder) {
@@ -141,18 +149,46 @@ public class MainSurfaceView extends SurfaceView
 	}
  
 	public Sheet getSheet() {
-		return mainSurfaceViewThread.sheet;
+		return sheet;
 	}
 	
 	public void setSheet(Sheet sheet) {
-		mainSurfaceViewThread.sheet = sheet;
+		this.sheet = sheet;
+	}
+
+	private void addPoint(PointF p) {
+		final long t = System.currentTimeMillis();
+		synchronized (lastSegment) {
+			lastSegment.add(p);
+		}
+		synchronized (lastSegmentTimes) {
+			lastSegmentTimes.add(t);
+		}
 	}
 	
+	private void finishSegment() {
+		// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
+		synchronized (lastSegment) { // TODO - do not block for long, just copy
+			synchronized (lastSegmentTimes) {
+				assert lastSegment.size() == lastSegmentTimes.size();
+				sheet.addShape(new Curve(lastSegment, sheet));
+				sheet.addShape(new BezierCurveSet(lastSegment, lastSegmentTimes, sheet));
+				lastSegment.clear();	
+				lastSegmentTimes.clear();
+			}
+		}
+	}
+
+	private void discardSegment() {
+		synchronized (lastSegment) {
+			lastSegment.clear();
+		}
+		synchronized (lastSegmentTimes) {
+			lastSegmentTimes.clear();
+		}
+	}
+
 	class MainSurfaceViewThread extends Thread {
-		public Sheet sheet;
-		// TODO linked list of segments to convert to shapes?
-		private ArrayList<PointF> lastSegment;
-		private ArrayList<Long> lastSegmentTimes;
 		private Paint paint;
 		
 		private boolean done;
@@ -160,23 +196,12 @@ public class MainSurfaceView extends SurfaceView
 		MainSurfaceViewThread() {
 			super();
 			done = false;
-			lastSegment = new ArrayList<PointF>();
-			lastSegmentTimes = new ArrayList<Long>();
-			sheet = new Sheet();
+			
 			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			paint.setColor(Color.BLACK);
 			paint.setStrokeWidth(1.0f);
 		}
 		
-		public void discardSegment() {
-			synchronized (lastSegment) {
-				lastSegment.clear();
-			}
-			synchronized (lastSegmentTimes) {
-				lastSegmentTimes.clear();
-			}
-		}
-
 		@Override
 		public void run() {
 			SurfaceHolder surfaceHolder = holder;
@@ -203,29 +228,6 @@ public class MainSurfaceView extends SurfaceView
 						canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
 					}
 					prevPoint = p;
-				}
-			}
-		}
-		
-		public void addPoint(PointF p) {
-			final long t = System.currentTimeMillis();
-			synchronized (lastSegment) {
-				lastSegment.add(p);
-			}
-			synchronized (lastSegmentTimes) {
-				lastSegmentTimes.add(t);
-			}
-		}
-		
-		public void finishSegment() {
-			// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
-			synchronized (lastSegment) { // TODO - do not block for long, just copy
-				synchronized (lastSegmentTimes) {
-					assert lastSegment.size() == lastSegmentTimes.size();
-					sheet.addShape(new Curve(lastSegment, sheet));
-					sheet.addShape(new BezierCurveSet(lastSegment, lastSegmentTimes, sheet));
-					lastSegment.clear();	
-					lastSegmentTimes.clear();
 				}
 			}
 		}

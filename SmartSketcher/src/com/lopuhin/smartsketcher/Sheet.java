@@ -30,8 +30,8 @@ public class Sheet {
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
-		viewZoom = 1.0f;
-		viewPos = new PointF(0.0f, 0.0f);
+		viewZoom = 2.0f;
+		viewPos = new PointF(100.0f, 200.0f);
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {
