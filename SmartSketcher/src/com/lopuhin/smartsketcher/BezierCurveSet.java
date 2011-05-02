@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class BezierCurveSet {
 	private final static String TAG = "BezierCurveSet";
-	private final static float maxFittingError = 5.0f;
+	private final static float maxFittingError = 10000.0f;
 	private final static float slowSpeedCoef = 0.2f;
 	
 	public static ArrayList<BezierCurve> approximated(
@@ -28,7 +28,7 @@ public class BezierCurveSet {
 	}
 	
 	private static ArrayList<BezierCurve> recursiveSplitting(
-			ArrayList<PointF> pointsList, int startIndex, int endIndex, Sheet sheet) {
+			final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
 		// return curves, approximating this part of points, splitting recursively
 		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
 		BezierCurve initialCurve = BezierCurve.approximated(pointsList, startIndex, endIndex, sheet);
@@ -49,7 +49,7 @@ public class BezierCurveSet {
 	}
 
 	private static ArrayList<Integer> splitCurveIndices(
-			ArrayList<PointF> pointsList, ArrayList<Long> pointsTimes) {
+			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes) {
 		// return indices of points that should be the on-curve control points of Bezier curves,
 		// not including first and last points of pointsList, based on speed and curvature
 		ArrayList<Integer> indices = new ArrayList<Integer>();
@@ -97,7 +97,7 @@ public class BezierCurveSet {
 		return speeds;
 	}
 
-	private static float getAvarage(float[] values) {
+	private static float getAvarage(final float[] values) {
 		float sum = 0;
 		for (float v: values) {
 			sum += v;

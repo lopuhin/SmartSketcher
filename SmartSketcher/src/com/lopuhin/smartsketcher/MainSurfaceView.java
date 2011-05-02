@@ -167,7 +167,7 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	private void finishSegment() {
-		// TODO - convert lastSegment to Shape in drawing thread, or in a separate thread
+		// TODO - convert lastSegment to Shape in a separate thread
 		synchronized (lastSegment) { // TODO - do not block for long, just copy
 			synchronized (lastSegmentTimes) {
 				assert lastSegment.size() == lastSegmentTimes.size();
@@ -192,7 +192,6 @@ public class MainSurfaceView extends SurfaceView
 
 	class MainSurfaceViewThread extends Thread {
 		private Paint paint;
-		
 		private boolean done;
 		
 		MainSurfaceViewThread() {
