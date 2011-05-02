@@ -23,7 +23,8 @@
    CLOSED: [2011-04-27 Wed 11:00]
    The easiest option may be just xml file - but only after smoothing is done, I think.
    Done by saving to xml - direct mapping from objects to xml.
-** TODO Load saved drawings   
+** DONE Load saved drawings   
+   CLOSED: [2011-05-02 Mon 16:52]
 ** TODO Export current view to image
 ** TODO Choose line width and color, degree of smoothness
 
