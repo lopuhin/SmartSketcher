@@ -26,7 +26,7 @@ public class SmartSketcher extends Activity {
     static final private int
     	UNDO_ITEM = Menu.FIRST, 
     	REDO_ITEM = Menu.FIRST + 1,
-    	SAVE_ITEM = Menu.FIRST + 2,
+    	SAVE_ITEM = Menu.FIRST + 2, // TODO - only new, not save!
     	OPEN_ITEM = Menu.FIRST + 3;
     
     @Override

@@ -29,13 +29,18 @@ public class BezierCurve extends Shape {
 		}
 	}
 	
-	// TODO - make static methods, not constructors
-	BezierCurve(final ArrayList<PointF> pointsList, final Sheet sheet) {
-		// creating approximation of pointsList with cubic Bezier curve
-		this(pointsList, 0, pointsList.size() - 1, sheet);
+	BezierCurve(final PointF[] pointsList) {
+		points = pointsList;
 	}
 	
-	BezierCurve(final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
+	// TODO - make static methods, not constructors
+	public static BezierCurve approximated(final ArrayList<PointF> pointsList, final Sheet sheet) {
+		// creating approximation of pointsList with cubic Bezier curve
+		return approximated(pointsList, 0, pointsList.size() - 1, sheet);
+	}
+	
+	public static BezierCurve approximated(
+			final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
 		// TODO - use sheet!!!
 		// creating approximation of pointsList from startIndex to endIndex with cubic Bezier curve
 		final PointF p0 = pointsList.get(startIndex);
@@ -44,11 +49,12 @@ public class BezierCurve extends Shape {
 		final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
 		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
 		// TODO - normalize by length
-		fittingError = fitting_fn.value(c) / (endIndex - startIndex);
 		Log.d(TAG, "solution: c = " + c);
 		final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
 		final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
-		points = new PointF[]{p0, p1, p2, p3};
+		BezierCurve curve = new BezierCurve(new PointF[]{p0, p1, p2, p3});
+		curve.fittingError = fitting_fn.value(c) / (endIndex - startIndex);
+		return curve;
 	}
 
 	public float getFittingError() {

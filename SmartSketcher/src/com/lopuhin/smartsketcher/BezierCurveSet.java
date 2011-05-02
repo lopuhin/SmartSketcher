@@ -1,28 +1,20 @@
 package com.lopuhin.smartsketcher;
 
-import java.io.IOException;
 import java.util.ArrayList;
 
-import org.w3c.dom.Node;
-import org.xmlpull.v1.XmlSerializer;
-
-import android.graphics.Canvas;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.FloatMath;
 import android.util.Log;
 
-public class BezierCurveSet extends Shape {
-	private ArrayList<BezierCurve> curves;
-
+public class BezierCurveSet {
 	private final static String TAG = "BezierCurveSet";
 	private final static float maxFittingError = 5.0f;
 	private final static float slowSpeedCoef = 0.2f;
 	
-	BezierCurveSet(
+	public static ArrayList<BezierCurve> approximated(
 			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes, 
 			final Sheet sheet) {
-		curves = new ArrayList<BezierCurve>();
+		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
 		ArrayList<Integer> splitCurveIndices = splitCurveIndices(pointsList, pointsTimes);
 		splitCurveIndices.add(pointsList.size() - 1);
 		int prevIndex = 0;
@@ -32,13 +24,14 @@ public class BezierCurveSet extends Shape {
 			}
 			prevIndex = index;
 		}
+		return curves;
 	}
 	
 	private static ArrayList<BezierCurve> recursiveSplitting(
 			ArrayList<PointF> pointsList, int startIndex, int endIndex, Sheet sheet) {
 		// return curves, approximating this part of points, splitting recursively
 		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
-		BezierCurve initialCurve = new BezierCurve(pointsList, startIndex, endIndex, sheet);
+		BezierCurve initialCurve = BezierCurve.approximated(pointsList, startIndex, endIndex, sheet);
 		Log.d(TAG, "Fitting from " + startIndex + " to " + endIndex + ": error: " + 
 				initialCurve.getFittingError());
 		if (endIndex - startIndex > 1 && initialCurve.getFittingError() > maxFittingError) {
@@ -82,19 +75,6 @@ public class BezierCurveSet extends Shape {
 			}
 		}
 		return indices;
-	}
-
-	@Override
-	public void draw(Canvas canvas, Paint paint, Sheet sheet) {
-		for (BezierCurve c: curves) {
-			c.draw(canvas, paint, sheet);
-		}
-	}
-
-	public void toXml(XmlSerializer s) throws IOException {
-		for (BezierCurve curve: curves) {
-			curve.toXml(s);
-		}
 	}
 	
 	private static float[] getSpeeds(
