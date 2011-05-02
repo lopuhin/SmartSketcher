@@ -8,7 +8,7 @@ import android.util.Log;
 
 public class BezierCurveSet {
 	private final static String TAG = "BezierCurveSet";
-	private final static float maxFittingError = 10000.0f;
+	private final static float maxFittingError = 2.0f;
 	private final static float slowSpeedCoef = 0.2f;
 	
 	public static ArrayList<BezierCurve> approximated(

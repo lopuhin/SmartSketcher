@@ -9,6 +9,7 @@ import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.FloatMath;
@@ -59,6 +60,16 @@ public class BezierCurve extends Shape {
 	
 	public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
 		// TODO - decide how many steps to use depending on the scale
+
+		final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		pointPaint.setColor(Color.GREEN);
+		pointPaint.setStrokeWidth(5.0f);
+		
+		PointF startPoint = points[0];
+		PointF endPoint = points[points.length - 1];
+		canvas.drawPoint(startPoint.x, startPoint.y, pointPaint);
+		canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
+		
 		PointF prevPoint = null;
 		for (float t = 0; t <= 1.01; t += 0.05) {
 			PointF currPoint = curvePoint(points, t);
@@ -129,25 +140,27 @@ public class BezierCurve extends Shape {
 				final PointF trP1 = new PointF(trP0.x + c * trTangents[0].x, trP0.y + c * trTangents[0].y);
 				final PointF trP2 = new PointF(trP3.x + c * trTangents[1].x, trP3.y + c * trTangents[1].y);
 				final PointF[] controlPoints = {trP0, trP1, trP2, trP3};
-				float maxDst2 = 0.0f;
-				for (float t = 0; t <= 1; t += 0.1f) {
-					final PointF curvePoint = curvePoint(controlPoints, t);
-					// TODO - find closest from the pointsList
-					// FIXME - slow, but works without coordinate transformation
-					float minDst2 = -1.0f;
-					for (int i = startIndex; i <= endIndex; i++) {
+				float maxDst = 0.0f;
+				int closestIndex = 1;
+				for (float curveT = 0; curveT <= 1.01; curveT += 0.1f) {
+					final PointF curvePoint = curvePoint(controlPoints, curveT);
+					// find two closest points by x-axis, and approximate y value linearly
+					for (int i = closestIndex; i <= endIndex; i++ ) {
 						final PointF p = trPoints.get(i);
-						final float dx = p.x - curvePoint.x, dy = p.y - curvePoint.y;
-						final float dst2 = dx * dx + dy * dy;
-						if (minDst2 < 0.0f || dst2 < minDst2) {
-							minDst2 = dst2;
+						if (p.x > curvePoint.x) {
+							final PointF prevP = trPoints.get(i-1);
+							final float t = (curvePoint.x - prevP.x) / (p.x - prevP.x); 
+							final float minDst = Math.abs(
+									curvePoint.y - (t * p.y + (1 - t) * prevP.y));
+							if (minDst > maxDst) {
+								maxDst = minDst;
+							}
+							closestIndex = i;
+							break;
 						}
 					}
-					if (minDst2 > maxDst2) {
-						maxDst2 = minDst2;
-					}
 				}
-				return maxDst2;
+				return maxDst;
 			}
 		};
 	}
