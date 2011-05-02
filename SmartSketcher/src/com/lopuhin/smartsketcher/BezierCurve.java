@@ -19,6 +19,8 @@ public class BezierCurve extends Shape {
 	protected PointF[] points;
 	
 	private final static String TAG = "BezierCurve";
+	private final static Boolean DEBUG = true;
+	
 	private float fittingError;
 	
 	BezierCurve(final ArrayList<PointF> pointsList) {
@@ -49,26 +51,39 @@ public class BezierCurve extends Shape {
 		final PointF[] tangents = findTangents(p0, p3, startIndex, endIndex, pointsList);
 		final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
 		final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
-		// TODO - normalize by length
 		Log.d(TAG, "solution: c = " + c);
 		final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
 		final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
 		BezierCurve curve = new BezierCurve(new PointF[]{p0, p1, p2, p3});
-		curve.fittingError = fitting_fn.value(c) / (endIndex - startIndex);
+		curve.fittingError = fitting_fn.value(c); // TODO - normalize by length?
 		return curve;
 	}
 	
 	public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
+		// TODO - use sheet!
 		// TODO - decide how many steps to use depending on the scale
 
-		final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		pointPaint.setColor(Color.GREEN);
-		pointPaint.setStrokeWidth(5.0f);
+		if (DEBUG) {
+			final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			pointPaint.setColor(Color.GREEN);
+			pointPaint.setStrokeWidth(5.0f);
 		
-		PointF startPoint = points[0];
-		PointF endPoint = points[points.length - 1];
-		canvas.drawPoint(startPoint.x, startPoint.y, pointPaint);
-		canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
+			PointF startPoint = points[0];
+			PointF endPoint = points[points.length - 1];
+			canvas.drawPoint(startPoint.x, startPoint.y, pointPaint);
+			canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
+			
+			pointPaint.setStrokeWidth(1.0f);
+			PointF prevControlPoint = null;
+			int idx = 0;
+			for (PointF currPoint: points) {
+				if (prevControlPoint != null && idx != 1) {
+					canvas.drawLine(prevControlPoint.x, prevControlPoint.y, currPoint.x, currPoint.y, pointPaint);
+					idx += 1;
+				}
+				prevControlPoint = currPoint;
+			}
+		}
 		
 		PointF prevPoint = null;
 		for (float t = 0; t <= 1.01; t += 0.05) {

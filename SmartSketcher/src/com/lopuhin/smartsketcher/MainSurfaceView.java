@@ -176,8 +176,8 @@ public class MainSurfaceView extends SurfaceView
 			synchronized (lastSegmentTimes) {
 				assert lastSegment.size() == lastSegmentTimes.size();
 				sheet.addShape(new Curve(lastSegment, sheet));
-				for (BezierCurve curve: BezierCurveSet.approximated(lastSegment, lastSegmentTimes, sheet)) {
-					sheet.addShape(curve);
+				for (Shape sh: BezierCurveSet.approximated(lastSegment, lastSegmentTimes, sheet)) {
+					sheet.addShape(sh);
 				}
 				lastSegment.clear();	
 				lastSegmentTimes.clear();

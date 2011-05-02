@@ -11,36 +11,45 @@ public class BezierCurveSet {
 	private final static float maxFittingError = 2.0f;
 	private final static float slowSpeedCoef = 0.2f;
 	
-	public static ArrayList<BezierCurve> approximated(
+	public static ArrayList<Shape> approximated(
 			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes, 
 			final Sheet sheet) {
-		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
+		ArrayList<Shape> curves = new ArrayList<Shape>();
 		ArrayList<Integer> splitCurveIndices = splitCurveIndices(pointsList, pointsTimes);
 		splitCurveIndices.add(pointsList.size() - 1);
 		int prevIndex = 0;
 		for (int index: splitCurveIndices) {
-			for (BezierCurve c: recursiveSplitting(pointsList, prevIndex, index, sheet)) {
-				curves.add(c);
+			Log.d(TAG,  "Fitting start");
+			for (Shape sh: recursiveSplitting(pointsList, prevIndex, index, sheet)) {
+				curves.add(sh);
 			}
 			prevIndex = index;
 		}
 		return curves;
 	}
 	
-	private static ArrayList<BezierCurve> recursiveSplitting(
+	private static ArrayList<Shape> recursiveSplitting(
 			final ArrayList<PointF> pointsList, final int startIndex, final int endIndex, final Sheet sheet) {
 		// return curves, approximating this part of points, splitting recursively
-		ArrayList<BezierCurve> curves = new ArrayList<BezierCurve>();
+		ArrayList<Shape> curves = new ArrayList<Shape>();
 		BezierCurve initialCurve = BezierCurve.approximated(pointsList, startIndex, endIndex, sheet);
 		Log.d(TAG, "Fitting from " + startIndex + " to " + endIndex + ": error: " + 
 				initialCurve.getFittingError());
-		if (endIndex - startIndex > 1 && initialCurve.getFittingError() > maxFittingError) {
-			final int midIndex = (endIndex + startIndex) / 2;
-			for (BezierCurve c: recursiveSplitting(pointsList, startIndex, midIndex, sheet)) {
-				curves.add(c);	
-			}
-			for (BezierCurve c: recursiveSplitting(pointsList, midIndex, endIndex, sheet)) {
-				curves.add(c);	
+		if (initialCurve.getFittingError() > maxFittingError) {
+			if (endIndex - startIndex > 4) {
+				final int midIndex = (endIndex + startIndex) / 2;
+				for (Shape sh: recursiveSplitting(pointsList, startIndex, midIndex, sheet)) {
+					curves.add(sh);	
+				}
+				for (Shape sh: recursiveSplitting(pointsList, midIndex, endIndex, sheet)) {
+					curves.add(sh);	
+				}
+			} else { // add curve from segments
+				ArrayList<PointF> points = new ArrayList<PointF>();
+				for (int i = startIndex; i <= endIndex; i++ ) {
+					points.add(pointsList.get(i));
+				}
+				curves.add(new Curve(points, sheet));
 			}
 		} else {
 			curves.add(initialCurve);
