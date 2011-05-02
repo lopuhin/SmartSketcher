@@ -197,6 +197,7 @@ public class MainSurfaceView extends SurfaceView
 	class MainSurfaceViewThread extends Thread {
 		private Paint paint;
 		private boolean done;
+		private int lastSegmentDirtyIndex = 0;
 		
 		MainSurfaceViewThread() {
 			super();
@@ -221,19 +222,27 @@ public class MainSurfaceView extends SurfaceView
 		}
 
 		public void draw(Canvas canvas) {
-			// clear canvas with white color
-			canvas.drawRGB(255, 255, 255);
-			// draw all saved shapes
-			sheet.draw(canvas, paint);
-			// draw last segment
-			PointF prevPoint = null;
+			boolean drawSheet = false;
 			synchronized (lastSegment) {
-				for (PointF p: lastSegment) {
-					if (prevPoint != null) {
-						canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
+				if (lastSegment.size() > lastSegmentDirtyIndex) {
+					// draw only not drawn part of last segment
+					PointF prevPoint = null, currPoint;
+					int size = lastSegment.size();
+					for (int i = Math.max(1, lastSegmentDirtyIndex); i < size; i++) {
+						currPoint = lastSegment.get(i);
+						if (prevPoint == null) prevPoint = lastSegment.get(i - 1);
+						canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, paint);
+						prevPoint = currPoint;
 					}
-					prevPoint = p;
+					lastSegmentDirtyIndex = size - 1;
+				} else {
+					drawSheet = true;
+					lastSegmentDirtyIndex = 0;
 				}
+			}
+			if (drawSheet) {
+				canvas.drawRGB(255, 255, 255);
+				sheet.draw(canvas, paint);
 			}
 		}
 		
