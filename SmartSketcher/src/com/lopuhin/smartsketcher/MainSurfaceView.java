@@ -171,18 +171,10 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	private void finishSegment() {
+		SmoothingThread smoothingThread = new SmoothingThread();
+		smoothingThread.start();
 		// TODO - convert lastSegment to Shape in a separate thread
-		synchronized (lastSegment) { // TODO - do not block for long, just copy
-			synchronized (lastSegmentTimes) {
-				assert lastSegment.size() == lastSegmentTimes.size();
-				sheet.addShape(new Curve(lastSegment, sheet));
-				for (Shape sh: BezierCurveSet.approximated(lastSegment, lastSegmentTimes, sheet)) {
-					sheet.addShape(sh);
-				}
-				lastSegment.clear();	
-				lastSegmentTimes.clear();
-			}
-		}
+		
 	}
 
 	private void discardSegment() {
@@ -194,6 +186,47 @@ public class MainSurfaceView extends SurfaceView
 		}
 	}
 
+	class SmoothingThread extends Thread {
+		// copy of MainSurfaceView private values
+		private ArrayList<PointF> lastSegmentCopy;
+		private ArrayList<Long> lastSegmentTimesCopy;
+		
+		SmoothingThread() {
+			super();
+			lastSegmentCopy = new ArrayList<PointF>();
+			lastSegmentTimesCopy = new ArrayList<Long>();
+			synchronized (lastSegment) {
+				synchronized (lastSegmentTimes) {
+					assert lastSegment.size() == lastSegmentTimes.size();
+					
+					for (PointF p: lastSegment) {
+						lastSegmentCopy.add(p);
+					}
+					for (Long t: lastSegmentTimes) {
+						lastSegmentTimesCopy.add(t);
+					}
+					lastSegment.clear();	
+					lastSegmentTimes.clear();
+				}
+			}
+			synchronized (sheet) {
+				// TODO - remove later
+				sheet.addShape(new Curve(lastSegmentCopy, sheet));	
+			}
+		}
+		
+		@Override
+		public void run() {
+			ArrayList<Shape> shapes = BezierCurveSet.approximated(
+					lastSegmentCopy, lastSegmentTimesCopy, sheet);
+			synchronized (sheet) {
+				for (Shape sh: shapes) {
+					sheet.addShape(sh);
+				}	
+			}
+		}
+	}
+	
 	class MainSurfaceViewThread extends Thread {
 		private Paint paint;
 		private boolean done;
