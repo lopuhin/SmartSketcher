@@ -11,9 +11,11 @@
 ** DONE Fix curve endings
    CLOSED: [2011-05-02 Mon 18:15]
    Sometimes Bezier curve does not reach end points of original path
-** TODO Create curves in a separate thread
+** DONE Create curves in a separate thread
+   CLOSED: [2011-05-02 Mon 23:17]
 ** TODO Start using javadoc   
-** TODO Optimize drawing thread
+** DONE Optimize drawing thread
+   CLOSED: [2011-05-02 Mon 23:16]
    Stop drawing thread when idle, do not redraw everything when draing new path, fix last segment blinking, etc.
 ** TODO Be a well-behaving application
    Restore state, maybe something else: check by real install to the device and running a lot of apps, to force killing by OS

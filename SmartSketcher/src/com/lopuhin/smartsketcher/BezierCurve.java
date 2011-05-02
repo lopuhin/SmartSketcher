@@ -19,7 +19,7 @@ public class BezierCurve extends Shape {
 	protected PointF[] points;
 	
 	private final static String TAG = "BezierCurve";
-	private final static Boolean DEBUG = true;
+	private final static boolean DEBUG = true;
 	
 	private float fittingError;
 	

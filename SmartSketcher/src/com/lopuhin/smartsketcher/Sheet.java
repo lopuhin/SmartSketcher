@@ -21,17 +21,19 @@ import android.util.Log;
 import android.util.Xml;
 
 public class Sheet {
-
-	public float viewZoom;  // zoom of the visible screen
-	public PointF viewPos; // upper left corner of the visible screen
+	public boolean isDirty;
+	
+	private float viewZoom;  // zoom of the visible screen
+	private PointF viewPos; // upper left corner of the visible screen
 	
 	private ArrayList<Shape> shapes;
 	private final static String TAG = "Sheet";
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
-		viewZoom = 2.0f;
-		viewPos = new PointF(100.0f, 200.0f);
+		isDirty = true;
+		viewZoom = 1.0f;
+		viewPos = new PointF(0.0f, 0.0f);
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {
@@ -88,19 +90,53 @@ public class Sheet {
 		} 	
 	}
 	
-	public void addShape(Shape sh) {
+	public void addShape(final Shape sh) {
 		synchronized (shapes) {
 			shapes.add(sh);
 		}
+		isDirty = true;
+	}
+	
+	public void removeShape(final Shape shape) {
+		synchronized (shapes) {
+			// remove shape, iterating from the end
+			for (int i = shapes.size() - 1; i >= 0; i-- ) {
+				Shape sh = shapes.get(i);
+				if (sh == shape) {
+					shapes.remove(i);
+					return;
+				}
+			}
+		}
+		isDirty = true;
 	}
 		
-	public void draw(Canvas canvas, Paint paint) {
+	public PointF getViewPos() {
+		return new PointF(viewPos.x, viewPos.y);
+	}
+	
+	public void setViewPos(PointF viewPos) {
+		this.viewPos = new PointF(viewPos.x, viewPos.y);
+		isDirty = true;
+	}
+	
+	public float getViewZoom() {
+		return viewZoom;
+	}
+	
+	public void setViewZoom(float viewZoom) {
+		this.viewZoom = viewZoom;
+		isDirty = true;
+	}
+	
+	public void draw(Canvas canvas, final Paint paint) {
 		// draw shapes
 		synchronized (shapes) {
 			for (Shape sh: shapes) {
 				sh.draw(canvas, paint, this);
 			}	
 		}
+		isDirty = false;
 	}
 	
 	public PointF toScreen(PointF p) {

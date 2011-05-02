@@ -65,8 +65,8 @@ public class MainSurfaceView extends SurfaceView
 				if (dst > 5f) {
 					mode = ZOOM_MODE;
 					discardSegment();
-					prevViewZoom = sheet.viewZoom;
-					prevViewPos = new PointF(sheet.viewPos.x, sheet.viewPos.y);
+					prevViewZoom = sheet.getViewZoom();
+					prevViewPos = sheet.getViewPos();
 					prevTouchSpacing = dst;
 					prevTouchCenter = touchCenter(event);
 				}
@@ -75,13 +75,13 @@ public class MainSurfaceView extends SurfaceView
 				if (mode == ZOOM_MODE) {
 					final float touchSpacing = touchSpacing(event); 
 					final float dZoom = touchSpacing / prevTouchSpacing;
-					sheet.viewZoom = prevViewZoom * dZoom;
+					sheet.setViewZoom(prevViewZoom * dZoom);
 					final PointF touchCenter = touchCenter(event);
-					sheet.viewPos = new PointF(
-							prevViewPos.x +	(prevTouchCenter.x - touchCenter.x / dZoom) / sheet.viewZoom,
-							prevViewPos.y + (prevTouchCenter.y - touchCenter.y / dZoom) / sheet.viewZoom);
-					prevViewZoom = sheet.viewZoom;
-					prevViewPos = sheet.viewPos;
+					sheet.setViewPos(new PointF(
+							prevViewPos.x +	(prevTouchCenter.x - touchCenter.x / dZoom) / sheet.getViewZoom(),
+							prevViewPos.y + (prevTouchCenter.y - touchCenter.y / dZoom) / sheet.getViewZoom()));
+					prevViewZoom = sheet.getViewZoom();
+					prevViewPos = sheet.getViewPos();
 					prevTouchSpacing = touchSpacing;
 					prevTouchCenter = touchCenter;
 				} else if (mode == DRAW_MODE) {
@@ -173,8 +173,6 @@ public class MainSurfaceView extends SurfaceView
 	private void finishSegment() {
 		SmoothingThread smoothingThread = new SmoothingThread();
 		smoothingThread.start();
-		// TODO - convert lastSegment to Shape in a separate thread
-		
 	}
 
 	private void discardSegment() {
@@ -187,31 +185,31 @@ public class MainSurfaceView extends SurfaceView
 	}
 
 	class SmoothingThread extends Thread {
+		// perform one-time smoothing of lastSegment
+		
 		// copy of MainSurfaceView private values
 		private ArrayList<PointF> lastSegmentCopy;
 		private ArrayList<Long> lastSegmentTimesCopy;
+		private Curve tempCurve;
 		
 		SmoothingThread() {
 			super();
 			lastSegmentCopy = new ArrayList<PointF>();
 			lastSegmentTimesCopy = new ArrayList<Long>();
 			synchronized (lastSegment) {
-				synchronized (lastSegmentTimes) {
-					assert lastSegment.size() == lastSegmentTimes.size();
-					
-					for (PointF p: lastSegment) {
-						lastSegmentCopy.add(p);
-					}
-					for (Long t: lastSegmentTimes) {
-						lastSegmentTimesCopy.add(t);
-					}
-					lastSegment.clear();	
-					lastSegmentTimes.clear();
+				assert lastSegment.size() == lastSegmentTimes.size();			
+				for (PointF p: lastSegment) {
+					lastSegmentCopy.add(p);
 				}
+				for (Long t: lastSegmentTimes) {
+					lastSegmentTimesCopy.add(t);
+				}
+				lastSegment.clear();	
+				lastSegmentTimes.clear();
 			}
 			synchronized (sheet) {
-				// TODO - remove later
-				sheet.addShape(new Curve(lastSegmentCopy, sheet));	
+				tempCurve = new Curve(lastSegmentCopy, sheet);
+				sheet.addShape(tempCurve);
 			}
 		}
 		
@@ -222,7 +220,8 @@ public class MainSurfaceView extends SurfaceView
 			synchronized (sheet) {
 				for (Shape sh: shapes) {
 					sheet.addShape(sh);
-				}	
+				}
+				sheet.removeShape(tempCurve);
 			}
 		}
 	}
@@ -244,20 +243,29 @@ public class MainSurfaceView extends SurfaceView
 		@Override
 		public void run() {
 			SurfaceHolder surfaceHolder = holder;
-			// Repeat the drawing loop until the thread is stopped.
 			while (!done) {
 				// Lock the surface and return the canvas to draw onto.
-				Canvas canvas = surfaceHolder.lockCanvas();
-				draw(canvas);
-				// Unlock the canvas and render the current image.
-				surfaceHolder.unlockCanvasAndPost(canvas);
+				boolean needDrawing = sheet.isDirty;
+				if (!needDrawing) {
+					synchronized (lastSegment) {
+						needDrawing = lastSegment.size() > 0;
+					}
+				}
+				if (needDrawing) {
+					Canvas canvas = surfaceHolder.lockCanvas();
+					draw(canvas);
+					surfaceHolder.unlockCanvasAndPost(canvas);
+				} else {
+					try {
+						MainSurfaceViewThread.sleep(50);
+					} catch (InterruptedException e) { }
+				}
 			}
 		}
 
 		public void draw(Canvas canvas) {
-			boolean drawSheet = false;
 			synchronized (lastSegment) {
-				if (lastSegment.size() > lastSegmentDirtyIndex) {
+				if (lastSegment.size() > 1) {
 					// draw only not drawn part of last segment
 					PointF prevPoint = null, currPoint;
 					int size = lastSegment.size();
@@ -268,15 +276,12 @@ public class MainSurfaceView extends SurfaceView
 						prevPoint = currPoint;
 					}
 					lastSegmentDirtyIndex = size - 1;
-				} else {
-					drawSheet = true;
-					lastSegmentDirtyIndex = 0;
+					return;
 				}
 			}
-			if (drawSheet) {
-				canvas.drawRGB(255, 255, 255);
-				sheet.draw(canvas, paint);
-			}
+			lastSegmentDirtyIndex = 0;
+			canvas.drawRGB(255, 255, 255);
+			sheet.draw(canvas, paint);
 		}
 		
 		public void requestExitAndWait() {

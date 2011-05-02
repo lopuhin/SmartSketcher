@@ -14,7 +14,8 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 public class Curve extends Shape {
-	protected PointF[] points;
+	private PointF[] points;
+	private final static boolean DEBUG = true;
 	
 	Curve(ArrayList<PointF> pointsList) {
 		points = new PointF[pointsList.size()];
@@ -36,15 +37,15 @@ public class Curve extends Shape {
 	}
 	
 	public void draw(Canvas canvas, Paint paint, Sheet sheet) {
-		final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-		pointPaint.setColor(Color.RED);
-		pointPaint.setStrokeWidth(3.0f);
-		
 		PointF prevPoint = null;
-		
 		for (PointF p: points) {
 			p = sheet.toScreen(p);
-			canvas.drawPoint(p.x, p.y, pointPaint);
+			if (DEBUG) {
+				final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+				pointPaint.setColor(Color.RED);
+				pointPaint.setStrokeWidth(3.0f);
+				canvas.drawPoint(p.x, p.y, pointPaint);
+			}
 			if (prevPoint != null) {
 				canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
 			}
