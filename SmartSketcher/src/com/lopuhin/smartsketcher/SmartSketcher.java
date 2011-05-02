@@ -29,7 +29,6 @@ public class SmartSketcher extends Activity {
     	SAVE_ITEM = Menu.FIRST + 2,
     	OPEN_ITEM = Menu.FIRST + 3;
     
-    
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
     	super.onCreateOptionsMenu(menu);
@@ -61,17 +60,6 @@ public class SmartSketcher extends Activity {
     	
     	}
     	return false;
-    }
-
-    // FIXME - not working - should detect still long presses in onTouchEvent
-    @Override
-    public void onCreateContextMenu(
-    		ContextMenu menu, View v,
-    		ContextMenu.ContextMenuInfo menuInfo) {
-    	super.onCreateContextMenu(menu, v, menuInfo);
-    	menu.setHeaderTitle(R.string.app_name);
-    	menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
-    	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
     }
 
 }

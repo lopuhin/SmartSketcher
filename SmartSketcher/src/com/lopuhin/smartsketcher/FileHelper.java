@@ -15,7 +15,7 @@ import android.widget.Toast;
 
 
 public class FileHelper {
-	private static final String FILENAME_PATTERN = "sketch_%d.png";
+	private static final String FILENAME_PATTERN = "sketch_%d.xml";
 
 	private final MainSurfaceView mainSurfaceView;
 	private final Context context;
@@ -127,7 +127,7 @@ public class FileHelper {
 		File newFile = getUniqueFilePath(getSDDir());
 		saveSheet(newFile);
 		// FIXME - no need to do it here, as it is only a picture?
-		notifyMediaScanner(newFile);
+		//notifyMediaScanner(newFile);
 		return newFile;
 	}
 

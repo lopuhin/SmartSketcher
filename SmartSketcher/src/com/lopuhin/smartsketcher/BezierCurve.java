@@ -94,7 +94,8 @@ public class BezierCurve extends Shape {
 	
 	private static Fn getFittingFn(final PointF p0, final PointF p3, final PointF[] tangents,
 			final int startIndex, final int endIndex, final ArrayList<PointF> pointsList) {
-		// function that measures maximum squared distance from curve to path points
+		// function that measures fitting error of given approximation,
+		// using maximum squared distance from curve to path points
 		return new Fn() {
 			public float value(float c) {
 				// fitting error - squared max distance from approximating curve to points array

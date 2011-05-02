@@ -9,6 +9,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
@@ -34,6 +35,7 @@ public class Sheet {
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {
+		// load sheet from XML file
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		Sheet sheet = new Sheet();
 		try {
@@ -44,14 +46,17 @@ public class Sheet {
             for (int i = 0; i < shapeNodes.getLength(); i++) {
             	Node node = shapeNodes.item(i);
             	String nodeName = node.getNodeName();
-            	Shape shape = null;
-            	if (nodeName == "BezierCurve") {
-            		shape = BezierCurve.fromXml(node);
-            	} else if (nodeName == "BezierCurve") {
-            		shape = Curve.fromXml(node);
-            	}
-            	if (shape != null) {
-            		sheet.addShape(shape);
+            	Log.d(TAG, "loading from node " + nodeName);
+            	if (nodeName.equals("pos")) {
+            		NamedNodeMap attr = node.getAttributes();
+        			sheet.viewPos = new PointF(
+        					Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
+        					Float.parseFloat(attr.getNamedItem("y").getNodeValue()));
+        			sheet.viewZoom = Float.parseFloat(attr.getNamedItem("zoom").getNodeValue());
+            	} else if (nodeName.equals("BezierCurve")) {
+            		sheet.addShape(BezierCurve.fromXml(node));
+            	} else if (nodeName.equals("Curve")) {
+            		sheet.addShape(Curve.fromXml(node));
             	}
             }
 		} catch (Exception e) {

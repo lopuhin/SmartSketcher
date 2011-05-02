@@ -147,6 +147,7 @@ public class MainSurfaceView extends SurfaceView
 	public void setSheet(Sheet sheet) {
 		mainSurfaceViewThread.sheet = sheet;
 	}
+	
 	class MainSurfaceViewThread extends Thread {
 		public Sheet sheet;
 		// TODO linked list of segments to convert to shapes?
@@ -192,6 +193,7 @@ public class MainSurfaceView extends SurfaceView
 		public void draw(Canvas canvas) {
 			// clear canvas with white color
 			canvas.drawRGB(255, 255, 255);
+			// draw all saved shapes
 			sheet.draw(canvas, paint);
 			// draw last segment
 			PointF prevPoint = null;
@@ -229,8 +231,7 @@ public class MainSurfaceView extends SurfaceView
 		}
 		
 		public void requestExitAndWait() {
-			// Mark this thread as complete and combine into
-			// the main application thread.
+			// Mark this thread as complete and combine into the main application thread.
 			done = true;
 			try {
 				join();

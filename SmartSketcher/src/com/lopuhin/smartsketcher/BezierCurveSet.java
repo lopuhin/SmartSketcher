@@ -16,7 +16,7 @@ public class BezierCurveSet extends Shape {
 	private ArrayList<BezierCurve> curves;
 
 	private final static String TAG = "BezierCurveSet";
-	private final static float maxFittingError = 3.0f;
+	private final static float maxFittingError = 5.0f;
 	private final static float slowSpeedCoef = 0.2f;
 	
 	BezierCurveSet(
@@ -99,6 +99,7 @@ public class BezierCurveSet extends Shape {
 	
 	private static float[] getSpeeds(
 			final ArrayList<PointF> pointsList, final ArrayList<Long> pointsTimes) {
+		// speeds of drawing
 		float[] speeds = new float[pointsList.size() - 1];
 		float dt, ds, dx, dy;
 		PointF p1, p2;
