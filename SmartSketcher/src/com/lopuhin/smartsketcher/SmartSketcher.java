@@ -18,6 +18,13 @@ public class SmartSketcher extends Activity {
 	private static final int SELECT_PICTURE = 1;
 	private static String TAG = "SmartSketcher";
 	
+    static final private int
+    	UNDO_ITEM = Menu.FIRST, 
+    	REDO_ITEM = Menu.FIRST + 1,
+    	SAVE_ITEM = Menu.FIRST + 2, // TODO - only new, not save!
+    	OPEN_ITEM = Menu.FIRST + 3,
+    	CLEAR_ITEM = Menu.FIRST + 4;
+    
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,16 +32,20 @@ public class SmartSketcher extends Activity {
         mainSurfaceView = new MainSurfaceView(this);
         setContentView(mainSurfaceView);
         fileHelper = new FileHelper(mainSurfaceView);
-        mainSurfaceView.resume();
-        mainSurfaceView.setSheet(fileHelper.getSavedSheet());
     }
     
-    static final private int
-    	UNDO_ITEM = Menu.FIRST, 
-    	REDO_ITEM = Menu.FIRST + 1,
-    	SAVE_ITEM = Menu.FIRST + 2, // TODO - only new, not save!
-    	OPEN_ITEM = Menu.FIRST + 3,
-    	CLEAR_ITEM = Menu.FIRST + 4;
+    @Override
+    protected void onResume() {
+    	super.onResume();
+    	mainSurfaceView.resume();
+    	mainSurfaceView.setSheet(fileHelper.getSavedSheet());
+    }
+    
+    @Override
+    protected void onPause() {
+    	super.onPause();
+    	fileHelper.saveToSD();
+    }
     
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
