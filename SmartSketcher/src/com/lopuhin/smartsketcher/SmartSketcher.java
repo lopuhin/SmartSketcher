@@ -21,7 +21,7 @@ public class SmartSketcher extends Activity {
     static final private int
     	UNDO_ITEM = Menu.FIRST, 
     	REDO_ITEM = Menu.FIRST + 1,
-    	SAVE_ITEM = Menu.FIRST + 2, // TODO - only new, not save!
+    	NEW_ITEM = Menu.FIRST + 2,
     	OPEN_ITEM = Menu.FIRST + 3,
     	CLEAR_ITEM = Menu.FIRST + 4;
     
@@ -53,10 +53,10 @@ public class SmartSketcher extends Activity {
 
     	menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
     	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
-    	menu.add(0, CLEAR_ITEM, Menu.NONE, R.string.clear);
     	menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
-    	menu.add(0, SAVE_ITEM, Menu.NONE, R.string.save).setIcon(
-				android.R.drawable.ic_menu_save);
+    	menu.add(0, CLEAR_ITEM, Menu.NONE, R.string.clear);
+    	menu.add(0, NEW_ITEM, Menu.NONE, R.string.newitem);
+    	
     	return true;
     }
     
@@ -73,8 +73,9 @@ public class SmartSketcher extends Activity {
     	case (CLEAR_ITEM) :
     		mainSurfaceView.clearSheet();
     		return true;
-    	case (SAVE_ITEM) :
+    	case (NEW_ITEM) :
     		fileHelper.saveToSD();
+    		mainSurfaceView.clearSheet();
     		return true;
     	case (OPEN_ITEM) :
     		Intent intent = new Intent();
@@ -83,7 +84,6 @@ public class SmartSketcher extends Activity {
         	startActivityForResult(Intent.createChooser(
         			intent, "Open"), SELECT_PICTURE);
     		return true;
-    	
     	}
     	return false;
     }
