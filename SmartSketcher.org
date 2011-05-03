@@ -27,6 +27,10 @@
    Done by saving to xml - direct mapping from objects to xml.
 ** DONE Load saved drawings   
    CLOSED: [2011-05-02 Mon 16:52]
+** TODO Choose which sketch to open, using preview
+*** DONE Generate previews
+    CLOSED: [2011-05-03 Tue 20:01]
+*** TODO Gallery view of current previews    
 ** TODO Export current view to image
 ** TODO Choose line width and color, degree of smoothness
 

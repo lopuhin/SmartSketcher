@@ -227,17 +227,12 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	class MainSurfaceViewThread extends Thread {
-		private Paint paint;
 		private boolean done;
 		private int lastSegmentDirtyIndex = 0;
 		
 		MainSurfaceViewThread() {
 			super();
 			done = false;
-			
-			paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			paint.setColor(Color.BLACK);
-			paint.setStrokeWidth(1.0f);
 		}
 		
 		@Override
@@ -272,7 +267,7 @@ public class MainSurfaceView extends SurfaceView
 					for (int i = Math.max(1, lastSegmentDirtyIndex); i < size; i++) {
 						currPoint = lastSegment.get(i);
 						if (prevPoint == null) prevPoint = lastSegment.get(i - 1);
-						canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, paint);
+						canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, sheet.paint);
 						prevPoint = currPoint;
 					}
 					lastSegmentDirtyIndex = size - 1;
@@ -281,7 +276,7 @@ public class MainSurfaceView extends SurfaceView
 			}
 			lastSegmentDirtyIndex = 0;
 			canvas.drawRGB(255, 255, 255);
-			sheet.draw(canvas, paint);
+			sheet.draw(canvas);
 		}
 		
 		public void requestExitAndWait() {

@@ -14,7 +14,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.Log;
@@ -22,6 +24,7 @@ import android.util.Xml;
 
 public class Sheet {
 	public boolean isDirty;
+	public Paint paint;
 	
 	private float viewZoom;  // zoom of the visible screen
 	private PointF viewPos; // upper left corner of the visible screen
@@ -29,11 +32,20 @@ public class Sheet {
 	private ArrayList<Shape> shapes;
 	private final static String TAG = "Sheet";
 	
+	private final static int
+		PREVIEW_W = 100,
+		PREVIEW_H = 100;
+	
+	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
 		isDirty = true;
 		viewZoom = 1.0f;
 		viewPos = new PointF(0.0f, 0.0f);
+		
+		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		paint.setColor(Color.BLACK);
+		paint.setStrokeWidth(1.0f);
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {
@@ -90,6 +102,26 @@ public class Sheet {
 		} 	
 	}
 	
+	public void savePreviewToFile(FileOutputStream fos) {
+		// render preview to file, using default viewZoom and viewPos
+		final PointF prevViewPos = getViewPos();
+		final float prevViewZoom = getViewZoom();
+		try {
+			Bitmap bitmap = Bitmap.createBitmap(PREVIEW_W, PREVIEW_H, Bitmap.Config.ARGB_8888);
+			Canvas canvas = new Canvas(bitmap);
+			setViewPos(new PointF());
+			setViewZoom(1.0f);
+			draw(canvas); 
+			bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+		} catch (Exception e) {
+			Log.e(TAG, "error saving preview", e);
+			throw new RuntimeException(e);
+		} finally {
+			setViewPos(prevViewPos);
+			setViewZoom(prevViewZoom);
+		}
+	}
+	
 	public void addShape(final Shape sh) {
 		synchronized (shapes) {
 			shapes.add(sh);
@@ -129,7 +161,7 @@ public class Sheet {
 		isDirty = true;
 	}
 	
-	public void draw(Canvas canvas, final Paint paint) {
+	public void draw(Canvas canvas) {
 		// draw shapes
 		synchronized (shapes) {
 			for (Shape sh: shapes) {

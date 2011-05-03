@@ -15,7 +15,8 @@ import android.widget.Toast;
 
 
 public class FileHelper {
-	private static final String FILENAME_PATTERN = "sketch_%d.xml";
+	private static final String FILENAME_PATTERN = "sketch-%d.xml";
+	private static final String PREVIEW_FILENAME_PATTERN = "sketch-preview-%d.png";
 
 	private final MainSurfaceView mainSurfaceView;
 	private final Context context;
@@ -68,12 +69,16 @@ public class FileHelper {
 		return file;
 	}
 
-	private File getUniqueFilePath(File dir) {
+	private File[] getUniqueFilePath(File dir) {
+		// return pair [sketch filename, preview filename]
 		int suffix = 1;
 		while (new File(dir, String.format(FILENAME_PATTERN, suffix)).exists()) {
 			suffix++;
 		}
-		return new File(dir, String.format(FILENAME_PATTERN, suffix));
+		return new File[]{
+				new File(dir, String.format(FILENAME_PATTERN, suffix)),
+				new File(dir, String.format(PREVIEW_FILENAME_PATTERN, suffix)),
+		};
 	}
 
 	private void saveSheet(File file) {
@@ -86,6 +91,16 @@ public class FileHelper {
 		}
 	}
 
+	private void savePreview(File file) {
+		try {
+			FileOutputStream fos = new FileOutputStream(file);
+			Sheet sheet = mainSurfaceView.getSheet();
+			sheet.savePreviewToFile(fos);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
 	private boolean isStorageAvailable() {
 		String externalStorageState = Environment.getExternalStorageState();
 		if (!externalStorageState.equals(Environment.MEDIA_MOUNTED)) {
@@ -124,11 +139,11 @@ public class FileHelper {
 	}
 
 	File saveSheet() {
-		File newFile = getUniqueFilePath(getSDDir());
-		saveSheet(newFile);
-		// FIXME - no need to do it here, as it is only a picture?
-		//notifyMediaScanner(newFile);
-		return newFile;
+		File[] files = getUniqueFilePath(getSDDir());
+		saveSheet(files[0]);
+		savePreview(files[1]);
+		notifyMediaScanner(files[1]);
+		return files[0];
 	}
 
 	private void notifyMediaScanner(File file) {
