@@ -131,7 +131,10 @@ public class FileHelper {
 		try {
 			FileOutputStream fos = new FileOutputStream(file);
 			Sheet sheet = mainSurfaceView.getSheet();
-			sheet.savePreviewToFile(fos);
+			sheet.savePreviewToFile(
+					fos,
+					mainSurfaceView.getMeasuredWidth(),
+					mainSurfaceView.getMeasuredHeight());
 		} catch (FileNotFoundException e) {
 			throw new RuntimeException(e);
 		}

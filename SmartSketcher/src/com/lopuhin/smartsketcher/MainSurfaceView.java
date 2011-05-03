@@ -273,7 +273,6 @@ public class MainSurfaceView extends SurfaceView
 				}
 			}
 			lastSegmentDirtyIndex = 0;
-			canvas.drawRGB(255, 255, 255);
 			sheet.draw(canvas);
 		}
 		

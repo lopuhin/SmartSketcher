@@ -67,10 +67,10 @@ public class SmartSketcher extends Activity {
     		return true;
     	case (OPEN_ITEM) :
     		Intent intent = new Intent();
-        	intent.setType("image/*");
+        	intent.setType("image/png");
         	intent.setAction(Intent.ACTION_GET_CONTENT);
         	startActivityForResult(Intent.createChooser(
-        			intent, "Select Picture"), SELECT_PICTURE);
+        			intent, "Open"), SELECT_PICTURE);
     		return true;
     	
     	}

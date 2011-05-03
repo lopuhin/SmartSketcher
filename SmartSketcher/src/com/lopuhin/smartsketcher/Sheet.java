@@ -32,11 +32,6 @@ public class Sheet {
 	private ArrayList<Shape> shapes;
 	private final static String TAG = "Sheet";
 	
-	private final static int
-		PREVIEW_W = 100,
-		PREVIEW_H = 100;
-	
-	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
 		isDirty = true;
@@ -102,14 +97,15 @@ public class Sheet {
 		} 	
 	}
 	
-	public void savePreviewToFile(FileOutputStream fos) {
+	public void savePreviewToFile(
+			FileOutputStream fos, final int previewW, final int previewH) {
 		// render preview to file, using default viewZoom and viewPos
 		final PointF prevViewPos = getViewPos();
 		final float prevViewZoom = getViewZoom();
 		try {
-			Bitmap bitmap = Bitmap.createBitmap(PREVIEW_W, PREVIEW_H, Bitmap.Config.ARGB_8888);
+			Bitmap bitmap = Bitmap.createBitmap(previewW, previewH, Bitmap.Config.ARGB_8888);
 			Canvas canvas = new Canvas(bitmap);
-			setViewPos(new PointF());
+			setViewPos(new PointF(0.0f, 0.0f));
 			setViewZoom(1.0f);
 			draw(canvas); 
 			bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
@@ -126,7 +122,7 @@ public class Sheet {
 		synchronized (shapes) {
 			shapes.add(sh);
 		}
-		isDirty = true;
+		setDirty();
 	}
 	
 	public void removeShape(final Shape shape) {
@@ -162,6 +158,7 @@ public class Sheet {
 	}
 	
 	public void draw(Canvas canvas) {
+		canvas.drawRGB(255, 255, 255);
 		// draw shapes
 		synchronized (shapes) {
 			for (Shape sh: shapes) {
