@@ -171,6 +171,10 @@ public class Sheet {
 		isDirty = false;
 	}
 	
+	public void setDirty() {
+		isDirty = true;
+	}
+	
 	public PointF toScreen(PointF p) {
 		// return Point with the screen coordinates of p
 		return new PointF(

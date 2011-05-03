@@ -2,16 +2,12 @@ package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
 
-import android.os.SystemClock;
 import android.util.FloatMath;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
 
 
@@ -33,7 +29,7 @@ public class MainSurfaceView extends SurfaceView
 	private ArrayList<PointF> lastSegment;
 	private ArrayList<Long> lastSegmentTimes;
 	
-	private final static String TAG = "MainSurfaceView";
+	//private final static String TAG = "MainSurfaceView";
 	
 	MainSurfaceView(Context context) {
 		super(context);
@@ -153,7 +149,9 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	public void setSheet(Sheet sheet) {
-		this.sheet = sheet;
+		if (sheet != null) {
+			this.sheet = sheet;
+		}
 	}
 	
 	public void clearSheet() {
