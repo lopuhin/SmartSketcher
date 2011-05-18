@@ -30,10 +30,13 @@ public class Sheet {
 	private PointF viewPos; // upper left corner of the visible screen
 	
 	private ArrayList<Shape> shapes;
+	private ArrayList<IAction> doneActions, undoneActions;
 	private final static String TAG = "Sheet";
 	
 	Sheet() {
 		shapes = new ArrayList<Shape>();
+		doneActions = new ArrayList<IAction>();
+		undoneActions = new ArrayList<IAction>();
 		isDirty = true;
 		viewZoom = 1.0f;
 		viewPos = new PointF(0.0f, 0.0f);
@@ -136,16 +139,55 @@ public class Sheet {
 				}
 			}
 		}
-		isDirty = true;
+		setDirty();
 	}
 		
+	public void undo() {
+		final int lastIdx = doneActions.size() - 1;
+		if (lastIdx >= 0) {
+			synchronized (shapes) {
+				IAction action = doneActions.get(lastIdx);
+				undoAction(action);
+				synchronized (doneActions) {
+					doneActions.remove(lastIdx);
+				}
+			}
+		}
+	}
+	
+	public void redo() {
+		final int lastIdx = undoneActions.size() - 1;
+		if (lastIdx >= 0) {
+			synchronized (shapes) {
+				IAction action = undoneActions.get(lastIdx);
+				doAction(action);
+				synchronized (undoneActions) {
+					undoneActions.remove(lastIdx);
+				}
+			}
+		}
+	}
+	
+	public void doAction(IAction action) {
+		synchronized (doneActions) {
+			doneActions.add(action);
+		}
+		action.doAction(this);
+	}
+	
+	public void undoAction(IAction action) {
+		synchronized (undoneActions) {
+			undoneActions.add(action);
+		}
+		action.undoAction(this);
+	}
 	public PointF getViewPos() {
 		return new PointF(viewPos.x, viewPos.y);
 	}
 	
 	public void setViewPos(PointF viewPos) {
 		this.viewPos = new PointF(viewPos.x, viewPos.y);
-		isDirty = true;
+		setDirty();
 	}
 	
 	public float getViewZoom() {
@@ -154,7 +196,7 @@ public class Sheet {
 	
 	public void setViewZoom(float viewZoom) {
 		this.viewZoom = viewZoom;
-		isDirty = true;
+		setDirty();
 	}
 	
 	public void draw(Canvas canvas) {

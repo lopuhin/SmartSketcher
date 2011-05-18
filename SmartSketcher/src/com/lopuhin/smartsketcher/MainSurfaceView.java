@@ -9,6 +9,7 @@ import android.view.SurfaceView;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
+import android.location.Address;
 
 
 public class MainSurfaceView extends SurfaceView 
@@ -162,22 +163,20 @@ public class MainSurfaceView extends SurfaceView
 		final long t = System.currentTimeMillis();
 		synchronized (lastSegment) {
 			lastSegment.add(p);
-		}
-		synchronized (lastSegmentTimes) {
 			lastSegmentTimes.add(t);
 		}
 	}
 	
 	private void finishSegment() {
+		// user stopped drawing, we should add smoothed lastSegment to sheet
 		SmoothingThread smoothingThread = new SmoothingThread();
 		smoothingThread.start();
 	}
 
 	private void discardSegment() {
+		// lastSegment really was not meant to be drawn 
 		synchronized (lastSegment) {
 			lastSegment.clear();
-		}
-		synchronized (lastSegmentTimes) {
 			lastSegmentTimes.clear();
 		}
 	}
@@ -216,9 +215,7 @@ public class MainSurfaceView extends SurfaceView
 			ArrayList<Shape> shapes = BezierCurveSet.approximated(
 					lastSegmentCopy, lastSegmentTimesCopy, sheet);
 			synchronized (sheet) {
-				for (Shape sh: shapes) {
-					sheet.addShape(sh);
-				}
+				sheet.doAction(new AddShapes(shapes));
 				sheet.removeShape(tempCurve);
 			}
 		}

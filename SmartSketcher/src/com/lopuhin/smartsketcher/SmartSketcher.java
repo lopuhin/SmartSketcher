@@ -65,10 +65,10 @@ public class SmartSketcher extends Activity {
     	super.onOptionsItemSelected(item);
     	switch (item.getItemId()) {
     	case (UNDO_ITEM) : 
-    		// TODO
+    		mainSurfaceView.getSheet().undo();
     		return true;
     	case (REDO_ITEM) :
-    		// TODO
+    		mainSurfaceView.getSheet().redo();
     		return true;
     	case (CLEAR_ITEM) :
     		mainSurfaceView.clearSheet();
