@@ -58,7 +58,6 @@ public class Sheet {
             for (int i = 0; i < shapeNodes.getLength(); i++) {
             	Node node = shapeNodes.item(i);
             	String nodeName = node.getNodeName();
-            	Log.d(TAG, "loading from node " + nodeName);
             	if (nodeName.equals("pos")) {
             		NamedNodeMap attr = node.getAttributes();
         			sheet.viewPos = new PointF(
@@ -135,6 +134,7 @@ public class Sheet {
 				Shape sh = shapes.get(i);
 				if (sh == shape) {
 					shapes.remove(i);
+					setDirty();
 					return;
 				}
 			}
@@ -181,6 +181,7 @@ public class Sheet {
 		}
 		action.undoAction(this);
 	}
+	
 	public PointF getViewPos() {
 		return new PointF(viewPos.x, viewPos.y);
 	}
@@ -227,6 +228,5 @@ public class Sheet {
 				viewPos.x + p.x / viewZoom, 
 				viewPos.y + p.y / viewZoom);
 	}
-	
 	
 }

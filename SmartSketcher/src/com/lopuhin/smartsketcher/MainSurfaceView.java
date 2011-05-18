@@ -3,13 +3,13 @@ package com.lopuhin.smartsketcher;
 import java.util.ArrayList;
 
 import android.util.FloatMath;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.PointF;
-import android.location.Address;
 
 
 public class MainSurfaceView extends SurfaceView 
@@ -30,7 +30,7 @@ public class MainSurfaceView extends SurfaceView
 	private ArrayList<PointF> lastSegment;
 	private ArrayList<Long> lastSegmentTimes;
 	
-	//private final static String TAG = "MainSurfaceView";
+	private final static String TAG = "MainSurfaceView";
 	
 	MainSurfaceView(Context context) {
 		super(context);
