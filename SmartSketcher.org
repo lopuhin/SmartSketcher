@@ -20,7 +20,9 @@
 ** DONE Be a well-behaving application
    CLOSED: [2011-05-04 Wed 01:10]
    Restore state, maybe something else: check by real install to the device and running a lot of apps, to force killing by OS
-** TODO Undo/redo
+** DONE Undo/redo
+   CLOSED: [2011-05-19 Thu 13:37]
+** TODO Indicate if undo and redo are possible in the menu
 ** TODO Eraser
 ** DONE Save in native (vector) format
    CLOSED: [2011-04-27 Wed 11:00]
@@ -38,9 +40,10 @@
 ** TODO Choose line width and color, degree of smoothness
 
 * Big but doable features
-** TODO Smoothing
+** DONE Smoothing
+   CLOSED: [2011-05-19 Thu 13:37]
    Using [[http://en.wikipedia.org/wiki/B%C3%A9zier_curve][Bezier curves]], found an [[http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.9193&rep=rep1&type=pdf][article]] about curve approximation (saved to Dropbox)
-** TODO Create and edt text (via keyboard input)
+** TODO Create and edit text (via keyboard input)
 
 * Difficult features
 ** TODO Simple symbol recognition

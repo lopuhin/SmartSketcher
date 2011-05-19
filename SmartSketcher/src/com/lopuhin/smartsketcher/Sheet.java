@@ -182,6 +182,12 @@ public class Sheet {
 		action.undoAction(this);
 	}
 	
+	public void removeDoneAction(IAction action) {
+		synchronized (doneActions) {
+			doneActions.remove(action);
+		}
+	}
+	
 	public PointF getViewPos() {
 		return new PointF(viewPos.x, viewPos.y);
 	}
