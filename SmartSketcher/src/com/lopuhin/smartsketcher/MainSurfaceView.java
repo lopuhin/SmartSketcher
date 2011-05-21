@@ -15,9 +15,9 @@ import android.graphics.PointF;
 public class MainSurfaceView extends SurfaceView 
 	implements SurfaceHolder.Callback {
 	
-	private int mode;
+	private int mode, submode;
 	private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
-	
+	public final static int DRAW_SUBMODE = 0, ERASE_SUBMODE = 1;
 	// initial configuration, when user starts dragging with two fingers
 	private float prevTouchSpacing, prevViewZoom;
 	private PointF prevTouchCenter, prevViewPos;
@@ -39,6 +39,7 @@ public class MainSurfaceView extends SurfaceView
 	
 	private void init() {
 		mode = IDLE_MODE;
+		submode = DRAW_SUBMODE;
 		// Create a new SurfaceHolder and assign this class as its callback.
 		holder = getHolder();
 		holder.addCallback(this);
@@ -55,13 +56,21 @@ public class MainSurfaceView extends SurfaceView
 			switch (event.getAction() & MotionEvent.ACTION_MASK) {
 			case (MotionEvent.ACTION_DOWN) :
 				mode = DRAW_MODE;
-				addPoint(mainPoint);
+				if (submode == DRAW_SUBMODE) {
+					addPoint(mainPoint);
+				} else if (submode == ERASE_SUBMODE) {
+					// TODO
+				}
 				break;
 			case (MotionEvent.ACTION_POINTER_DOWN) :
 				final float dst = touchSpacing(event); 
 				if (dst > 5f) {
 					mode = ZOOM_MODE;
-					discardSegment();
+					if (submode == DRAW_SUBMODE) {
+						discardSegment();
+					} else if (submode == ERASE_SUBMODE) {
+						// TODO
+					}
 					prevViewZoom = sheet.getViewZoom();
 					prevViewPos = sheet.getViewPos();
 					prevTouchSpacing = dst;
@@ -82,13 +91,21 @@ public class MainSurfaceView extends SurfaceView
 					prevTouchSpacing = touchSpacing;
 					prevTouchCenter = touchCenter;
 				} else if (mode == DRAW_MODE) {
-					addPoint(mainPoint);
+					if (submode == DRAW_SUBMODE) {
+						addPoint(mainPoint);
+					} else if (submode == ERASE_SUBMODE) {
+						// TODO
+					}
 				}
 				break;	
 			case (MotionEvent.ACTION_UP) :
 				if (mode == DRAW_MODE) {
-					addPoint(mainPoint);
-					finishSegment();
+					if (submode == DRAW_SUBMODE) {
+						addPoint(mainPoint);
+						finishSegment();
+					} else if (submode == ERASE_SUBMODE) {
+						// TODO
+					}
 				}
 				mode = IDLE_MODE;
 				break;
@@ -104,6 +121,14 @@ public class MainSurfaceView extends SurfaceView
 			if (hasSurface == true)
 				mainSurfaceViewThread.start();
 		}	
+	}
+	
+	public int getSubmode() {
+		return submode;
+	}
+	
+	public void setSubmode(int submode) {
+		this.submode = submode;
 	}
 	
 	public void pause() {

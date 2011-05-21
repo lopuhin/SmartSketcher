@@ -10,4 +10,7 @@
     <string name="open">Open</string>
     <string name="clear">Clear</string>
     <string name="newitem">New</string>
+    <string name="draw">Draw</string>
+    <string name="erase">Erase</string>
+    <string name="brush">Brush</string>
 </resources>

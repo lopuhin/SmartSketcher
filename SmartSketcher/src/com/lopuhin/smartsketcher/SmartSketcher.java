@@ -23,7 +23,10 @@ public class SmartSketcher extends Activity {
     	REDO_ITEM = Menu.FIRST + 1,
     	NEW_ITEM = Menu.FIRST + 2,
     	OPEN_ITEM = Menu.FIRST + 3,
-    	CLEAR_ITEM = Menu.FIRST + 4;
+    	CLEAR_ITEM = Menu.FIRST + 4,
+    	ERASE_ITEM = Menu.FIRST + 5,
+    	DRAW_ITEM = Menu.FIRST + 6,
+    	BRUSH_ITEM = Menu.FIRST + 7;
     
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -53,6 +56,9 @@ public class SmartSketcher extends Activity {
 
     	menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
     	menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
+    	menu.add(0, BRUSH_ITEM, Menu.NONE, R.string.brush);
+    	menu.add(0, DRAW_ITEM, Menu.NONE, R.string.draw);
+    	menu.add(0, ERASE_ITEM, Menu.NONE, R.string.erase);
     	menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
     	menu.add(0, CLEAR_ITEM, Menu.NONE, R.string.clear);
     	menu.add(0, NEW_ITEM, Menu.NONE, R.string.newitem);
@@ -67,6 +73,13 @@ public class SmartSketcher extends Activity {
     	undoItem.setEnabled(mainSurfaceView.getSheet().canUndo());
     	MenuItem redoItem = menu.findItem(REDO_ITEM);
     	redoItem.setEnabled(mainSurfaceView.getSheet().canRedo());
+    	
+    	final int submode = mainSurfaceView.getSubmode();
+    	MenuItem drawItem = menu.findItem(DRAW_ITEM);
+    	drawItem.setEnabled(submode != MainSurfaceView.DRAW_SUBMODE);
+    	MenuItem eraseItem = menu.findItem(ERASE_ITEM);
+    	eraseItem.setEnabled(submode != MainSurfaceView.ERASE_SUBMODE);
+
     	return true;
     }
 
@@ -80,6 +93,12 @@ public class SmartSketcher extends Activity {
     		return true;
     	case (REDO_ITEM) :
     		mainSurfaceView.getSheet().redo();
+    		return true;
+    	case (DRAW_ITEM) :
+    		mainSurfaceView.setSubmode(MainSurfaceView.DRAW_SUBMODE);
+    		return true;
+    	case (ERASE_ITEM) :
+    		mainSurfaceView.setSubmode(MainSurfaceView.ERASE_SUBMODE);
     		return true;
     	case (CLEAR_ITEM) :
     		mainSurfaceView.clearSheet();
