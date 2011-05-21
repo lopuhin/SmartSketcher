@@ -154,6 +154,10 @@ public class Sheet {
 			}
 		}
 	}
+
+	public boolean canUndo() {
+		return doneActions.size() > 0;
+	}
 	
 	public void redo() {
 		final int lastIdx = undoneActions.size() - 1;
@@ -166,6 +170,10 @@ public class Sheet {
 				}
 			}
 		}
+	}
+
+	public boolean canRedo() {
+		return undoneActions.size() > 0;
 	}
 	
 	public void doAction(IAction action) {

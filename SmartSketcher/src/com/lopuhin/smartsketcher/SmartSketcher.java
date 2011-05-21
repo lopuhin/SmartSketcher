@@ -61,6 +61,17 @@ public class SmartSketcher extends Activity {
     }
     
     @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+    	super.onPrepareOptionsMenu(menu);
+    	MenuItem undoItem = menu.findItem(UNDO_ITEM);
+    	undoItem.setEnabled(mainSurfaceView.getSheet().canUndo());
+    	MenuItem redoItem = menu.findItem(REDO_ITEM);
+    	redoItem.setEnabled(mainSurfaceView.getSheet().canRedo());
+    	return true;
+    }
+
+    
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
     	super.onOptionsItemSelected(item);
     	switch (item.getItemId()) {

@@ -22,7 +22,8 @@
    Restore state, maybe something else: check by real install to the device and running a lot of apps, to force killing by OS
 ** DONE Undo/redo
    CLOSED: [2011-05-19 Thu 13:37]
-** TODO Indicate if undo and redo are possible in the menu
+** DONE Indicate if undo and redo are possible in the menu
+   CLOSED: [2011-05-21 Sat 13:07]
 ** TODO Eraser
 ** DONE Save in native (vector) format
    CLOSED: [2011-04-27 Wed 11:00]
