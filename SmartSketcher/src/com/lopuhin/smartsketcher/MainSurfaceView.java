@@ -8,7 +8,11 @@ import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
 import android.graphics.PointF;
 
 
@@ -29,6 +33,7 @@ public class MainSurfaceView extends SurfaceView
 	private Sheet sheet;
 	private ArrayList<PointF> lastSegment;
 	private ArrayList<Long> lastSegmentTimes;
+	private ArrayList<PointF> lastEraseTrace;
 	
 	private final static String TAG = "MainSurfaceView";
 	
@@ -47,6 +52,7 @@ public class MainSurfaceView extends SurfaceView
 		sheet = new Sheet();
 		lastSegment = new ArrayList<PointF>();
 		lastSegmentTimes = new ArrayList<Long>();
+		lastEraseTrace = new ArrayList<PointF>();
 	}
 	
 	@Override
@@ -59,7 +65,7 @@ public class MainSurfaceView extends SurfaceView
 				if (submode == DRAW_SUBMODE) {
 					addPoint(mainPoint);
 				} else if (submode == ERASE_SUBMODE) {
-					// TODO
+					eraseAt(mainPoint);
 				}
 				break;
 			case (MotionEvent.ACTION_POINTER_DOWN) :
@@ -69,7 +75,7 @@ public class MainSurfaceView extends SurfaceView
 					if (submode == DRAW_SUBMODE) {
 						discardSegment();
 					} else if (submode == ERASE_SUBMODE) {
-						// TODO
+						discardErasing();
 					}
 					prevViewZoom = sheet.getViewZoom();
 					prevViewPos = sheet.getViewPos();
@@ -94,7 +100,7 @@ public class MainSurfaceView extends SurfaceView
 					if (submode == DRAW_SUBMODE) {
 						addPoint(mainPoint);
 					} else if (submode == ERASE_SUBMODE) {
-						// TODO
+						eraseAt(mainPoint);
 					}
 				}
 				break;	
@@ -104,7 +110,8 @@ public class MainSurfaceView extends SurfaceView
 						addPoint(mainPoint);
 						finishSegment();
 					} else if (submode == ERASE_SUBMODE) {
-						// TODO
+						eraseAt(mainPoint);
+						finishErasing();
 					}
 				}
 				mode = IDLE_MODE;
@@ -192,6 +199,10 @@ public class MainSurfaceView extends SurfaceView
 		}
 	}
 	
+	private void eraseAt(PointF p) {
+		lastEraseTrace.add(p);
+	}
+	
 	private void finishSegment() {
 		// user stopped drawing, we should add smoothed lastSegment to sheet
 		synchronized (lastSegment) {
@@ -210,13 +221,36 @@ public class MainSurfaceView extends SurfaceView
 		}
 	}
 	
+	private void finishErasing() {
+		// TODO - erase permanently, ensure there is no blinking 
+		synchronized (lastEraseTrace) {
+			lastEraseTrace.clear();
+		}
+	}
+	
+	private void discardErasing() {
+		synchronized (lastEraseTrace) {
+			lastEraseTrace.clear();
+		}
+	}
+	
 	class MainSurfaceViewThread extends Thread {
 		private boolean done;
-		private int lastSegmentDirtyIndex = 0;
+		private int lastSegmentDirtyIndex, lastEraseTraceDirtyIndex;
+		private Paint whiteFillPaint, blackOutlinePaint;
+		
 		
 		MainSurfaceViewThread() {
 			super();
 			done = false;
+			lastSegmentDirtyIndex = 0;
+			lastEraseTraceDirtyIndex= -1;
+			whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			whiteFillPaint.setColor(Color.WHITE);
+			blackOutlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+			blackOutlinePaint.setColor(Color.BLACK);
+			blackOutlinePaint.setStyle(Style.STROKE);
+			blackOutlinePaint.setStrokeWidth(1.0f);
 		}
 		
 		@Override
@@ -228,6 +262,11 @@ public class MainSurfaceView extends SurfaceView
 				if (!needDrawing) {
 					synchronized (lastSegment) {
 						needDrawing = lastSegment.size() > 0;
+					}
+					if (!needDrawing) {
+						synchronized (lastEraseTrace) {
+							needDrawing = lastEraseTrace.size() > 0;
+						}
 					}
 				}
 				if (needDrawing) {
@@ -244,10 +283,10 @@ public class MainSurfaceView extends SurfaceView
 
 		public void draw(Canvas canvas) {
 			synchronized (lastSegment) {
-				if (lastSegment.size() > 1) {
+				final int size = lastSegment.size(); 
+				if (size > 1) {
 					// draw only not drawn part of last segment
 					PointF prevPoint = null, currPoint;
-					int size = lastSegment.size();
 					for (int i = Math.max(1, lastSegmentDirtyIndex); i < size; i++) {
 						currPoint = lastSegment.get(i);
 						if (prevPoint == null) prevPoint = lastSegment.get(i - 1);
@@ -256,9 +295,34 @@ public class MainSurfaceView extends SurfaceView
 					}
 					lastSegmentDirtyIndex = size - 1;
 					return;
+				} else {
+					lastSegmentDirtyIndex = 0;
 				}
 			}
-			lastSegmentDirtyIndex = 0;
+			synchronized (lastEraseTrace) {
+				final int size = lastEraseTrace.size();
+				//Resources res = getResources();
+				//final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
+				final float eraserRadius = 30.0f; // TODO - load from resources 
+				final float eps = 2.0f;
+				if (size - 1 > lastEraseTraceDirtyIndex) {
+					if (size > 1) { // erase last circle
+						final PointF prevPoint = lastEraseTrace.get(size - 2);
+						Log.d(TAG, "erase prev point " + eraserRadius);
+						canvas.drawCircle(prevPoint.x, prevPoint.y, eraserRadius, whiteFillPaint);
+					}
+					Log.d(TAG, "erase curr point " + eraserRadius);
+					final PointF lastPoint = lastEraseTrace.get(size - 1);
+					canvas.drawCircle(lastPoint.x, lastPoint.y, eraserRadius - eps, whiteFillPaint);
+					canvas.drawCircle(lastPoint.x, lastPoint.y, eraserRadius - eps, blackOutlinePaint);
+					lastEraseTraceDirtyIndex = size - 1;
+				} 
+				if (size > 0) {
+					return;
+				} else {
+					lastEraseTraceDirtyIndex = -1;
+				}
+			}
 			sheet.draw(canvas);
 		}
 		

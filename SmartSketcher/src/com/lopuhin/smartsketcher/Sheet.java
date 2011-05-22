@@ -141,7 +141,7 @@ public class Sheet {
 		}
 		setDirty();
 	}
-		
+			
 	public void undo() {
 		final int lastIdx = doneActions.size() - 1;
 		if (lastIdx >= 0) {

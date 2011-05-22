@@ -13,4 +13,5 @@
     <string name="draw">Draw</string>
     <string name="erase">Erase</string>
     <string name="brush">Brush</string>
+    <dimen name="eraser_radius">30px</dimen>
 </resources>
