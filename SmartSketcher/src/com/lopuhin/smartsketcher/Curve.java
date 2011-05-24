@@ -15,7 +15,6 @@ import android.graphics.PointF;
 
 public class Curve extends Shape {
 	private PointF[] points;
-	private final static boolean DEBUG = true;
 	
 	Curve(ArrayList<PointF> pointsList) {
 		points = new PointF[pointsList.size()];
@@ -40,7 +39,7 @@ public class Curve extends Shape {
 		PointF prevPoint = null;
 		for (PointF p: points) {
 			p = sheet.toScreen(p);
-			if (DEBUG) {
+			if (Config.DEBUG) {
 				final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 				pointPaint.setColor(Color.RED);
 				pointPaint.setStrokeWidth(3.0f);

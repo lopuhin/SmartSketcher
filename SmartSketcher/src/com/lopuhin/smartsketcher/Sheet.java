@@ -71,7 +71,8 @@ public class Sheet {
             	}
             }
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			Log.e(TAG, "unable to loadFromFile", e);
+			//throw new RuntimeException(e);
 		}
 		return sheet;
 	}

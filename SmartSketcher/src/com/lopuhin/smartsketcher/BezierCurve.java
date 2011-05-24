@@ -19,7 +19,6 @@ public class BezierCurve extends Shape {
 	protected PointF[] points;
 	
 	private final static String TAG = "BezierCurve";
-	private final static boolean DEBUG = true;
 	
 	private float fittingError;
 	
@@ -63,7 +62,7 @@ public class BezierCurve extends Shape {
 		// TODO - use sheet!
 		// TODO - decide how many steps to use depending on the scale
 
-		if (DEBUG) {
+		if (Config.DEBUG) {
 			final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
 			pointPaint.setColor(Color.GREEN);
 			pointPaint.setStrokeWidth(5.0f);
