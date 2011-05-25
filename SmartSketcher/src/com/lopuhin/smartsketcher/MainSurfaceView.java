@@ -36,6 +36,7 @@ public class MainSurfaceView extends SurfaceView
 	private ArrayList<Long> lastSegmentTimes;
 	private ArrayList<PointF> lastEraseTrace;
 	private int lastSegmentDirtyIndex, lastEraseTraceDirtyIndex;
+	private boolean finishErasing;
 	
 	private final static String TAG = "MainSurfaceView";
 	
@@ -57,6 +58,7 @@ public class MainSurfaceView extends SurfaceView
 		lastEraseTrace = new ArrayList<PointF>();
 		lastSegmentDirtyIndex = 0;
 		lastEraseTraceDirtyIndex= -1;
+		finishErasing = false;
 	}
 	
 	@Override
@@ -230,8 +232,10 @@ public class MainSurfaceView extends SurfaceView
 	private void finishErasing() {
 		// TODO - erase permanently, ensure there is no blinking 
 		synchronized (lastEraseTrace) {
-			lastEraseTrace.clear();
-			lastEraseTraceDirtyIndex = -1;
+			final int size = lastEraseTrace.size();
+			if (size > 0) {
+				finishErasing = true;
+			}
 		}
 	}
 	
@@ -245,6 +249,7 @@ public class MainSurfaceView extends SurfaceView
 	class MainSurfaceViewThread extends Thread {
 		private boolean done;
 		private Paint whiteFillPaint, blackOutlinePaint;
+		private float eraserRadius;
 		
 		Bitmap sheetBitmap;
 		Canvas sheetCanvas;
@@ -258,26 +263,28 @@ public class MainSurfaceView extends SurfaceView
 			blackOutlinePaint.setColor(Color.BLACK);
 			blackOutlinePaint.setStyle(Style.STROKE);
 			blackOutlinePaint.setStrokeWidth(1.0f);
+			//Resources res = getResources();
+			//final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
+			eraserRadius = 30.0f; // TODO - load from resources 
 		}
 		
 		@Override
 		public void run() {
 			SurfaceHolder surfaceHolder = holder;
 			while (!done) {
-				// Lock the surface and return the canvas to draw onto.
 				boolean needDrawing = sheet.isDirty;
-				// TODO - remove logic duplication
 				if (!needDrawing) {
 					synchronized (lastSegment) {
 						needDrawing = lastSegment.size() > lastSegmentDirtyIndex + 1;
 					}
 					if (!needDrawing) {
 						synchronized (lastEraseTrace) {
-							needDrawing = lastEraseTrace.size() > lastEraseTraceDirtyIndex + 1;
+							needDrawing = lastEraseTrace.size() > lastEraseTraceDirtyIndex + 1 || finishErasing;
 						}
 					}
 				}
 				if (needDrawing) {
+					// Lock the surface and return the canvas to draw onto.
 					Canvas canvas = surfaceHolder.lockCanvas();
 					draw(canvas);
 					surfaceHolder.unlockCanvasAndPost(canvas);
@@ -310,18 +317,23 @@ public class MainSurfaceView extends SurfaceView
 			}
 			synchronized (lastEraseTrace) {
 				final int size = lastEraseTrace.size();
-				//Resources res = getResources();
-				//final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
-				final float eraserRadius = 30.0f; // TODO - load from resources 
-				final float eps = 2.0f;
 				PointF currPoint = null;
 				for (int i = 0; i < size; i++) {
 					currPoint = lastEraseTrace.get(i);
 					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, whiteFillPaint);
 				}
 				if (currPoint != null) {
-					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius - eps, blackOutlinePaint);
-					lastEraseTraceDirtyIndex = size - 1;
+					Paint paint;
+					if (finishErasing) {
+						paint = whiteFillPaint;
+						lastEraseTrace.clear();
+						lastEraseTraceDirtyIndex = -1;
+						finishErasing = false;
+					} else {
+						paint = blackOutlinePaint;
+						lastEraseTraceDirtyIndex = size - 1;
+					}
+					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, paint);
 				}
 			}
 		}
