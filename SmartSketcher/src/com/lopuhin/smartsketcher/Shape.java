@@ -12,5 +12,6 @@ public abstract class Shape {
 	public abstract void draw(Canvas canvas, Paint paint, Sheet sheet);
 
 	public abstract void toXml(XmlSerializer serializer) throws IOException;
-	
+
+	//public abstract static Shape fromXml(Node node) throws IOException;
 }
