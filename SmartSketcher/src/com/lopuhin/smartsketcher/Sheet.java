@@ -72,7 +72,11 @@ public class Sheet {
             		sheet.addShape(BezierCurve.fromXml(node));
             	} else if (nodeName.equals("Curve")) {
             		sheet.addShape(Curve.fromXml(node));
+            	} else if (nodeName.equals("ErasePoint")) {
+            		sheet.addShape(ErasePoint.fromXml(node));
             	}
+         
+            	
             }
 		} catch (Exception e) {
 			Log.e(TAG, "unable to loadFromFile", e);

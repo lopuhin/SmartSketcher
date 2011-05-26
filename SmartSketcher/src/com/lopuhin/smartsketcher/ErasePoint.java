@@ -1,7 +1,11 @@
 package com.lopuhin.smartsketcher;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Canvas;
@@ -23,9 +27,20 @@ public class ErasePoint extends Shape {
 	}
 
 	@Override
-	public void toXml(XmlSerializer serializer) throws IOException {
-		// TODO Auto-generated method stub
-
+	public void toXml(XmlSerializer s) throws IOException {
+		s.startTag("", "ErasePoint");
+			s.attribute("", "x", String.format("%f", point.x));
+			s.attribute("", "y", String.format("%f", point.y));
+			s.attribute("", "radius", String.format("%f", radius));
+		s.endTag("", "ErasePoint");
+	}
+	
+	public static ErasePoint fromXml(Node node) throws IOException {
+		NamedNodeMap attr = node.getAttributes();
+		return new ErasePoint(
+				new PointF(Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
+						Float.parseFloat(attr.getNamedItem("y").getNodeValue())),
+				Float.parseFloat(attr.getNamedItem("radius").getNodeValue()));
 	}
 
 }
