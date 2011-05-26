@@ -323,9 +323,11 @@ public class MainSurfaceView extends SurfaceView
 					Paint paint;
 					if (finishErasing) {
 						paint = sheet.whiteFillPaint;
+						ArrayList<Shape> shapes = new ArrayList<Shape>();
 						for (final PointF p: lastEraseTrace) {
-							sheet.addShape(new ErasePoint(p, eraserRadius));
-						}
+							shapes.add(new ErasePoint(p, eraserRadius));
+						} 
+						sheet.doAction(new AddShapes(shapes));
 						lastEraseTrace.clear();
 						lastEraseTraceDirtyIndex = -1;
 						finishErasing = false;
