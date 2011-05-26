@@ -19,12 +19,13 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.Paint.Style;
 import android.util.Log;
 import android.util.Xml;
 
 public class Sheet {
 	public boolean isDirty;
-	public Paint paint;
+	public Paint paint, whiteFillPaint;
 	
 	private float viewZoom;  // zoom of the visible screen
 	private PointF viewPos; // upper left corner of the visible screen
@@ -43,7 +44,10 @@ public class Sheet {
 		
 		paint = new Paint(Paint.ANTI_ALIAS_FLAG);
 		paint.setColor(Color.BLACK);
+		paint.setStyle(Style.STROKE);
 		paint.setStrokeWidth(1.0f);
+		whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+		whiteFillPaint.setColor(Color.WHITE);
 	}
 	
 	public static Sheet loadFromFile(FileInputStream fis) {

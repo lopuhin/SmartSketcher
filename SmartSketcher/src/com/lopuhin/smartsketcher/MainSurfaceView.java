@@ -27,6 +27,8 @@ public class MainSurfaceView extends SurfaceView
 	private float prevTouchSpacing, prevViewZoom;
 	private PointF prevTouchCenter, prevViewPos;
 	
+	private float eraserRadius;
+	
 	private SurfaceHolder holder;
 	private MainSurfaceViewThread mainSurfaceViewThread;
 	private boolean hasSurface;
@@ -59,6 +61,9 @@ public class MainSurfaceView extends SurfaceView
 		lastSegmentDirtyIndex = 0;
 		lastEraseTraceDirtyIndex= -1;
 		finishErasing = false;
+		//Resources res = getResources();
+		//final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
+		eraserRadius = 30.0f; // TODO - load from resources
 	}
 	
 	@Override
@@ -230,7 +235,8 @@ public class MainSurfaceView extends SurfaceView
 	}
 	
 	private void finishErasing() {
-		// TODO - erase permanently, ensure there is no blinking 
+		// read erasing finishing is done in drawing thread,
+		// to erase the outline of eraser
 		synchronized (lastEraseTrace) {
 			final int size = lastEraseTrace.size();
 			if (size > 0) {
@@ -248,8 +254,6 @@ public class MainSurfaceView extends SurfaceView
 	
 	class MainSurfaceViewThread extends Thread {
 		private boolean done;
-		private Paint whiteFillPaint, blackOutlinePaint;
-		private float eraserRadius;
 		
 		Bitmap sheetBitmap;
 		Canvas sheetCanvas;
@@ -257,15 +261,6 @@ public class MainSurfaceView extends SurfaceView
 		MainSurfaceViewThread() {
 			super();
 			done = false;
-			whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			whiteFillPaint.setColor(Color.WHITE);
-			blackOutlinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-			blackOutlinePaint.setColor(Color.BLACK);
-			blackOutlinePaint.setStyle(Style.STROKE);
-			blackOutlinePaint.setStrokeWidth(1.0f);
-			//Resources res = getResources();
-			//final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
-			eraserRadius = 30.0f; // TODO - load from resources 
 		}
 		
 		@Override
@@ -297,7 +292,9 @@ public class MainSurfaceView extends SurfaceView
 		}
 
 		public void draw(Canvas canvas) {
+			// need to redraw entire view here
 			if (sheet.isDirty) {
+				// draw sheet to bitmap, and post this bitmap on every redraw
 				if (sheetCanvas == null) {
 					initSheetBuffer(canvas.getWidth(), canvas.getHeight());
 				}
@@ -320,17 +317,20 @@ public class MainSurfaceView extends SurfaceView
 				PointF currPoint = null;
 				for (int i = 0; i < size; i++) {
 					currPoint = lastEraseTrace.get(i);
-					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, whiteFillPaint);
+					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, sheet.whiteFillPaint);
 				}
 				if (currPoint != null) {
 					Paint paint;
 					if (finishErasing) {
-						paint = whiteFillPaint;
+						paint = sheet.whiteFillPaint;
+						for (final PointF p: lastEraseTrace) {
+							sheet.addShape(new ErasePoint(p, eraserRadius));
+						}
 						lastEraseTrace.clear();
 						lastEraseTraceDirtyIndex = -1;
 						finishErasing = false;
 					} else {
-						paint = blackOutlinePaint;
+						paint = sheet.paint;
 						lastEraseTraceDirtyIndex = size - 1;
 					}
 					canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, paint);
