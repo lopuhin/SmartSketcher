@@ -9,7 +9,11 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.LinearLayout;
 
+import com.google.ads.AdRequest;
+import com.google.ads.AdSize;
+import com.google.ads.AdView;
 
 public class SmartSketcher extends Activity {
 	private MainSurfaceView mainSurfaceView;
@@ -32,8 +36,14 @@ public class SmartSketcher extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        AdView adView = new AdView(this, AdSize.BANNER, Config.ADMOB_ID);
+        LinearLayout layout = (LinearLayout)findViewById(R.id.mainLayout);
+        layout.addView(adView);
+        adView.loadAd(new AdRequest());
+        
         mainSurfaceView = new MainSurfaceView(this);
-        setContentView(mainSurfaceView);
+        layout.addView(mainSurfaceView);
         fileHelper = new FileHelper(mainSurfaceView);
     }
     
