@@ -46,19 +46,25 @@ public class MainSurfaceView extends SurfaceView
         
     private final static String TAG = "MainSurfaceView";
         
-    MainSurfaceView(Context context, DBAdapter dbAdapter) {
+    MainSurfaceView(Context context, DBAdapter dbAdapter, Sheet _sheet) {
+        /**
+         * Init: create empty sheet if _sheet is null, or load existing
+         */
         super(context);
-        init(dbAdapter);
+        init(dbAdapter, _sheet);
     }
-        
-    private void init(DBAdapter dbAdapter) {
+    
+    private void init(DBAdapter dbAdapter, Sheet _sheet) {
         mode = IDLE_MODE;
         submode = DRAW_SUBMODE;
         // Create a new SurfaceHolder and assign this class as its callback.
         holder = getHolder();
         holder.addCallback(this);
         hasSurface = false;
-        sheet = new Sheet(dbAdapter);
+        if (_sheet != null)
+            sheet = _sheet;
+        else
+            sheet = new Sheet(dbAdapter, true);
         lastSegment = new ArrayList<PointF>();
         lastSegmentTimes = new ArrayList<Long>();
         lastEraseTrace = new ArrayList<PointF>();
@@ -223,7 +229,7 @@ public class MainSurfaceView extends SurfaceView
     }
         
     public void clearSheet() {
-        sheet = new Sheet(sheet.getDBAdapter());
+        sheet = new Sheet(sheet.getDBAdapter(), true);
     }
 
     private void addPoint(PointF p) {

@@ -30,15 +30,17 @@ public class SmartSketcher extends Activity {
         BRUSH_ITEM = Menu.FIRST + 7;
     
     @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    public void onCreate(Bundle bundle) {
+        super.onCreate(bundle);
         setContentView(R.layout.main);
-        
         LinearLayout layout = (LinearLayout)findViewById(R.id.mainLayout);
         
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
-        mainSurfaceView = new MainSurfaceView(this, dbAdapter);
+        Sheet sheet = null;
+        if (bundle != null && bundle.get("currentSheetId") != null)
+            sheet = dbAdapter.loadSheet(bundle.getLong("currentSheetId"));
+        mainSurfaceView = new MainSurfaceView(this, dbAdapter, sheet);
         layout.addView(mainSurfaceView);
     }
     
@@ -46,13 +48,12 @@ public class SmartSketcher extends Activity {
     protected void onResume() {
         super.onResume();
         mainSurfaceView.resume();
-        mainSurfaceView.setSheet(dbAdapter.loadLastSheet());
     }
-    
+
     @Override
-    protected void onPause() {
-        super.onPause();
-        // saving is done all the time
+    public void onSaveInstanceState(Bundle bundle) {
+        bundle.putLong("currentSheetId", dbAdapter.getCurrentSheetId());
+        super.onSaveInstanceState(bundle);
     }
     
     @Override

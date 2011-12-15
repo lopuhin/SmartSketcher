@@ -40,7 +40,7 @@ public class Sheet {
     private ArrayList<IAction> doneActions, undoneActions;
     private final static String TAG = "Sheet";
     
-    Sheet(DBAdapter _dbAdapter) {
+    Sheet(DBAdapter _dbAdapter, Boolean isNew) {
         dbAdapter = _dbAdapter;
         shapes = new ArrayList<Shape>();
         doneActions = new ArrayList<IAction>();
@@ -55,7 +55,8 @@ public class Sheet {
         paint.setStrokeWidth(1.0f);
         whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         whiteFillPaint.setColor(Color.WHITE);
-        dbAdapter.newSheet(this);
+        if (isNew)
+            dbAdapter.newSheet(this);
     }
 
     public DBAdapter getDBAdapter() {
@@ -145,21 +146,24 @@ public class Sheet {
             setViewZoom(prevViewZoom);
         }
     }
-     
-    public void addShape(final Shape shape) {
+
+    public void addShape(final Shape shape, Boolean save) {
         /**
-         * Add shape to sheet.
+         * Add shape to sheet, save if save is true.
          */
         synchronized (shapes) {
             shapes.add(shape);
         }
         setDirty();
-        if (!shape.isTransient()) {
-            // TODO in thread
+        if (save && !shape.isTransient()) {
             dbAdapter.addShape(shape);
         }
     }
-     
+
+    public void addShape(final Shape shape) {
+        addShape(shape, true);
+    }
+    
     public void removeShape(final Shape shape) {
         synchronized (shapes) {
             // find shape, iterating from the end (shapes are removed by undo)
@@ -174,7 +178,6 @@ public class Sheet {
         }
         setDirty();
         if (!shape.isTransient()) {
-            // TODO in thread?
             dbAdapter.removeShape(shape);
         }
     }

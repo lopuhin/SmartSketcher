@@ -1,7 +1,12 @@
 package com.lopuhin.smartsketcher;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
@@ -77,16 +82,85 @@ public class DBAdapter {
         sheetValues.put(SHEET_X, viewPos.x);
         sheetValues.put(SHEET_Y, viewPos.y);
         sheetValues.put(SHEET_ZOOM, sheet.getViewZoom());
-        // TODO - check error (-1)
         currentSheetId = db.insert(SHEETS_TABLE, null, sheetValues);
     }
 
-    public Sheet loadLastSheet() {
+    public long getCurrentSheetId() {
+        return currentSheetId;
+    }
+    
+    public Sheet loadSheet(long sheetId) {
         /**
-         * Load last saved sheet
+         * Load sheet from db, set currentSheetId to sheetId
          */
-        // TODO: load sheet, save its id
-        return new Sheet(this);
+        currentSheetId = sheetId;
+        Sheet sheet = new Sheet(this, false);
+        // load sheet
+        Cursor cSheet = db.query(SHEETS_TABLE, null, KEY_ID + "=" + sheetId,
+                                 null, null, null, null);
+        sheet.setViewPos(new PointF(cSheet.getFloat(SHEET_X_COLUMN),
+                                    cSheet.getFloat(SHEET_Y_COLUMN)));
+        sheet.setViewZoom(cSheet.getFloat(SHEET_ZOOM_COLUMN));
+        // load all shapes
+        Cursor cShapes = db.query(SHAPES_TABLE, null, SHEET_ID + "=" + sheetId,
+                                  null, null, null, null);
+        ArrayList<Long> shapeIds = new ArrayList<Long>();
+        ArrayList<String> shapeNames = new ArrayList<String>();
+        if (cShapes.moveToFirst()) {
+            do {
+                shapeIds.add(cShapes.getLong(0));
+                shapeNames.add(cShapes.getString(SHAPE_NAME_COLUMN));
+            } while (cShapes.moveToNext());
+        }
+        if (shapeIds.size() > 0) {
+            // load all points and create shapes
+            Cursor cPoints = db.query(POINTS_TABLE, null,
+                                      SHAPE_ID + "in (" + join(shapeIds, ",") + ")",
+                                      null,null,null, SHAPE_ID); // group by shape_id
+            ArrayList<PointF> points = new ArrayList<PointF>();
+            long currentShapeId = shapeIds.get(0);
+            int shapeIndex = 0;
+            do {
+                long shapeId = cPoints.getLong(SHAPE_ID_COLUMN);
+                if (shapeId != currentShapeId) {
+                    sheet.addShape(createShape(points, shapeNames.get(shapeIndex)),
+                                   false);
+                    shapeIndex += 1;
+                    points.clear();
+                }
+                points.add(new PointF(cPoints.getFloat(POINT_X_COLUMN),
+                           	cPoints.getFloat(POINT_Y_COLUMN)));
+            } while (cPoints.moveToNext());
+        }
+        return sheet;
+    }
+
+    private Shape createShape(ArrayList<PointF> points, String shapeName) {
+        /**
+         * Create shape (determine class from shapeName) from given points.
+         */
+        if (shapeName == "com.lopuhin.smartsketcher.Curve") {
+            return new Curve(points, false);
+        } else if (shapeName == "com.lopuhin.smartsketcher.BezierCurve") {
+            return new BezierCurve(points);
+        } else {
+            throw new RuntimeException();
+        }
+    }
+    public static String join(Collection<?> s, String delimiter) {
+        /**
+         * Join elements in collection s by given delimiter. Return a string
+         */
+        StringBuilder builder = new StringBuilder();
+        Iterator iter = s.iterator();
+        while (iter.hasNext()) {
+            builder.append(iter.next());
+            if (!iter.hasNext()) {
+                break;                  
+            }
+            builder.append(delimiter);
+        }
+        return builder.toString();
     }
 
     public void addShape(Shape shape) {
