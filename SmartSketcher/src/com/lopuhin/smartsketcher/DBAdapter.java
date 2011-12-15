@@ -1,10 +1,12 @@
 package com.lopuhin.smartsketcher;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.PointF;
 import android.util.Log;
 
 
@@ -37,7 +39,7 @@ public class DBAdapter {
         SHEET_NAME + " TEXT NOT NULL, " +
         SHEET_X + " REAL NOT NULL, " +
         SHEET_Y + " REAL NOT NULL, " +
-        SHEET_ZOOM + " REAL NOT NULL, " +
+        SHEET_ZOOM + " REAL NOT NULL " +
         ");";
     private static final String SHAPES_TABLE_CREATE = "CREATE TABLE " +
         SHAPES_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
@@ -50,13 +52,15 @@ public class DBAdapter {
         SHAPE_ID + " INTEGER NOT NULL, " +
         POINT_X + " REAL NOT NULL, " +
         POINT_Y + " REAL NOT NULL, " +
-        "FOREIGN KEY(" + SHAPE_NAME + ") REFERENCES " + SHAPES_TABLE + "(" + KEY_ID + ")" + 
+        "FOREIGN KEY(" + SHAPE_ID + ") REFERENCES " + SHAPES_TABLE + "(" + KEY_ID + ")" + 
         ");";
     
     private SQLiteDatabase db;
     private final Context context;
     private DBHelper dbHelper;
-    private int currentSheetId;
+    private long currentSheetId;
+    
+    private final String TAG = "DBAdapter";
     
     public DBAdapter(Context _context) {
         context = _context;
@@ -64,7 +68,17 @@ public class DBAdapter {
     }
 
     public void newSheet(Sheet sheet) {
-        // TODO - create sheet in db, save its id
+        /**
+         * Create new sheet in db, set currentSheetId
+         */
+        ContentValues sheetValues = new ContentValues();
+        sheetValues.put(SHEET_NAME, "sheet"); // TODO
+        PointF viewPos = sheet.getViewPos();
+        sheetValues.put(SHEET_X, viewPos.x);
+        sheetValues.put(SHEET_Y, viewPos.y);
+        sheetValues.put(SHEET_ZOOM, sheet.getViewZoom());
+        // TODO - check error (-1)
+        currentSheetId = db.insert(SHEETS_TABLE, null, sheetValues);
     }
 
     public Sheet loadLastSheet() {
@@ -77,9 +91,22 @@ public class DBAdapter {
 
     public void addShape(Shape shape) {
         /**
-         * save shape in current sheet
+         * Save shape in current sheet
          */
-        // TODO
+        ContentValues shapeValues = new ContentValues();
+        shapeValues.put(SHEET_ID, currentSheetId);
+        shapeValues.put(SHAPE_NAME, shape.getClass().getName());
+        long shape_id = db.insert(SHAPES_TABLE, null, shapeValues);
+        // TODO - insert in one query
+        Log.d(TAG, "Inserting points " + shape.getPoints().length);
+        for (PointF point: shape.getPoints()) {
+            ContentValues pointValues = new ContentValues();
+            pointValues.put(SHAPE_ID, shape_id);
+            pointValues.put(POINT_X, point.x);
+            pointValues.put(POINT_Y, point.y);
+            db.insert(POINTS_TABLE, null, pointValues);
+        }
+        Log.d(TAG, "Done inserting points");
     }
 
     public void removeShape(Shape shape) {

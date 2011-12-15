@@ -63,7 +63,8 @@ public class BezierCurve extends Shape {
         curve.fittingError = fitting_fn.value(c); // TODO - normalize by length?
         return curve;
     }
-        
+
+    @Override
     public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
         // TODO - use sheet!
         // TODO - decide how many steps to use depending on the scale
@@ -100,6 +101,11 @@ public class BezierCurve extends Shape {
         }        
     }
 
+    @Override
+    public PointF[] getPoints() {
+        return points;
+    }
+    
     /*
     public void toXml(XmlSerializer s) throws IOException {
         s.startTag("", "BezierCurve");

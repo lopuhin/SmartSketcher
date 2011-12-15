@@ -55,6 +55,7 @@ public class Sheet {
         paint.setStrokeWidth(1.0f);
         whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
         whiteFillPaint.setColor(Color.WHITE);
+        dbAdapter.newSheet(this);
     }
 
     public DBAdapter getDBAdapter() {
@@ -154,7 +155,7 @@ public class Sheet {
         }
         setDirty();
         if (!shape.isTransient()) {
-            // TODO in thread?
+            // TODO in thread
             dbAdapter.addShape(shape);
         }
     }

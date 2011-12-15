@@ -40,7 +40,8 @@ public class Curve extends Shape {
             i += 1;
         }
     }
-        
+
+    @Override
     public void draw(Canvas canvas, Paint paint, Sheet sheet) {
         PointF prevPoint = null;
         for (PointF p: points) {
@@ -59,10 +60,15 @@ public class Curve extends Shape {
     }
 
     @Override
+    public PointF[] getPoints() {
+        return points;
+    }
+    
+    @Override
     public Boolean isTransient() {
         return isTransient;
     }
-    
+
     /*
       public void toXml(XmlSerializer s) throws IOException {
       s.startTag("", "Curve");

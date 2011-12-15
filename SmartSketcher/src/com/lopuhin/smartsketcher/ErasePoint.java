@@ -26,6 +26,12 @@ public class ErasePoint extends Shape {
 		canvas.drawCircle(point.x, point.y, radius, sheet.whiteFillPaint);
 	}
 
+	@Override
+	public PointF[] getPoints() {
+		PointF[] points = new PointF[1];
+		points[0] = point;
+		return points;
+	}
 	/*
 	@Override
 	public void toXml(XmlSerializer s) throws IOException {

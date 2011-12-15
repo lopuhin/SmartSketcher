@@ -37,6 +37,7 @@ public class SmartSketcher extends Activity {
         LinearLayout layout = (LinearLayout)findViewById(R.id.mainLayout);
         
         dbAdapter = new DBAdapter(this);
+        dbAdapter.open();
         mainSurfaceView = new MainSurfaceView(this, dbAdapter);
         layout.addView(mainSurfaceView);
     }
@@ -108,8 +109,7 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.clearSheet();
             return true;
         case (NEW_ITEM) :
-            mainSurfaceView.clearSheet();
-            dbAdapter.newSheet(mainSurfaceView.getSheet());
+            mainSurfaceView.clearSheet();	
             return true;
         case (OPEN_ITEM) :
             Intent intent = new Intent();
