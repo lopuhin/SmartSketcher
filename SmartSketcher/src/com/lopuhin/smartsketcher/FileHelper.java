@@ -34,17 +34,7 @@ public class FileHelper {
 		this.context = mainSurfaceView.getContext();
 	}
 
-	public Sheet getSavedSheet() {
-		if (!isStorageAvailable()) {
-			return null;
-		}
-		File lastFile = getLastFile(getSDDir());
-		if (lastFile == null) {
-			return null;
-		}
-		return getSavedSheet(lastFile);
-	}
-
+	/*
 	public Sheet getSavedSheetByPreviewPath(String previewPath) {
 		String parent = getSDDir().getAbsolutePath();
 		String expectedPath = parent + "/" + PREVIEW_FILENAME_RE;
@@ -62,23 +52,13 @@ public class FileHelper {
     	}
     	return null;
 	}
+	*/
 	
 	public void saveToSD() {
 		if (!isStorageAvailable()) {
 			return;
 		}
 		new SaveTask().execute();
-	}
-
-	private Sheet getSavedSheet(File file) {
-		Sheet savedSheet = null;
-		try {
-			FileInputStream fis = new FileInputStream(file);
-			savedSheet = Sheet.loadFromFile(fis);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-		return savedSheet;
 	}
 
 	private File getSDDir() {
@@ -117,16 +97,7 @@ public class FileHelper {
 		};
 	}
 
-	private void saveSheet(File file) {
-		try {
-			FileOutputStream fos = new FileOutputStream(file);
-			Sheet sheet = mainSurfaceView.getSheet();
-			sheet.saveToFile(fos);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
+	
 	private void savePreview(File file) {
 		try {
 			FileOutputStream fos = new FileOutputStream(file);
@@ -172,7 +143,7 @@ public class FileHelper {
 
 	private File saveSheet() {
 		File[] files = getUniqueFilePath(getSDDir());
-		saveSheet(files[0]);
+		//saveSheet(files[0]);
 		savePreview(files[1]);
 		notifyMediaScanner(files[1]);
 		return files[0];

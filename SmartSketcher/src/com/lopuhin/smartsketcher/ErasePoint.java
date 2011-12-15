@@ -26,6 +26,7 @@ public class ErasePoint extends Shape {
 		canvas.drawCircle(point.x, point.y, radius, sheet.whiteFillPaint);
 	}
 
+	/*
 	@Override
 	public void toXml(XmlSerializer s) throws IOException {
 		s.startTag("", "ErasePoint");
@@ -42,5 +43,6 @@ public class ErasePoint extends Shape {
 						Float.parseFloat(attr.getNamedItem("y").getNodeValue())),
 				Float.parseFloat(attr.getNamedItem("radius").getNodeValue()));
 	}
-
+	*/
+	
 }

@@ -7,49 +7,86 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+
 public class DBAdapter {
+    /**
+     * Responsible for Sheet persistance: adds new shapes to current sheet,
+     * restores sheet from database
+     */
     private static final String DATABASE_NAME = "smartsketcher.db";
     private static final int DATABASE_VERSION = 1;
-    private static final String SKETCHES_TABLE = "sketches";
+    private static final String SHEETS_TABLE = "sheets";
     private static final String SHAPES_TABLE = "shapes";
     private static final String POINTS_TABLE = "points";
 
     public static final String KEY_ID="_id";
 
-    public static final String SKETCH_NAME = "sketch_name";
-    public static final int SKETCH_NAME_COLUMN = 1;
+    public static final String SHEET_NAME = "sheet_name",
+        SHEET_X = "x", SHEET_Y = "y", SHEET_ZOOM = "zoom";
+    public static final int SHEET_NAME_COLUMN = 1,
+        SHEET_X_COLUMN = 2, SHEET_Y_COLUMN = 3, SHEET_ZOOM_COLUMN = 4;
 
-    public static final String SKETCH_ID = "sketch_id", SHAPE_NAME = "shape_name";
-    public static final int SKETCH_ID_COLUMN = 1, SHAPE_NAME_COLUMN = 2;
+    public static final String SHEET_ID = "sheet_id", SHAPE_NAME = "shape_name";
+    public static final int SHEET_ID_COLUMN = 1, SHAPE_NAME_COLUMN = 2;
 
-    public static final String SHAPE_ID = "shape_id", POINT_X_NAME = "x", POINT_Y_NAME = "y";
+    public static final String SHAPE_ID = "shape_id", POINT_X = "x", POINT_Y = "y";
     public static final int SHAPE_ID_COLUMN = 1, POINT_X_COLUMN = 2, POINT_Y_COLUMN = 3;
 
-    private static final String SKETCHES_TABLE_CREATE = "CREATE TABLE " +
-        SKETCHES_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        SKETCH_NAME + " TEXT NOT NULL, " +
+    private static final String SHEETS_TABLE_CREATE = "CREATE TABLE " +
+        SHEETS_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+        SHEET_NAME + " TEXT NOT NULL, " +
+        SHEET_X + " REAL NOT NULL, " +
+        SHEET_Y + " REAL NOT NULL, " +
+        SHEET_ZOOM + " REAL NOT NULL, " +
         ");";
     private static final String SHAPES_TABLE_CREATE = "CREATE TABLE " +
         SHAPES_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        SKETCH_ID + " INTEGER, " + 
+        SHEET_ID + " INTEGER NOT NULL, " + 
         SHAPE_NAME + " TEXT NOT NULL, " +
-        "FOREIGN KEY(" + SKETCH_ID + ") REFERENCES " + SKETCHES_TABLE + "(" + KEY_ID + ")" +
+        "FOREIGN KEY(" + SHEET_ID + ") REFERENCES " + SHEETS_TABLE + "(" + KEY_ID + ")" +
         ");";
     private static final String POINTS_TABLE_CREATE = "CREATE TABLE " +
         POINTS_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        SHAPE_ID + " INTEGER, " +
-        POINT_X_NAME + " REAL NOT NULL, " +
-        POINT_Y_NAME + " REAL NOT NULL, " +
+        SHAPE_ID + " INTEGER NOT NULL, " +
+        POINT_X + " REAL NOT NULL, " +
+        POINT_Y + " REAL NOT NULL, " +
         "FOREIGN KEY(" + SHAPE_NAME + ") REFERENCES " + SHAPES_TABLE + "(" + KEY_ID + ")" + 
         ");";
     
     private SQLiteDatabase db;
     private final Context context;
     private DBHelper dbHelper;
+    private int currentSheetId;
     
     public DBAdapter(Context _context) {
         context = _context;
         dbHelper = new DBHelper(context, DATABASE_NAME, null, DATABASE_VERSION);
+    }
+
+    public void newSheet(Sheet sheet) {
+        // TODO - create sheet in db, save its id
+    }
+
+    public Sheet loadLastSheet() {
+        /**
+         * Load last saved sheet
+         */
+        // TODO: load sheet, save its id
+        return new Sheet(this);
+    }
+
+    public void addShape(Shape shape) {
+        /**
+         * save shape in current sheet
+         */
+        // TODO
+    }
+
+    public void removeShape(Shape shape) {
+        /**
+         * remove shape from current sheet
+         */
+        // TODO
     }
     
     public DBAdapter open() throws SQLException {
@@ -92,7 +129,7 @@ public class DBAdapter {
         
         @Override
         public void onCreate(SQLiteDatabase _db) {
-            _db.execSQL(SKETCHES_TABLE_CREATE);
+            _db.execSQL(SHEETS_TABLE_CREATE);
             _db.execSQL(SHAPES_TABLE_CREATE);
             _db.execSQL(POINTS_TABLE_CREATE);
         }
@@ -106,7 +143,7 @@ public class DBAdapter {
 
 	    _db.execSQL("DROP TABLE IF EXISTS " + POINTS_TABLE);
             _db.execSQL("DROP TABLE IF EXISTS " + SHAPES_TABLE);
-            _db.execSQL("DROP TABLE IF EXISTS " + SKETCHES_TABLE);
+            _db.execSQL("DROP TABLE IF EXISTS " + SHEETS_TABLE);
 
             onCreate(_db);
         }
