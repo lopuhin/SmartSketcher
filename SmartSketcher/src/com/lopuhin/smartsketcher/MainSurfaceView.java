@@ -156,6 +156,7 @@ public class MainSurfaceView extends SurfaceView
         /**
          * Create and start the graphics update thread.
          */
+        sheet.setDirty();
         if (mainSurfaceViewThread == null) {
             mainSurfaceViewThread = new MainSurfaceViewThread();
             if (hasSurface == true)

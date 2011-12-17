@@ -62,6 +62,10 @@ public class Sheet {
     public DBAdapter getDBAdapter() {
         return dbAdapter;
     }
+
+    public long getId() {
+        return dbAdapter.getCurrentSheetId();
+    }
     
     public void savePreviewToFile(FileOutputStream fos,
                                   final int previewW,

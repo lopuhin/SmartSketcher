@@ -17,7 +17,8 @@ import android.widget.LinearLayout;
 public class SmartSketcher extends Activity {
     private MainSurfaceView mainSurfaceView;
     private DBAdapter dbAdapter;
-        
+    private FileHelper fileHelper;
+    
     private static final int SELECT_PICTURE = 1;
     private static String TAG = "SmartSketcher";
         
@@ -40,8 +41,11 @@ public class SmartSketcher extends Activity {
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
         Sheet sheet = dbAdapter.loadLastSheet();
+
         mainSurfaceView = new MainSurfaceView(this, dbAdapter, sheet);
         layout.addView(mainSurfaceView);
+
+        fileHelper = new FileHelper(mainSurfaceView);
     }
     
     @Override
@@ -49,7 +53,14 @@ public class SmartSketcher extends Activity {
         super.onResume();
         mainSurfaceView.resume();
     }
-    
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "onPause");
+        fileHelper.savePreview();
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
@@ -107,11 +118,10 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.clearSheet();	
             return true;
         case (OPEN_ITEM) :
-            Intent intent = new Intent();
-            intent.setType("image/png");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(Intent.createChooser(intent, "Open"),
-                                   SELECT_PICTURE);
+            fileHelper.savePreview();
+            Log.d(TAG, "uri pattern " + fileHelper.getURIPattern());
+            Intent intent = new Intent(Intent.ACTION_PICK, fileHelper.getURIPattern());
+            startActivityForResult(Intent.createChooser(intent, "Open"), SELECT_PICTURE);
             return true;
         }
         return false;
@@ -121,8 +131,10 @@ public class SmartSketcher extends Activity {
         if (resultCode == RESULT_OK && requestCode == SELECT_PICTURE) {
             Uri selectedImageUri = data.getData();
             String selectedImagePath = getPath(selectedImageUri);
-            // TODO
-            //mainSurfaceView.setSheet(fileHelper.getSavedSheetByPreviewPath(selectedImagePath));
+            Long sheetId = fileHelper.getSheetIdByPreviewPath(selectedImagePath);
+            if (sheetId != null) {
+                mainSurfaceView.setSheet(dbAdapter.loadSheet(sheetId));
+            }
         }
         mainSurfaceView.getSheet().setDirty();
     }
