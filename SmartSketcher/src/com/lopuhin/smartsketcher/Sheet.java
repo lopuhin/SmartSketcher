@@ -63,66 +63,6 @@ public class Sheet {
         return dbAdapter;
     }
     
-    /*
-    public static Sheet loadFromFile(FileInputStream fis) {
-        // load sheet from XML file
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        Sheet sheet = new Sheet();
-        try {
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document dom = builder.parse(fis);
-            Element root = dom.getDocumentElement();
-            NodeList shapeNodes = root.getChildNodes();
-            for (int i = 0; i < shapeNodes.getLength(); i++) {
-                Node node = shapeNodes.item(i);
-                String nodeName = node.getNodeName();
-                if (nodeName.equals("pos")) {
-                    NamedNodeMap attr = node.getAttributes();
-                    sheet.viewPos = new PointF(
-                                               Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
-                                               Float.parseFloat(attr.getNamedItem("y").getNodeValue()));
-                    sheet.viewZoom = Float.parseFloat(attr.getNamedItem("zoom").getNodeValue());
-                } else if (nodeName.equals("BezierCurve")) {
-                    sheet.addShape(BezierCurve.fromXml(node));
-                } else if (nodeName.equals("Curve")) {
-                    sheet.addShape(Curve.fromXml(node));
-                } else if (nodeName.equals("ErasePoint")) {
-                    sheet.addShape(ErasePoint.fromXml(node));
-                }
-         
-                 
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "unable to loadFromFile", e);
-            //throw new RuntimeException(e);
-        }
-        return sheet;
-        }*/
-
-    /*
-    public void saveToFile(FileOutputStream fos) {
-        XmlSerializer s = Xml.newSerializer();
-        try {
-            final String encoding = "UTF-8";
-            s.setOutput(fos, encoding);
-            s.startDocument(encoding, true);
-            s.startTag("", "Sheet");
-            s.startTag("", "pos");
-            s.attribute("", "x", String.format("%f", viewPos.x));
-            s.attribute("", "y", String.format("%f", viewPos.y));
-            s.attribute("", "zoom", String.format("%f", viewZoom));
-            s.endTag("", "pos");
-            for (Shape shape: shapes) {
-                shape.toXml(s);
-            }
-            s.endTag("", "Sheet");
-            s.endDocument();
-        } catch (Exception e) {
-            Log.e(TAG, "error saving sheet", e);
-            throw new RuntimeException(e);
-        }      
-        }*/
-     
     public void savePreviewToFile(FileOutputStream fos,
                                   final int previewW,
                                   final int previewH) {

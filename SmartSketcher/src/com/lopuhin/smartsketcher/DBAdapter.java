@@ -93,17 +93,23 @@ public class DBAdapter {
         /**
          * Load sheet from db, set currentSheetId to sheetId
          */
+        Log.d(TAG, "loadSheet " + sheetId);
         currentSheetId = sheetId;
         Sheet sheet = new Sheet(this, false);
         // load sheet
         Cursor cSheet = db.query(SHEETS_TABLE, null, KEY_ID + "=" + sheetId,
                                  null, null, null, null);
+        if (!cSheet.moveToFirst())
+            return sheet;
         sheet.setViewPos(new PointF(cSheet.getFloat(SHEET_X_COLUMN),
                                     cSheet.getFloat(SHEET_Y_COLUMN)));
         sheet.setViewZoom(cSheet.getFloat(SHEET_ZOOM_COLUMN));
+        cSheet.close();
         // load all shapes
         Cursor cShapes = db.query(SHAPES_TABLE, null, SHEET_ID + "=" + sheetId,
                                   null, null, null, null);
+        if (!cShapes.moveToFirst())
+            return sheet;
         ArrayList<Long> shapeIds = new ArrayList<Long>();
         ArrayList<String> shapeNames = new ArrayList<String>();
         if (cShapes.moveToFirst()) {
@@ -112,37 +118,66 @@ public class DBAdapter {
                 shapeNames.add(cShapes.getString(SHAPE_NAME_COLUMN));
             } while (cShapes.moveToNext());
         }
+        cShapes.close();
         if (shapeIds.size() > 0) {
             // load all points and create shapes
             Cursor cPoints = db.query(POINTS_TABLE, null,
-                                      SHAPE_ID + "in (" + join(shapeIds, ",") + ")",
+                                      SHAPE_ID + " IN (" + join(shapeIds, ",") + ")",
                                       null,null,null, SHAPE_ID); // group by shape_id
             ArrayList<PointF> points = new ArrayList<PointF>();
             long currentShapeId = shapeIds.get(0);
+            Log.d(TAG, "currentShapeId " + currentShapeId + " " + shapeIds.size());
             int shapeIndex = 0;
+            if (!cPoints.moveToFirst())
+                return sheet;
             do {
                 long shapeId = cPoints.getLong(SHAPE_ID_COLUMN);
+                Log.d(TAG, "shapeId " + shapeId + " " + shapeIndex);
                 if (shapeId != currentShapeId) {
+                    currentShapeId = shapeId;
                     sheet.addShape(createShape(points, shapeNames.get(shapeIndex)),
                                    false);
                     shapeIndex += 1;
                     points.clear();
                 }
                 points.add(new PointF(cPoints.getFloat(POINT_X_COLUMN),
-                           	cPoints.getFloat(POINT_Y_COLUMN)));
+                                      cPoints.getFloat(POINT_Y_COLUMN)));
             } while (cPoints.moveToNext());
+            cPoints.close();
+            if (points.size() > 0) {
+                sheet.addShape(createShape(points, shapeNames.get(shapeIndex)),
+                               false);
+            }
         }
         return sheet;
     }
 
+    public Sheet loadLastSheet() {
+        /**
+         * Load last saved sheet. Can return null, if there is no last sheet
+         */
+        Cursor c = db.rawQuery("SELECT MAX(" + KEY_ID + ") FROM " + SHEETS_TABLE, null);
+        if (c.moveToFirst()) {
+            long sheetId = c.getLong(0);
+            c.close();
+            return loadSheet(sheetId);
+        } else {
+            return null;
+        }
+    }
+    
     private Shape createShape(ArrayList<PointF> points, String shapeName) {
         /**
          * Create shape (determine class from shapeName) from given points.
          */
-        if (shapeName == "com.lopuhin.smartsketcher.Curve") {
+        Log.d(TAG, "createShape " + shapeName);
+        if (shapeName.equals("com.lopuhin.smartsketcher.Curve")) {
             return new Curve(points, false);
-        } else if (shapeName == "com.lopuhin.smartsketcher.BezierCurve") {
+        } else if (shapeName.equals("com.lopuhin.smartsketcher.BezierCurve")) {
             return new BezierCurve(points);
+        } else if (shapeName.equals("com.lopuhin.smartsketcher.ErasePoint")) {
+            // TODO
+            throw new RuntimeException();
         } else {
             throw new RuntimeException();
         }
@@ -174,11 +209,13 @@ public class DBAdapter {
         // TODO - insert in one query
         Log.d(TAG, "Inserting points " + shape.getPoints().length);
         for (PointF point: shape.getPoints()) {
-            ContentValues pointValues = new ContentValues();
-            pointValues.put(SHAPE_ID, shape_id);
-            pointValues.put(POINT_X, point.x);
-            pointValues.put(POINT_Y, point.y);
-            db.insert(POINTS_TABLE, null, pointValues);
+            if (!Float.isNaN(point.x) && !Float.isNaN(point.y)) {
+                ContentValues pointValues = new ContentValues();
+                pointValues.put(SHAPE_ID, shape_id);
+                pointValues.put(POINT_X, point.x);
+                pointValues.put(POINT_Y, point.y);
+                db.insert(POINTS_TABLE, null, pointValues);
+            }
         }
         Log.d(TAG, "Done inserting points");
     }

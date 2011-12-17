@@ -70,29 +70,4 @@ public class Curve extends Shape {
         return isTransient;
     }
 
-    /*
-      public void toXml(XmlSerializer s) throws IOException {
-      s.startTag("", "Curve");
-      for (PointF point: points) {
-      s.startTag("", "point");
-      s.attribute("", "x", String.format("%f", point.x));
-      s.attribute("", "y", String.format("%f", point.y));
-      s.endTag("", "point");
-      }
-      s.endTag("", "Curve");
-      }
-
-      public static Curve fromXml(Node node) throws IOException {
-      ArrayList<PointF> points = new ArrayList<PointF>();
-      NodeList pointNodes = node.getChildNodes();
-      for (int i = 0; i < pointNodes.getLength(); i++ ) {
-      Node pointNode = pointNodes.item(i);
-      NamedNodeMap attr = pointNode.getAttributes();
-      points.add(new PointF(
-      Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
-      Float.parseFloat(attr.getNamedItem("y").getNodeValue())));
-      }
-      return new Curve(points);
-      }*/
-        
 }

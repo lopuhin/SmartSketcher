@@ -1,5 +1,7 @@
 package com.lopuhin.smartsketcher;
 
+import java.util.logging.Logger;
+
 import android.app.Activity;
 import android.content.Intent;
 import android.database.Cursor;
@@ -37,9 +39,7 @@ public class SmartSketcher extends Activity {
         
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
-        Sheet sheet = null;
-        if (bundle != null && bundle.get("currentSheetId") != null)
-            sheet = dbAdapter.loadSheet(bundle.getLong("currentSheetId"));
+        Sheet sheet = dbAdapter.loadLastSheet();
         mainSurfaceView = new MainSurfaceView(this, dbAdapter, sheet);
         layout.addView(mainSurfaceView);
     }
@@ -48,12 +48,6 @@ public class SmartSketcher extends Activity {
     protected void onResume() {
         super.onResume();
         mainSurfaceView.resume();
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle bundle) {
-        bundle.putLong("currentSheetId", dbAdapter.getCurrentSheetId());
-        super.onSaveInstanceState(bundle);
     }
     
     @Override

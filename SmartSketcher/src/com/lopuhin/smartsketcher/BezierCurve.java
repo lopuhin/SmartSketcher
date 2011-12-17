@@ -106,31 +106,6 @@ public class BezierCurve extends Shape {
         return points;
     }
     
-    /*
-    public void toXml(XmlSerializer s) throws IOException {
-        s.startTag("", "BezierCurve");
-        for (PointF point: points) {
-            s.startTag("", "point");
-            s.attribute("", "x", String.format("%f", point.x));
-            s.attribute("", "y", String.format("%f", point.y));
-            s.endTag("", "point");
-        }
-        s.endTag("", "BezierCurve");
-    }
-        
-    public static BezierCurve fromXml(Node node) throws IOException {
-        ArrayList<PointF> points = new ArrayList<PointF>();
-        NodeList pointNodes = node.getChildNodes();
-        for (int i = 0; i < pointNodes.getLength(); i++ ) {
-            Node pointNode = pointNodes.item(i);
-            NamedNodeMap attr = pointNode.getAttributes();
-            points.add(new PointF(
-                                  Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
-                                  Float.parseFloat(attr.getNamedItem("y").getNodeValue())));
-        }
-        return new BezierCurve(points);
-        }*/
-
     public float getFittingError() {
         // normalized fitting error
         return fittingError;

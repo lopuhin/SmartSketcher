@@ -32,23 +32,4 @@ public class ErasePoint extends Shape {
 		points[0] = point;
 		return points;
 	}
-	/*
-	@Override
-	public void toXml(XmlSerializer s) throws IOException {
-		s.startTag("", "ErasePoint");
-			s.attribute("", "x", String.format("%f", point.x));
-			s.attribute("", "y", String.format("%f", point.y));
-			s.attribute("", "radius", String.format("%f", radius));
-		s.endTag("", "ErasePoint");
-	}
-	
-	public static ErasePoint fromXml(Node node) throws IOException {
-		NamedNodeMap attr = node.getAttributes();
-		return new ErasePoint(
-				new PointF(Float.parseFloat(attr.getNamedItem("x").getNodeValue()),
-						Float.parseFloat(attr.getNamedItem("y").getNodeValue())),
-				Float.parseFloat(attr.getNamedItem("radius").getNodeValue()));
-	}
-	*/
-	
 }
