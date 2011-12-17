@@ -21,8 +21,8 @@ public class Curve extends Shape {
     private PointF[] points;
     private Boolean isTransient;
 
-
     Curve(ArrayList<PointF> pointsList, Boolean _isTransient) {
+        isTransient = _isTransient;
         points = new PointF[pointsList.size()];
         int i = 0;
         for (PointF p: pointsList) {
@@ -63,6 +63,11 @@ public class Curve extends Shape {
     @Override
     public PointF[] getPoints() {
         return points;
+    }
+
+    @Override
+    public float getThickness() {
+        return 1.0f; // TODO
     }
     
     @Override

@@ -20,8 +20,8 @@ public class DBAdapter {
      * Responsible for Sheet persistance: adds new shapes to current sheet,
      * restores sheet from database
      */
+    private static final int DATABASE_VERSION = 2;
     private static final String DATABASE_NAME = "smartsketcher.db";
-    private static final int DATABASE_VERSION = 1;
     private static final String SHEETS_TABLE = "sheets";
     private static final String SHAPES_TABLE = "shapes";
     private static final String POINTS_TABLE = "points";
@@ -33,8 +33,10 @@ public class DBAdapter {
     public static final int SHEET_NAME_COLUMN = 1,
         SHEET_X_COLUMN = 2, SHEET_Y_COLUMN = 3, SHEET_ZOOM_COLUMN = 4;
 
-    public static final String SHEET_ID = "sheet_id", SHAPE_NAME = "shape_name";
-    public static final int SHEET_ID_COLUMN = 1, SHAPE_NAME_COLUMN = 2;
+    public static final String SHEET_ID = "sheet_id", SHAPE_NAME = "shape_name",
+        SHAPE_THICKNESS = "shape_thickness";
+    public static final int SHEET_ID_COLUMN = 1, SHAPE_NAME_COLUMN = 2,
+        SHAPE_THICKNESS_COLUMN = 3;
 
     public static final String SHAPE_ID = "shape_id", POINT_X = "x", POINT_Y = "y";
     public static final int SHAPE_ID_COLUMN = 1, POINT_X_COLUMN = 2, POINT_Y_COLUMN = 3;
@@ -50,6 +52,7 @@ public class DBAdapter {
         SHAPES_TABLE + " (" + KEY_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
         SHEET_ID + " INTEGER NOT NULL, " + 
         SHAPE_NAME + " TEXT NOT NULL, " +
+        SHAPE_THICKNESS + " REAL NOT NULL, " + 
         "FOREIGN KEY(" + SHEET_ID + ") REFERENCES " + SHEETS_TABLE + "(" + KEY_ID + ")" +
         ");";
     private static final String POINTS_TABLE_CREATE = "CREATE TABLE " +
@@ -88,7 +91,21 @@ public class DBAdapter {
     public long getCurrentSheetId() {
         return currentSheetId;
     }
-    
+
+    public Sheet loadLastSheet() {
+        /**
+         * Load last saved sheet. Can return null, if there is no last sheet
+         */
+        Cursor c = db.rawQuery("SELECT MAX(" + KEY_ID + ") FROM " + SHEETS_TABLE, null);
+        if (c.moveToFirst()) {
+            long sheetId = c.getLong(0);
+            c.close();
+            return loadSheet(sheetId);
+        } else {
+            return null;
+        }
+    }
+        
     public Sheet loadSheet(long sheetId) {
         /**
          * Load sheet from db, set currentSheetId to sheetId
@@ -110,16 +127,17 @@ public class DBAdapter {
                                   null, null, null, null);
         if (!cShapes.moveToFirst())
             return sheet;
+        ArrayList<ShapeInfo> shapes = new ArrayList<ShapeInfo>();
         ArrayList<Long> shapeIds = new ArrayList<Long>();
-        ArrayList<String> shapeNames = new ArrayList<String>();
         if (cShapes.moveToFirst()) {
             do {
                 shapeIds.add(cShapes.getLong(0));
-                shapeNames.add(cShapes.getString(SHAPE_NAME_COLUMN));
+                shapes.add(new ShapeInfo(cShapes.getString(SHAPE_NAME_COLUMN),
+                                         cShapes.getFloat(SHAPE_THICKNESS_COLUMN)));
             } while (cShapes.moveToNext());
         }
         cShapes.close();
-        if (shapeIds.size() > 0) {
+        if (shapes.size() > 0) {
             // load all points and create shapes
             Cursor cPoints = db.query(POINTS_TABLE, null,
                                       SHAPE_ID + " IN (" + join(shapeIds, ",") + ")",
@@ -135,7 +153,8 @@ public class DBAdapter {
                 Log.d(TAG, "shapeId " + shapeId + " " + shapeIndex);
                 if (shapeId != currentShapeId) {
                     currentShapeId = shapeId;
-                    sheet.addShape(createShape(points, shapeNames.get(shapeIndex)),
+                    
+                    sheet.addShape(createShape(points, shapes.get(shapeIndex)),
                                    false);
                     shapeIndex += 1;
                     points.clear();
@@ -145,44 +164,39 @@ public class DBAdapter {
             } while (cPoints.moveToNext());
             cPoints.close();
             if (points.size() > 0) {
-                sheet.addShape(createShape(points, shapeNames.get(shapeIndex)),
+                sheet.addShape(createShape(points, shapes.get(shapeIndex)),
                                false);
             }
         }
         return sheet;
     }
 
-    public Sheet loadLastSheet() {
-        /**
-         * Load last saved sheet. Can return null, if there is no last sheet
-         */
-        Cursor c = db.rawQuery("SELECT MAX(" + KEY_ID + ") FROM " + SHEETS_TABLE, null);
-        if (c.moveToFirst()) {
-            long sheetId = c.getLong(0);
-            c.close();
-            return loadSheet(sheetId);
-        } else {
-            return null;
+    private class ShapeInfo {
+        public String name;
+        public float thickness;
+        ShapeInfo(String name, float thickness) {
+            this.name = name;
+            this.thickness = thickness;
         }
     }
     
-    private Shape createShape(ArrayList<PointF> points, String shapeName) {
+    private Shape createShape(ArrayList<PointF> points, ShapeInfo shapeInfo) {
         /**
          * Create shape (determine class from shapeName) from given points.
          */
-        Log.d(TAG, "createShape " + shapeName);
-        if (shapeName.equals("com.lopuhin.smartsketcher.Curve")) {
+        Log.d(TAG, "createShape " + shapeInfo.name);
+        if (shapeInfo.name.equals("com.lopuhin.smartsketcher.Curve")) {
             return new Curve(points, false);
-        } else if (shapeName.equals("com.lopuhin.smartsketcher.BezierCurve")) {
+        } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.BezierCurve")) {
             return new BezierCurve(points);
-        } else if (shapeName.equals("com.lopuhin.smartsketcher.ErasePoint")) {
-            // TODO
-            throw new RuntimeException();
+        } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.ErasePoint")) {
+            return new ErasePoint(points.get(0), shapeInfo.thickness);
         } else {
             throw new RuntimeException();
         }
     }
-    public static String join(Collection<?> s, String delimiter) {
+    
+    private static String join(Collection<?> s, String delimiter) {
         /**
          * Join elements in collection s by given delimiter. Return a string
          */
@@ -205,6 +219,7 @@ public class DBAdapter {
         ContentValues shapeValues = new ContentValues();
         shapeValues.put(SHEET_ID, currentSheetId);
         shapeValues.put(SHAPE_NAME, shape.getClass().getName());
+        shapeValues.put(SHAPE_THICKNESS, shape.getThickness());
         long shape_id = db.insert(SHAPES_TABLE, null, shapeValues);
         // TODO - insert in one query
         Log.d(TAG, "Inserting points " + shape.getPoints().length);

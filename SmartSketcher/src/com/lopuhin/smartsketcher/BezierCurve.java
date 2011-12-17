@@ -106,6 +106,11 @@ public class BezierCurve extends Shape {
         return points;
     }
     
+    @Override
+    public float getThickness() {
+        return 1.0f; // TODO
+    }
+        
     public float getFittingError() {
         // normalized fitting error
         return fittingError;
