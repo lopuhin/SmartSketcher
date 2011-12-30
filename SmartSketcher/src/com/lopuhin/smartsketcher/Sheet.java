@@ -185,6 +185,7 @@ public class Sheet {
     }
      
     public void setViewPos(PointF viewPos) {
+        Log.d(TAG, "setViewPos " + viewPos.x + " " + viewPos.y);
         this.viewPos = new PointF(viewPos.x, viewPos.y);
         setDirty();
     }
@@ -194,6 +195,7 @@ public class Sheet {
     }
      
     public void setViewZoom(float viewZoom) {
+        Log.d(TAG, "setViewZoom " + viewZoom);
         this.viewZoom = viewZoom;
         setDirty();
     }

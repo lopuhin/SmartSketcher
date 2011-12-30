@@ -27,6 +27,7 @@ public class MainSurfaceView extends SurfaceView
     private int mode, instrument;
     private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
     public final static int DRAW_INSTRUMENT = 0, ERASE_INSTRUMENT = 1;
+    private final static float SMALL_TOUCH_SPACING = 1.0f;
     // initial configuration, when user starts dragging with two fingers
     private float prevTouchSpacing, prevViewZoom;
     private PointF prevTouchCenter, prevViewPos;
@@ -96,7 +97,7 @@ public class MainSurfaceView extends SurfaceView
                 }
                 break;
             case (MotionEvent.ACTION_POINTER_DOWN) :
-                final float dst = touchSpacing(event); 
+                final float dst = touchSpacing(event);
                 if (dst > 5f) {
                     mode = ZOOM_MODE;
                     if (instrument == DRAW_INSTRUMENT) {
@@ -112,7 +113,11 @@ public class MainSurfaceView extends SurfaceView
                 break;
             case (MotionEvent.ACTION_MOVE) :
                 if (mode == ZOOM_MODE) {
-                    final float touchSpacing = touchSpacing(event); 
+                    float touchSpacing = touchSpacing(event);
+                    if (touchSpacing < SMALL_TOUCH_SPACING)
+                        touchSpacing = prevTouchSpacing;
+                    Log.d(TAG, "touchSpacing " + touchSpacing +
+                          " prevTouchSpacing " + prevTouchSpacing);
                     final float dZoom = touchSpacing / prevTouchSpacing;
                     sheet.setViewZoom(prevViewZoom * dZoom);
                     final PointF touchCenter = touchCenter(event);
@@ -134,7 +139,7 @@ public class MainSurfaceView extends SurfaceView
                         eraseAt(mainPoint);
                     }
                 }
-                break;        
+                break;
             case (MotionEvent.ACTION_UP) :
                 if (mode == DRAW_MODE) {
                     if (instrument == DRAW_INSTRUMENT) {
@@ -257,10 +262,10 @@ public class MainSurfaceView extends SurfaceView
          */ 
         synchronized (lastSegment) {
             SmoothLastSegment action = new SmoothLastSegment(lastSegment, lastSegmentTimes);
-            lastSegment.clear();        
+            lastSegment.clear();
             lastSegmentTimes.clear();
             lastSegmentDirtyIndex = 0;
-            sheet.doAction(action);                        
+            sheet.doAction(action);
         }
     }
 
@@ -350,7 +355,7 @@ public class MainSurfaceView extends SurfaceView
             }
             canvas.drawBitmap(sheetBitmap, 0, 0, null);
             synchronized (lastSegment) {
-                final int size = lastSegment.size(); 
+                final int size = lastSegment.size();
                 PointF prevPoint = null, currPoint;
                 for (int i = 1; i < size; i++) {
                     currPoint = lastSegment.get(i);
