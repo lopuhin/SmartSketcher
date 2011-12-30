@@ -64,7 +64,7 @@ public class SmoothLastSegment implements IAction {
         SmoothingThread(Sheet sheet, SmoothLastSegment action) {
             super();
             synchronized (sheet) {
-                tempCurve = new Curve(lastSegment, sheet, true);
+                tempCurve = Curve.approximated(lastSegment, sheet, true);
                 sheet.addShape(tempCurve);
             }
             this.sheet = sheet;

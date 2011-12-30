@@ -57,7 +57,7 @@ public class BezierCurveSet {
                 for (int i = startIndex; i <= endIndex; i++ ) {
                     points.add(pointsList.get(i));
                 }
-                curves.add(new Curve(points, sheet, false));
+                curves.add(Curve.approximated(points, sheet, false));
             }
         } else {
             curves.add(initialCurve);

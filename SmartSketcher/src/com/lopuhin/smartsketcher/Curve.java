@@ -21,6 +21,11 @@ public class Curve extends Shape {
     private PointF[] points;
     private Boolean isTransient;
 
+    Curve(PointF[] _points, Boolean _isTransient) {
+        isTransient = _isTransient;
+        points = _points;
+    }
+
     Curve(ArrayList<PointF> pointsList, Boolean _isTransient) {
         isTransient = _isTransient;
         points = new PointF[pointsList.size()];
@@ -31,15 +36,15 @@ public class Curve extends Shape {
         }
     }
         
-    // TODO - make static  
-    Curve(final ArrayList<PointF> pointsList, Sheet sheet, Boolean _isTransient) {
-        isTransient = _isTransient;
-        points = new PointF[pointsList.size()];
+    public static Curve
+        approximated(final ArrayList<PointF> pointsList, Sheet sheet, Boolean isTransient) {
+        PointF[] points = new PointF[pointsList.size()];
         int i = 0;
         for (PointF p: pointsList) {
             points[i] = sheet.toSheet(p);
             i += 1;
         }
+        return new Curve(points, isTransient);
     }
 
     @Override
