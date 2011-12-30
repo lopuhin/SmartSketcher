@@ -112,9 +112,11 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
             return true;
         case (CLEAR_ITEM) :
+            mainSurfaceView.setDefaultInstrument();
             mainSurfaceView.clearSheet();
             return true;
         case (NEW_ITEM) :
+            mainSurfaceView.setDefaultInstrument();
             mainSurfaceView.clearSheet();	
             return true;
         case (OPEN_ITEM) :
@@ -136,6 +138,7 @@ public class SmartSketcher extends Activity {
                 mainSurfaceView.setSheet(dbAdapter.loadSheet(sheetId));
             }
         }
+        mainSurfaceView.setDefaultInstrument();
         mainSurfaceView.getSheet().setDirty();
     }
         

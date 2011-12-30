@@ -171,6 +171,10 @@ public class MainSurfaceView extends SurfaceView
     public void setInstrument(int instrument) {
         this.instrument = instrument;
     }
+
+    public void setDefaultInstrument() {
+        instrument = DRAW_INSTRUMENT;
+    }
         
     public void pause() {
         /**
@@ -214,9 +218,8 @@ public class MainSurfaceView extends SurfaceView
         /**
          * Center of two touch points
          */
-        return new PointF(
-                          (event.getX(0) + event.getX(1)) / 2,
-                          (event.getY(0) + event.getY(1)) / 2);
+        return new PointF((event.getX(0) + event.getX(1)) / 2.0f,
+                          (event.getY(0) + event.getY(1)) / 2.0f);
     }
  
     public Sheet getSheet() {
@@ -317,7 +320,9 @@ public class MainSurfaceView extends SurfaceView
                     }
                     if (!needDrawing) {
                         synchronized (lastEraseTrace) {
-                            needDrawing = lastEraseTrace.size() > lastEraseTraceDirtyIndex + 1 || finishErasing;
+                            needDrawing = lastEraseTrace.size() >
+                                lastEraseTraceDirtyIndex + 1
+                                || finishErasing;
                         }
                     }
                 }
@@ -350,7 +355,8 @@ public class MainSurfaceView extends SurfaceView
                 for (int i = 1; i < size; i++) {
                     currPoint = lastSegment.get(i);
                     if (prevPoint == null) prevPoint = lastSegment.get(i - 1);
-                    canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, sheet.paint);
+                    canvas.drawLine(prevPoint.x, prevPoint.y,
+                                    currPoint.x, currPoint.y, sheet.paint);
                     prevPoint = currPoint;
                 }
                 lastSegmentDirtyIndex = size - 1;
@@ -360,7 +366,8 @@ public class MainSurfaceView extends SurfaceView
                 PointF currPoint = null;
                 for (int i = 0; i < size; i++) {
                     currPoint = lastEraseTrace.get(i);
-                    canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, sheet.whiteFillPaint);
+                    canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius,
+                                      sheet.whiteFillPaint);
                 }
                 if (currPoint != null) {
                     Paint paint;
@@ -385,7 +392,9 @@ public class MainSurfaceView extends SurfaceView
         }
                 
         public void requestExitAndWait() {
-            // Mark this thread as complete and combine into the main application thread.
+            /**
+             * Mark this thread as complete and combine into the main application thread.
+             */
             done = true;
             try {
                 join();
