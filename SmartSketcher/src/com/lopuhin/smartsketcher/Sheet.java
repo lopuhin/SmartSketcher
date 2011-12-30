@@ -214,17 +214,33 @@ public class Sheet {
     }
      
     public PointF toScreen(PointF p) {
-        // return Point with the screen coordinates of p
-        return new PointF(
-                          viewZoom * (p.x - viewPos.x), 
+        /**
+         * Return Point with the screen coordinates of p
+         */
+        return new PointF(viewZoom * (p.x - viewPos.x), 
                           viewZoom * (p.y - viewPos.y));
     }
      
     public PointF toSheet(PointF p) {
-        // return Point with the sheet coordinates of p
-        return new PointF(
-                          viewPos.x + p.x / viewZoom, 
+        /**
+         * Return Point with the sheet coordinates of p
+         */
+        return new PointF(viewPos.x + p.x / viewZoom, 
                           viewPos.y + p.y / viewZoom);
+    }
+
+    public float toSheet(float x) {
+        /**
+         * Return x, scaled to sheet coordinated
+         */
+        return x / viewZoom;
+    }
+
+    public float toScreen(float x) {
+        /**
+         * Return x, scaled to screen coordinated
+         */
+        return x * viewZoom;
     }
      
 }

@@ -85,11 +85,11 @@ public class SmartSketcher extends Activity {
         MenuItem redoItem = menu.findItem(REDO_ITEM);
         redoItem.setEnabled(mainSurfaceView.getSheet().canRedo());
             
-        final int submode = mainSurfaceView.getSubmode();
+        final int instrument = mainSurfaceView.getInstrument();
         MenuItem drawItem = menu.findItem(DRAW_ITEM);
-        drawItem.setEnabled(submode != MainSurfaceView.DRAW_SUBMODE);
+        drawItem.setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT);
         MenuItem eraseItem = menu.findItem(ERASE_ITEM);
-        eraseItem.setEnabled(submode != MainSurfaceView.ERASE_SUBMODE);
+        eraseItem.setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT);
 
         return true;
     }
@@ -106,10 +106,10 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.getSheet().redo();
             return true;
         case (DRAW_ITEM) :
-            mainSurfaceView.setSubmode(MainSurfaceView.DRAW_SUBMODE);
+            mainSurfaceView.setInstrument(MainSurfaceView.DRAW_INSTRUMENT);
             return true;
         case (ERASE_ITEM) :
-            mainSurfaceView.setSubmode(MainSurfaceView.ERASE_SUBMODE);
+            mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
             return true;
         case (CLEAR_ITEM) :
             mainSurfaceView.clearSheet();

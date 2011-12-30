@@ -24,9 +24,9 @@ public class MainSurfaceView extends SurfaceView
      * adds shapes to sheet.
      */
         
-    private int mode, submode;
+    private int mode, instrument;
     private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
-    public final static int DRAW_SUBMODE = 0, ERASE_SUBMODE = 1;
+    public final static int DRAW_INSTRUMENT = 0, ERASE_INSTRUMENT = 1;
     // initial configuration, when user starts dragging with two fingers
     private float prevTouchSpacing, prevViewZoom;
     private PointF prevTouchCenter, prevViewPos;
@@ -56,7 +56,7 @@ public class MainSurfaceView extends SurfaceView
     
     private void init(DBAdapter dbAdapter, Sheet _sheet) {
         mode = IDLE_MODE;
-        submode = DRAW_SUBMODE;
+        instrument = DRAW_INSTRUMENT;
         // Create a new SurfaceHolder and assign this class as its callback.
         holder = getHolder();
         holder.addCallback(this);
@@ -81,7 +81,7 @@ public class MainSurfaceView extends SurfaceView
         /**
          * Handle touch events from the touchscreen.
          * There can be 3 modes: drawing, zooming, and beeing idle.
-         * Drawing mode has 2 submodes: drawing and erazing.
+         * Drawing mode can use only one instrument: drawing or erazing.
          * Here we change modes and feed touch data to approriate places
          */
         if (mainSurfaceViewThread != null) {
@@ -89,9 +89,9 @@ public class MainSurfaceView extends SurfaceView
             switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case (MotionEvent.ACTION_DOWN) :
                 mode = DRAW_MODE;
-                if (submode == DRAW_SUBMODE) {
+                if (instrument == DRAW_INSTRUMENT) {
                     addPoint(mainPoint);
-                } else if (submode == ERASE_SUBMODE) {
+                } else if (instrument == ERASE_INSTRUMENT) {
                     eraseAt(mainPoint);
                 }
                 break;
@@ -99,9 +99,9 @@ public class MainSurfaceView extends SurfaceView
                 final float dst = touchSpacing(event); 
                 if (dst > 5f) {
                     mode = ZOOM_MODE;
-                    if (submode == DRAW_SUBMODE) {
+                    if (instrument == DRAW_INSTRUMENT) {
                         discardSegment();
-                    } else if (submode == ERASE_SUBMODE) {
+                    } else if (instrument == ERASE_INSTRUMENT) {
                         discardErasing();
                     }
                     prevViewZoom = sheet.getViewZoom();
@@ -128,19 +128,19 @@ public class MainSurfaceView extends SurfaceView
                     prevTouchSpacing = touchSpacing;
                     prevTouchCenter = touchCenter;
                 } else if (mode == DRAW_MODE) {
-                    if (submode == DRAW_SUBMODE) {
+                    if (instrument == DRAW_INSTRUMENT) {
                         addPoint(mainPoint);
-                    } else if (submode == ERASE_SUBMODE) {
+                    } else if (instrument == ERASE_INSTRUMENT) {
                         eraseAt(mainPoint);
                     }
                 }
                 break;        
             case (MotionEvent.ACTION_UP) :
                 if (mode == DRAW_MODE) {
-                    if (submode == DRAW_SUBMODE) {
+                    if (instrument == DRAW_INSTRUMENT) {
                         addPoint(mainPoint);
                         finishSegment();
-                    } else if (submode == ERASE_SUBMODE) {
+                    } else if (instrument == ERASE_INSTRUMENT) {
                         eraseAt(mainPoint);
                         finishErasing();
                     }
@@ -164,12 +164,12 @@ public class MainSurfaceView extends SurfaceView
         }        
     }
         
-    public int getSubmode() {
-        return submode;
+    public int getInstrument() {
+        return instrument;
     }
         
-    public void setSubmode(int submode) {
-        this.submode = submode;
+    public void setInstrument(int instrument) {
+        this.instrument = instrument;
     }
         
     public void pause() {
@@ -368,7 +368,8 @@ public class MainSurfaceView extends SurfaceView
                         paint = sheet.whiteFillPaint;
                         ArrayList<Shape> shapes = new ArrayList<Shape>();
                         for (final PointF p: lastEraseTrace) {
-                            shapes.add(new ErasePoint(p, eraserRadius));
+                            shapes.add(new ErasePoint(sheet.toSheet(p),
+                                                      sheet.toSheet(eraserRadius)));
                         } 
                         sheet.doAction(new AddShapes(shapes));
                         lastEraseTrace.clear();
