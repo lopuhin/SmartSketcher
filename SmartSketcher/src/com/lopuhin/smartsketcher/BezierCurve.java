@@ -41,7 +41,9 @@ public class BezierCurve extends Shape {
         
     public static BezierCurve approximated(final ArrayList<PointF> pointsList,
                                            final Sheet sheet) {
-        // creating approximation of pointsList with cubic Bezier curve
+        /**
+         * Creating approximation of pointsList with cubic Bezier curve
+         */
         return approximated(pointsList, 0, pointsList.size() - 1, sheet);
     }
         
@@ -49,33 +51,39 @@ public class BezierCurve extends Shape {
         approximated(final ArrayList<PointF> pointsList,
                      final int startIndex,
                      final int endIndex, final Sheet sheet) {
-        // TODO - use sheet!!!
-        // creating approximation of pointsList from startIndex to endIndex with cubic Bezier curve
-        final PointF p0 = pointsList.get(startIndex);
-        final PointF p3 = pointsList.get(endIndex);
-        final PointF[] tangents = findTangents(p0, p3, startIndex, endIndex, pointsList);
-        final Fn fitting_fn  = getFittingFn(p0, p3, tangents, startIndex, endIndex, pointsList);
+        /**
+         * Creating approximation of pointsList from startIndex to endIndex
+         * with cubic Bezier curve
+        */
+        final PointF[] p = new PointF[4];
+        p[0] = pointsList.get(startIndex);
+        p[3] = pointsList.get(endIndex);
+        final PointF[] tangents = findTangents(p[0], p[3], startIndex, endIndex, pointsList);
+        final Fn fitting_fn  = getFittingFn(p[0], p[3], tangents,
+                                            startIndex, endIndex, pointsList);
         final float c = Solve.minimizeByStepping(fitting_fn, 0.0f, 1.0f, 0.05f);
         Log.d(TAG, "solution: c = " + c);
-        final PointF p1 = new PointF(p0.x + c * tangents[0].x, p0.y + c * tangents[0].y);
-        final PointF p2 = new PointF(p3.x + c * tangents[1].x, p3.y + c * tangents[1].y);
-        BezierCurve curve = new BezierCurve(new PointF[]{p0, p1, p2, p3});
+        p[1] = new PointF(p[0].x + c * tangents[0].x, p[0].y + c * tangents[0].y);
+        p[2] = new PointF(p[3].x + c * tangents[1].x, p[3].y + c * tangents[1].y);
+        for (int i = 0; i < p.length; i++) {
+            p[i] = sheet.toSheet(p[i]);
+        }
+        BezierCurve curve = new BezierCurve(p);
         curve.fittingError = fitting_fn.value(c); // TODO - normalize by length?
         return curve;
     }
 
     @Override
     public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
-        // TODO - use sheet!
-        // TODO - decide how many steps to use depending on the scale
 
         if (Config.DEBUG) {
+            // draw endpoints and control points of bezier curve
             final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
             pointPaint.setColor(Color.GREEN);
             pointPaint.setStrokeWidth(5.0f);
                 
-            PointF startPoint = points[0];
-            PointF endPoint = points[points.length - 1];
+            PointF startPoint = sheet.toScreen(points[0]);
+            PointF endPoint = sheet.toScreen(points[points.length - 1]);
             canvas.drawPoint(startPoint.x, startPoint.y, pointPaint);
             canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
                         
@@ -83,8 +91,10 @@ public class BezierCurve extends Shape {
             PointF prevControlPoint = null;
             int idx = 0;
             for (PointF currPoint: points) {
+                currPoint = sheet.toScreen(currPoint);
                 if (prevControlPoint != null && idx != 1) {
-                    canvas.drawLine(prevControlPoint.x, prevControlPoint.y, currPoint.x, currPoint.y, pointPaint);
+                    canvas.drawLine(prevControlPoint.x, prevControlPoint.y,
+                                    currPoint.x, currPoint.y, pointPaint);
                     idx += 1;
                 }
                 prevControlPoint = currPoint;
@@ -92,8 +102,9 @@ public class BezierCurve extends Shape {
         }
                 
         PointF prevPoint = null;
+        // TODO - decide how many steps to use depending on the scale
         for (float t = 0; t <= 1.01; t += 0.05) {
-            PointF currPoint = curvePoint(points, t);
+            PointF currPoint = sheet.toScreen(curvePoint(points, t));
             if (prevPoint != null) {
                 canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, paint);
             }

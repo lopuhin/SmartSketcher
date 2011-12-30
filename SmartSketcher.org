@@ -13,7 +13,7 @@
    Sometimes Bezier curve does not reach end points of original path
 ** DONE Create curves in a separate thread
    CLOSED: [2011-05-02 Mon 23:17]
-** TODO Start using javadoc   
+** DONE Start using javadoc   
 ** DONE Optimize drawing thread
    CLOSED: [2011-05-02 Mon 23:16]
    Stop drawing thread when idle, do not redraw everything when draing new path, fix last segment blinking, etc.
@@ -43,8 +43,12 @@
 
 ** TODO Eraser radius
    Load radius from resources, make dependant on resolution, maybe let user change it while erasing, using the second finger
-** TODO Optimize saving sheet to xml file
+** DONE Optimize saving sheet to xml file
    Currently saving is very very slow, and often we do not do it in time. Maybe save in background every 60-30 seconds, if anything has changed
+** TODO Pallete of instruments
+   Start with curves, smoothed curves and eraser
+** TODO "Hand" tool - allows moving without drawing
+** TODO Draw lines and arrows
 * Big but doable features
 ** DONE Smoothing
    CLOSED: [2011-05-19 Thu 13:37]

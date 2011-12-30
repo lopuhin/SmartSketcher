@@ -38,6 +38,9 @@ public class Curve extends Shape {
         
     public static Curve
         approximated(final ArrayList<PointF> pointsList, Sheet sheet, Boolean isTransient) {
+        /**
+         * Create curve from sheet points
+         */
         PointF[] points = new PointF[pointsList.size()];
         int i = 0;
         for (PointF p: pointsList) {
