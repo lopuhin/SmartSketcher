@@ -282,7 +282,7 @@ public class MainSurfaceView extends SurfaceView
         
     private void finishErasing() {
         /**
-         * read erasing finishing is done in drawing thread,
+         * real erasing finishing is done in drawing thread,
          * to erase the outline of eraser
          */
         synchronized (lastEraseTrace) {
