@@ -31,6 +31,8 @@ public class SmartSketcher extends Activity {
         ERASE_ITEM = Menu.FIRST + 5,
         DRAW_ITEM = Menu.FIRST + 6,
         BRUSH_ITEM = Menu.FIRST + 7;
+
+    static final private int OPEN_SHEET_RESULT = 1;
     
     @Override
     public void onCreate(Bundle bundle) {
@@ -121,20 +123,18 @@ public class SmartSketcher extends Activity {
             return true;
         case (OPEN_ITEM) :
             fileHelper.savePreview();
-            Log.d(TAG, "uri pattern " + fileHelper.getURIPattern());
-            Intent intent = new Intent(Intent.ACTION_PICK, fileHelper.getURIPattern());
-            startActivityForResult(Intent.createChooser(intent, "Open"), SELECT_PICTURE);
+            Intent intent = new Intent(SmartSketcher.this, OpenSheetActivity.class);
+            startActivityForResult(intent, OPEN_SHEET_RESULT);
             return true;
         }
         return false;
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (resultCode == RESULT_OK && requestCode == SELECT_PICTURE) {
-            Uri selectedImageUri = data.getData();
-            String selectedImagePath = getPath(selectedImageUri);
-            Long sheetId = fileHelper.getSheetIdByPreviewPath(selectedImagePath);
-            if (sheetId != null) {
+        if (resultCode == RESULT_OK && requestCode == OPEN_SHEET_RESULT) {
+            long sheetId = data.getLongExtra("sheetId", -1);
+            Log.d(TAG, "sheetId " + sheetId);
+            if (sheetId != -1) {
                 mainSurfaceView.setSheet(dbAdapter.loadSheet(sheetId));
             }
         }
@@ -142,14 +142,13 @@ public class SmartSketcher extends Activity {
         mainSurfaceView.getSheet().setDirty();
     }
         
-    private String getPath(Uri uri) {
+    /*private String getPath(Uri uri) {
         String[] projection = {MediaStore.Images.Media.DATA};
         Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(
-                                                        MediaStore.Images.Media.DATA);
+        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
         cursor.moveToFirst();
         return cursor.getString(column_index);
-    }
+        }*/
 
 }
 

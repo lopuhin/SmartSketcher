@@ -231,9 +231,9 @@ public class MainSurfaceView extends SurfaceView
         return sheet;
     }
         
-    public void setSheet(Sheet _sheet) {
-        if (_sheet != null) {
-            sheet = sheet;
+    public void setSheet(Sheet sheet) {
+        if (sheet != null) {
+            this.sheet = sheet;
         }
     }
         
@@ -338,6 +338,7 @@ public class MainSurfaceView extends SurfaceView
                     surfaceHolder.unlockCanvasAndPost(canvas);
                 } else {
                     try {
+                        // FIXME
                         MainSurfaceViewThread.sleep(50);
                     } catch (InterruptedException e) { }
                 }
@@ -345,8 +346,11 @@ public class MainSurfaceView extends SurfaceView
         }
 
         public void draw(Canvas canvas) {
-            // need to redraw entire view here
+            /**
+             * Redraw entire view here
+             */
             if (sheet.isDirty) {
+                // FIXME???
                 // draw sheet to bitmap, and post this bitmap on every redraw
                 if (sheetCanvas == null) {
                     initSheetBuffer(canvas.getWidth(), canvas.getHeight());

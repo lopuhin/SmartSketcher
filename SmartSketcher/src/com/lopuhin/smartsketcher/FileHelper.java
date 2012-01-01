@@ -27,7 +27,7 @@ public class FileHelper {
 
     private final MainSurfaceView mainSurfaceView;
     private final Context context;
-    private final String TAG = "FileHelper";
+    private final static String TAG = "FileHelper";
 
     private boolean isSaved = false;
 
@@ -36,7 +36,7 @@ public class FileHelper {
         this.context = mainSurfaceView.getContext();
     }
 
-    public Long getSheetIdByPreviewPath(String previewPath) {
+    public static Long getSheetIdByPreviewPath(String previewPath) {
         /**
          * Return sheet id, given a path to preview, or null - if filename is invalid.
          */
@@ -51,32 +51,29 @@ public class FileHelper {
             }
         }
         return null;
-      }
+    }
 
+    public static File getPreviewFileBySheetId(long sheetId) {
+        /**
+         * Return file, where preview should live
+         */
+        return new File(getSDDir(), String.format(PREVIEW_FILENAME_PATTERN, sheetId));
+    }
+    
     public void savePreview() {
         /**
          * Spawn a thread to save preview
          */
         new SavePreviewThread().start();
     }
-
-    public Uri getURIPattern() {
-        /**
-         * URI, where preview files live
-         */
-        return Media.EXTERNAL_CONTENT_URI;
-        //return Uri.fromParts("content", getSDDir().getAbsolutePath(), null);
-    }
     
-    private File getSDDir() {
+    private static File getSDDir() {
         String path = Environment.getExternalStorageDirectory()
-            .getAbsolutePath() + "/smartsketcher/";
-
+            .getAbsolutePath() + "/android/com.lopuhin.smartsketcher/";
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();
         }
-
         return file;
     }
 
@@ -102,8 +99,7 @@ public class FileHelper {
              * Save preview to file (use current sheet id as postfix)
              */
             Sheet sheet = mainSurfaceView.getSheet();
-            File file = new File(getSDDir(),
-                                 String.format(PREVIEW_FILENAME_PATTERN, sheet.getId()));
+            File file = getPreviewFileBySheetId(sheet.getId());
             try {
                 FileOutputStream fos = new FileOutputStream(file);
                 sheet.savePreviewToFile(fos,

@@ -171,6 +171,61 @@ public class DBAdapter {
         return sheet;
     }
 
+    
+    public void addShape(Shape shape) {
+        /**
+         * Save shape in current sheet
+         */
+        ContentValues shapeValues = new ContentValues();
+        shapeValues.put(SHEET_ID, currentSheetId);
+        shapeValues.put(SHAPE_NAME, shape.getClass().getName());
+        shapeValues.put(SHAPE_THICKNESS, shape.getThickness());
+        long shape_id = db.insert(SHAPES_TABLE, null, shapeValues);
+        // TODO - insert in one query
+        Log.d(TAG, "Inserting points " + shape.getPoints().length);
+        for (PointF point: shape.getPoints()) {
+            if (!Float.isNaN(point.x) && !Float.isNaN(point.y)) {
+                ContentValues pointValues = new ContentValues();
+                pointValues.put(SHAPE_ID, shape_id);
+                pointValues.put(POINT_X, point.x);
+                pointValues.put(POINT_Y, point.y);
+                db.insert(POINTS_TABLE, null, pointValues);
+            }
+        }
+        Log.d(TAG, "Done inserting points");
+    }
+
+    public void removeShape(Shape shape) {
+        /**
+         * Remove shape from current sheet
+         */
+        // TODO
+    }
+
+    public ArrayList<Long> getSheetIds() {
+        /**
+         * Return an ArrayList of sheet ids
+         */
+        ArrayList<Long> sheetIds = new ArrayList<Long>();
+        Cursor c = db.query(SHEETS_TABLE, new String[] {KEY_ID},
+                            null, null, null, null, null);
+        if (c.moveToFirst()) {
+            do {
+                sheetIds.add(c.getLong(0));
+            } while (c.moveToNext());
+        }
+        return sheetIds;
+    }
+    
+    public DBAdapter open() throws SQLException {
+        db = dbHelper.getWritableDatabase();
+        return this;
+    }
+    
+    public void close() {
+        db.close();
+    }
+
     private class ShapeInfo {
         public String name;
         public float thickness;
@@ -212,52 +267,7 @@ public class DBAdapter {
         return builder.toString();
     }
 
-    public void addShape(Shape shape) {
-        /**
-         * Save shape in current sheet
-         */
-        ContentValues shapeValues = new ContentValues();
-        shapeValues.put(SHEET_ID, currentSheetId);
-        shapeValues.put(SHAPE_NAME, shape.getClass().getName());
-        shapeValues.put(SHAPE_THICKNESS, shape.getThickness());
-        long shape_id = db.insert(SHAPES_TABLE, null, shapeValues);
-        // TODO - insert in one query
-        Log.d(TAG, "Inserting points " + shape.getPoints().length);
-        for (PointF point: shape.getPoints()) {
-            if (!Float.isNaN(point.x) && !Float.isNaN(point.y)) {
-                ContentValues pointValues = new ContentValues();
-                pointValues.put(SHAPE_ID, shape_id);
-                pointValues.put(POINT_X, point.x);
-                pointValues.put(POINT_Y, point.y);
-                db.insert(POINTS_TABLE, null, pointValues);
-            }
-        }
-        Log.d(TAG, "Done inserting points");
-    }
-
-    public void removeShape(Shape shape) {
-        /**
-         * remove shape from current sheet
-         */
-        // TODO
-    }
-    
-    public DBAdapter open() throws SQLException {
-        db = dbHelper.getWritableDatabase();
-        return this;
-    }
-    
-    public void close() {
-        db.close();
-    }
-
     /*
-    public int insertEntry(MyObject _myObject) {
-        // TODO: Create a new ContentValues to represent my row
-        // and insert it into the database.
-        return index;
-    }
-    
     public boolean removeEntry(long _rowIndex) {
         return db.delete(DATABASE_TABLE, KEY_ID + "=" + _rowIndex, null) > 0;
     }
@@ -265,12 +275,6 @@ public class DBAdapter {
     public Cursor getAllEntries () {
         return db.query(DATABASE_TABLE, new String[] {KEY_ID, KEY_NAME},
                         null, null, null, null, null);
-    }
-
-    public MyObject getEntry(long _rowIndex) {
-        // TODO: Return a cursor to a row from the database and
-        // use the values to populate an instance of MyObject
-        return objectInstance;
     }
     */
     
