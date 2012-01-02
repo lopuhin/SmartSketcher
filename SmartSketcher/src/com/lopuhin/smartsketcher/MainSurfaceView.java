@@ -155,12 +155,26 @@ public class MainSurfaceView extends GLSurfaceView
     }
 
     @Override
+    public void onPause() {
+        /**
+         *  Kill the graphics update thread
+         */
+        super.onPause();
+        /*
+        if (mainSurfaceViewThread != null) {
+            mainSurfaceViewThread.requestExitAndWait();
+            mainSurfaceViewThread = null;
+            }*/
+    }
+
+    @Override
     public void onResume() {
         /**
          * Create and start the graphics update thread.
          */
         super.onResume();
         sheet.setDirty();
+
         /*
         if (mainSurfaceViewThread == null) {
             mainSurfaceViewThread = new MainSurfaceViewThread();
@@ -179,19 +193,6 @@ public class MainSurfaceView extends GLSurfaceView
 
     public void setDefaultInstrument() {
         instrument = DRAW_INSTRUMENT;
-    }
-
-    @Override
-    public void onPause() {
-        /**
-         *  Kill the graphics update thread
-         */
-        super.onPause();
-        /*
-        if (mainSurfaceViewThread != null) {
-            mainSurfaceViewThread.requestExitAndWait();
-            mainSurfaceViewThread = null;
-            }*/
     }
 
     /*

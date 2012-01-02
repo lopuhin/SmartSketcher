@@ -55,7 +55,6 @@ public class SmartSketcher extends Activity {
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG, "onPause");
         mainSurfaceView.onPause();
         fileHelper.savePreview();
     }

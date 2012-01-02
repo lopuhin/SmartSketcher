@@ -7,5 +7,5 @@ Install to device::
 
 Update build.xml::
 
-   $ android update project -p .
+   $ android update project --path . --target android-8 --subprojects
 
