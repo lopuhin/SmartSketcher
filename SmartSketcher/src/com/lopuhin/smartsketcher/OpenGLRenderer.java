@@ -31,6 +31,8 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     private final int mPositionDataSize = 3;
     private final int mColorOffset = 3;
     private final int mColorDataSize = 4;
+
+    private MultisampleConfigChooser mConfigChooser;
     
     private static String TAG = "OpenGLRenderer";
 
@@ -69,6 +71,14 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // Pass the color directly through the pipeline.
         + "   gl_FragColor = v_Color;     \n"    
         + "}                              \n";
+
+    OpenGLRenderer() {
+        mConfigChooser = new MultisampleConfigChooser();
+    }
+
+    public MultisampleConfigChooser getConfigChooser() {
+        return mConfigChooser;
+    }
     
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
         // Set the background frame color
@@ -144,7 +154,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
                  
         // Do a complete rotation every 10 seconds.
         long time = SystemClock.uptimeMillis() % 10000L;
@@ -179,7 +188,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3);
+        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, 3);
 
     }
     
@@ -208,7 +217,8 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             0.0f, 0.0f, 1.0f, 1.0f,
 
             0.0f, 0.559016994f, 0.0f, 
-            0.0f, 1.0f, 0.0f, 1.0f};
+            0.0f, 1.0f, 0.0f, 1.0f
+        };
         
         // initialize vertex Buffer for triangle  
         ByteBuffer vbb = ByteBuffer.allocateDirect(triangleData.length * mBytesPerFloat); 

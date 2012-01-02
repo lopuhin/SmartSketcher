@@ -44,14 +44,16 @@ public class MainSurfaceView extends GLSurfaceView
     private boolean finishErasing;
         
     private final static String TAG = "MainSurfaceView";
-        
+
     MainSurfaceView(Context context, DBAdapter dbAdapter, Sheet _sheet) {
         /**
          * Init: create empty sheet if _sheet is null, or load existing
          */
         super(context);
         setEGLContextClientVersion(2); // OpenGL ES 2.0 context
-        setRenderer(new OpenGLRenderer());
+        final OpenGLRenderer renderer = new OpenGLRenderer();
+        setEGLConfigChooser(renderer.getConfigChooser());
+        setRenderer(renderer);
 
         mode = IDLE_MODE;
         instrument = DRAW_INSTRUMENT;
