@@ -330,9 +330,12 @@ public class MainSurfaceView extends SurfaceView
                 }
                 if (needDrawing) {
                     // Lock the surface and return the canvas to draw onto.
+                    final long startTime = System.nanoTime();
                     Canvas canvas = surfaceHolder.lockCanvas();
                     draw(canvas);
                     surfaceHolder.unlockCanvasAndPost(canvas);
+                    final long drawTime = System.nanoTime() - startTime;
+                    Log.d(TAG, "drawing took " + drawTime);
                 } else {
                     try {
                         // FIXME
