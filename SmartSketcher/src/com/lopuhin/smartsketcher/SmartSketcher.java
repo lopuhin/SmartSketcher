@@ -49,13 +49,14 @@ public class SmartSketcher extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        mainSurfaceView.resume();
+        mainSurfaceView.onResume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
         Log.d(TAG, "onPause");
+        mainSurfaceView.onPause();
         fileHelper.savePreview();
     }
 

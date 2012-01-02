@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
+import android.opengl.GLSurfaceView;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.content.Context;
@@ -14,7 +15,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 
-public class MainSurfaceView extends SurfaceView 
+public class MainSurfaceView extends GLSurfaceView 
     implements SurfaceHolder.Callback {
     /**
      * Handles user interaction with touch screen, manages drawing thread,
@@ -49,15 +50,14 @@ public class MainSurfaceView extends SurfaceView
          * Init: create empty sheet if _sheet is null, or load existing
          */
         super(context);
-        init(dbAdapter, _sheet);
-    }
-    
-    private void init(DBAdapter dbAdapter, Sheet _sheet) {
+        setEGLContextClientVersion(2); // OpenGL ES 2.0 context
+        setRenderer(new OpenGLRenderer());
+
         mode = IDLE_MODE;
         instrument = DRAW_INSTRUMENT;
         // Create a new SurfaceHolder and assign this class as its callback.
-        holder = getHolder();
-        holder.addCallback(this);
+        /*holder = getHolder();
+          holder.addCallback(this);*/
         hasSurface = false;
         if (_sheet != null)
             sheet = _sheet;
@@ -154,16 +154,19 @@ public class MainSurfaceView extends SurfaceView
         return true;
     }
 
-    public void resume() {
+    @Override
+    public void onResume() {
         /**
          * Create and start the graphics update thread.
          */
+        super.onResume();
         sheet.setDirty();
+        /*
         if (mainSurfaceViewThread == null) {
             mainSurfaceViewThread = new MainSurfaceViewThread();
             if (hasSurface == true)
                 mainSurfaceViewThread.start();
-        }        
+                } */       
     }
         
     public int getInstrument() {
@@ -177,21 +180,25 @@ public class MainSurfaceView extends SurfaceView
     public void setDefaultInstrument() {
         instrument = DRAW_INSTRUMENT;
     }
-        
-    public void pause() {
+
+    @Override
+    public void onPause() {
         /**
          *  Kill the graphics update thread
          */
+        super.onPause();
+        /*
         if (mainSurfaceViewThread != null) {
             mainSurfaceViewThread.requestExitAndWait();
             mainSurfaceViewThread = null;
-        }
+            }*/
     }
-        
+
+    /*
     public void surfaceCreated(SurfaceHolder holder) {
         hasSurface = true;
         if (mainSurfaceViewThread == null) {
-            resume();
+            onResume(); // FIXME
         } else {
             mainSurfaceViewThread.start();
         }
@@ -199,14 +206,15 @@ public class MainSurfaceView extends SurfaceView
         
     public void surfaceDestroyed(SurfaceHolder holder) {
         hasSurface = false;
-        pause();
+        onPause();
     }
 
     public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
         if (mainSurfaceViewThread != null)        
             mainSurfaceViewThread.onWindowResize(w, h);
     }
-        
+    */
+    
     private float touchSpacing(MotionEvent event) {
         /**
          * Distance between two touch points
@@ -296,7 +304,8 @@ public class MainSurfaceView extends SurfaceView
             lastEraseTraceDirtyIndex = -1;
         }
     }
-        
+
+    
     class MainSurfaceViewThread extends Thread {
         /**
          * Drawing thread
@@ -419,4 +428,5 @@ public class MainSurfaceView extends SurfaceView
             sheetCanvas = new Canvas(sheetBitmap);
         }
     }
+    
 }
