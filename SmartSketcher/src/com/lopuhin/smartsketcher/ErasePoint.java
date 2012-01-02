@@ -1,13 +1,5 @@
 package com.lopuhin.smartsketcher;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xmlpull.v1.XmlSerializer;
-
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;

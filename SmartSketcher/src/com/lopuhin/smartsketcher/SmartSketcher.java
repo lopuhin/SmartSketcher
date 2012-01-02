@@ -4,10 +4,7 @@ import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.database.Cursor;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -19,7 +16,6 @@ public class SmartSketcher extends Activity {
     private DBAdapter dbAdapter;
     private FileHelper fileHelper;
     
-    private static final int SELECT_PICTURE = 1;
     private static String TAG = "SmartSketcher";
         
     static final private int

@@ -1,35 +1,27 @@
 package com.lopuhin.smartsketcher;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
-import android.net.Uri;
-import android.provider.MediaStore.Images.Media;
 
 
 public class FileHelper {
     private static final String
         PREVIEW_FILENAME_RE = "preview-(\\d+).png",
-        PREVIEW_FILENAME_PATTERN = "preview-%d.png",
-        PREVIEW_FILENAME_PATH_PATTERN = "preview-*.png";
-
+        PREVIEW_FILENAME_PATTERN = "preview-%d.png";
+    
     private final MainSurfaceView mainSurfaceView;
     private final Context context;
     private final static String TAG = "FileHelper";
-
-    private boolean isSaved = false;
 
     FileHelper(MainSurfaceView mainSurfaceView) {
         this.mainSurfaceView = mainSurfaceView;

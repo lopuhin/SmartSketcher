@@ -1,18 +1,7 @@
 package com.lopuhin.smartsketcher;
 
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xmlpull.v1.XmlSerializer;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -21,7 +10,6 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.Paint.Style;
 import android.util.Log;
-import android.util.Xml;
 
 
 public class Sheet {
