@@ -12,6 +12,7 @@ import android.util.Log;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
+import android.graphics.PointF;
 
 
 public class OpenGLRenderer implements GLSurfaceView.Renderer {
@@ -144,10 +145,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         final float far = 10.0f;
 
         Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-         //Matrix.setLookAtM(mVMatrix, 0,
-        //                  0, 0, -3,
-        //                  0f, 0f, 0f,
-        //                  0f, 1.0f, 0.0f);
     }
 
     public void onDrawFrame(GL10 unused) {
@@ -159,21 +156,24 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
         
-        // Draw the triangle facing straight on.
         Matrix.setIdentityM(mModelMatrix, 0);
         Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
         
-        triangleBuffer.position(mPositionOffset);
+        drawSegments(triangleBuffer, 3);
+    }
+
+    private void drawSegments(FloatBuffer buffer, int nSegments) {
+        buffer.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize,
                                      GLES20.GL_FLOAT, false,
-                                     mStrideBytes, triangleBuffer);        
+                                     mStrideBytes, buffer);        
                 
         GLES20.glEnableVertexAttribArray(mPositionHandle);        
         
         // Pass in the color information
-        triangleBuffer.position(mColorOffset);
+        buffer.position(mColorOffset);
         GLES20.glVertexAttribPointer(mColorHandle, mColorDataSize, GLES20.GL_FLOAT, false,
-                                     mStrideBytes, triangleBuffer);        
+                                     mStrideBytes, buffer);        
         
         GLES20.glEnableVertexAttribArray(mColorHandle);
         
@@ -188,48 +188,51 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
 
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, 3);
+        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, nSegments);
 
     }
     
     private int loadShader(int type, String shaderCode) {
-    
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
         int shader = GLES20.glCreateShader(type); 
-        
         // add the source code to the shader and compile it
         GLES20.glShaderSource(shader, shaderCode);
         GLES20.glCompileShader(shader);
-        
         return shader;
     }
     
     private void initShapes() {
-    
-        float triangleData[] = {
-            // X, Y, Z, 
-            // R, G, B, A
-            -0.5f, -0.25f, 0.0f, 
-            1.0f, 0.0f, 0.0f, 1.0f,
+        PointF points[] = {
+            new PointF(-0.5f, -0.25f),
+            new PointF( 0.5f, -0.25f),
+            new PointF( 0.0f,  0.559016994f)};
+        triangleBuffer = createBuffer(points);
+    }
 
-            0.5f, -0.25f, 0.0f,
-            0.0f, 0.0f, 1.0f, 1.0f,
-
-            0.0f, 0.559016994f, 0.0f, 
-            0.0f, 1.0f, 0.0f, 1.0f
-        };
-        
+    private FloatBuffer createBuffer(PointF[] points) {
+        float data[] = new float[points.length * 7];
+        for (int pi = 0; pi < points.length; pi++) {
+            PointF p = points[pi];
+            int i = pi * 7;
+            data[i+0] = p.x;  // x
+            data[i+1] = p.y;  // y
+            data[i+2] = 0.0f; // z
+            data[i+3] = 0.0f; // r
+            data[i+4] = 0.0f; // g
+            data[i+5] = 0.0f; // b
+            data[i+6] = 1.0f; // alpha
+        }
         // initialize vertex Buffer for triangle  
-        ByteBuffer vbb = ByteBuffer.allocateDirect(triangleData.length * mBytesPerFloat); 
+        ByteBuffer vbb = ByteBuffer.allocateDirect(data.length * mBytesPerFloat); 
         // use the device hardware's native byte order
         // create a floating point buffer from the ByteBuffer
-        triangleBuffer = vbb.order(ByteOrder.nativeOrder()).asFloatBuffer();
+        FloatBuffer buffer = vbb.order(ByteOrder.nativeOrder()).asFloatBuffer();
         // add the coordinates to the FloatBuffer
         // set the buffer to read the first coordinate
-        triangleBuffer.put(triangleData).position(0);
+        buffer.put(data).position(0);
+        return buffer;
     }
-    
 
 }
  

@@ -3,7 +3,7 @@ Reminder
 
 Install to device::
 
-   $ ant debug install
+   $ ant clean debug install
 
 Update build.xml::
 
