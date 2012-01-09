@@ -1,6 +1,7 @@
 package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
+import java.nio.FloatBuffer;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -14,8 +15,11 @@ public class BezierCurve extends Shape {
     /**
      * Bezier (smoothed) curve
      */
-    protected PointF[] points;
-        
+    private PointF[] points;
+
+    private FloatBuffer pointsBuffer;
+    private int pointsBufferSize;
+    
     private final static String TAG = "BezierCurve";
     private float fittingError;
     
@@ -26,12 +30,18 @@ public class BezierCurve extends Shape {
             points[i] = p;
             i += 1;
         }
+        initBuffer();
     }
         
     BezierCurve(final PointF[] pointsList) {
         points = pointsList;
+        initBuffer();
     }
-        
+    
+    public void draw(OpenGLRenderer renderer) {
+        renderer.drawSegments(pointsBuffer, pointsBufferSize);
+    }
+
     public static BezierCurve approximated(final ArrayList<PointF> pointsList,
                                            final Sheet sheet) {
         /**
@@ -118,6 +128,25 @@ public class BezierCurve extends Shape {
     public float getFittingError() {
         // normalized fitting error
         return fittingError;
+    }
+
+    private void initBuffer() {
+        final PointF[] segPoints = toSegments();
+        pointsBuffer = OpenGLRenderer.createBuffer(segPoints);
+        pointsBufferSize = segPoints.length;
+    }
+
+    private PointF[] toSegments() {
+        /**
+         * Return an approximasion of a curve as a series of points
+         */
+        int nSegments = 20;
+        PointF[] segPoints = new PointF[nSegments];
+        float t = 0.0f, delta = 1.0f / nSegments;
+        for (int i = 0; i < nSegments; i++, t += delta) {
+            segPoints[i] = curvePoint(points, t);
+        }
+        return segPoints;
     }
 
     private static PointF translated(PointF point, PointF shift, float cos, float sin) {

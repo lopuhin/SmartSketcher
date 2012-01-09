@@ -202,7 +202,22 @@ public class Sheet {
         }
         isDirty = false;
     }
-     
+
+    public ArrayList<Shape> getShapes() {
+        /**
+         * Return a copy of shapes
+         */
+        ArrayList<Shape> shapesCopy = new ArrayList<Shape>();
+        synchronized (shapes) {
+            for (Shape sh: shapes) {
+                shapesCopy.add(sh);
+            }
+        }
+        return shapesCopy;
+    }
+
+    //public 
+    
     public void setDirty() {
         isDirty = true;
     }

@@ -15,7 +15,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 
-public class MainSurfaceView extends GLSurfaceView 
+public class MainSurfaceView extends GLSurfaceView
     implements SurfaceHolder.Callback {
     /**
      * Handles user interaction with touch screen, manages drawing thread,
@@ -86,75 +86,73 @@ public class MainSurfaceView extends GLSurfaceView
          * Drawing mode can use only one instrument: drawing or erazing.
          * Here we change modes and feed touch data to approriate places
          */
-        //if (mainSurfaceViewThread != null) {
-            final PointF mainPoint = new PointF(event.getX(), event.getY());
-            switch (event.getAction() & MotionEvent.ACTION_MASK) {
-            case (MotionEvent.ACTION_DOWN) :
-                mode = DRAW_MODE;
+        final PointF mainPoint = new PointF(event.getX(), event.getY());
+        switch (event.getAction() & MotionEvent.ACTION_MASK) {
+        case (MotionEvent.ACTION_DOWN) :
+            mode = DRAW_MODE;
+            if (instrument == DRAW_INSTRUMENT) {
+                addPoint(mainPoint);
+            } else if (instrument == ERASE_INSTRUMENT) {
+                eraseAt(mainPoint);
+            }
+            break;
+        case (MotionEvent.ACTION_POINTER_DOWN) :
+            final float dst = touchSpacing(event);
+            if (dst > 5f) {
+                mode = ZOOM_MODE;
+                if (instrument == DRAW_INSTRUMENT) {
+                    discardSegment();
+                } else if (instrument == ERASE_INSTRUMENT) {
+                    discardErasing();
+                }
+                prevViewZoom = sheet.getViewZoom();
+                prevViewPos = sheet.getViewPos();
+                prevTouchSpacing = dst;
+                prevTouchCenter = touchCenter(event);
+            }
+            break;
+        case (MotionEvent.ACTION_MOVE) :
+            if (mode == ZOOM_MODE) {
+                float touchSpacing = touchSpacing(event);
+                if (touchSpacing < SMALL_TOUCH_SPACING)
+                    touchSpacing = prevTouchSpacing;
+                Log.d(TAG, "touchSpacing " + touchSpacing +
+                      " prevTouchSpacing " + prevTouchSpacing);
+                final float dZoom = touchSpacing / prevTouchSpacing;
+                sheet.setViewZoom(prevViewZoom * dZoom);
+                final PointF touchCenter = touchCenter(event);
+                sheet.setViewPos(
+                                 new PointF(prevViewPos.x +
+                                            (prevTouchCenter.x - touchCenter.x / dZoom) /
+                                            sheet.getViewZoom(),
+                                            prevViewPos.y +
+                                            (prevTouchCenter.y - touchCenter.y / dZoom) /
+                                            sheet.getViewZoom()));
+                prevViewZoom = sheet.getViewZoom();
+                prevViewPos = sheet.getViewPos();
+                prevTouchSpacing = touchSpacing;
+                prevTouchCenter = touchCenter;
+            } else if (mode == DRAW_MODE) {
                 if (instrument == DRAW_INSTRUMENT) {
                     addPoint(mainPoint);
                 } else if (instrument == ERASE_INSTRUMENT) {
                     eraseAt(mainPoint);
                 }
-                break;
-            case (MotionEvent.ACTION_POINTER_DOWN) :
-                final float dst = touchSpacing(event);
-                if (dst > 5f) {
-                    mode = ZOOM_MODE;
-                    if (instrument == DRAW_INSTRUMENT) {
-                        discardSegment();
-                    } else if (instrument == ERASE_INSTRUMENT) {
-                        discardErasing();
-                    }
-                    prevViewZoom = sheet.getViewZoom();
-                    prevViewPos = sheet.getViewPos();
-                    prevTouchSpacing = dst;
-                    prevTouchCenter = touchCenter(event);
-                }
-                break;
-            case (MotionEvent.ACTION_MOVE) :
-                if (mode == ZOOM_MODE) {
-                    float touchSpacing = touchSpacing(event);
-                    if (touchSpacing < SMALL_TOUCH_SPACING)
-                        touchSpacing = prevTouchSpacing;
-                    Log.d(TAG, "touchSpacing " + touchSpacing +
-                          " prevTouchSpacing " + prevTouchSpacing);
-                    final float dZoom = touchSpacing / prevTouchSpacing;
-                    sheet.setViewZoom(prevViewZoom * dZoom);
-                    final PointF touchCenter = touchCenter(event);
-                    sheet.setViewPos(
-                         new PointF(prevViewPos.x +
-                                    (prevTouchCenter.x - touchCenter.x / dZoom) /
-                                    sheet.getViewZoom(),
-                                    prevViewPos.y +
-                                    (prevTouchCenter.y - touchCenter.y / dZoom) /
-                                    sheet.getViewZoom()));
-                    prevViewZoom = sheet.getViewZoom();
-                    prevViewPos = sheet.getViewPos();
-                    prevTouchSpacing = touchSpacing;
-                    prevTouchCenter = touchCenter;
-                } else if (mode == DRAW_MODE) {
-                    if (instrument == DRAW_INSTRUMENT) {
-                        addPoint(mainPoint);
-                    } else if (instrument == ERASE_INSTRUMENT) {
-                        eraseAt(mainPoint);
-                    }
-                }
-                break;
-            case (MotionEvent.ACTION_UP) :
-                if (mode == DRAW_MODE) {
-                    if (instrument == DRAW_INSTRUMENT) {
-                        addPoint(mainPoint);
-                        finishSegment();
-                    } else if (instrument == ERASE_INSTRUMENT) {
-                        eraseAt(mainPoint);
-                        finishErasing();
-                    }
-                }
-                mode = IDLE_MODE;
-                break;
             }
-        //}
+            break;
+        case (MotionEvent.ACTION_UP) :
+            if (mode == DRAW_MODE) {
+                if (instrument == DRAW_INSTRUMENT) {
+                    addPoint(mainPoint);
+                    finishSegment();
+                } else if (instrument == ERASE_INSTRUMENT) {
+                    eraseAt(mainPoint);
+                    finishErasing();
+                }
+            }
+            mode = IDLE_MODE;
+            break;
+        }
         return true;
     }
 

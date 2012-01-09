@@ -16,7 +16,6 @@ public abstract class Shape {
     
     public abstract void draw(Canvas canvas, Paint paint, Sheet sheet);
 
-    public void draw(OpenGLRenderer renderer) {
-        
-    }
+    public abstract void draw(OpenGLRenderer renderer);
+
 }

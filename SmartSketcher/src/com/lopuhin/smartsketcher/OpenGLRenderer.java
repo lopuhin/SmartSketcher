@@ -16,7 +16,6 @@ import android.graphics.PointF;
 
 
 public class OpenGLRenderer implements GLSurfaceView.Renderer {
-    private FloatBuffer triangleBuffer;
 
     private int programHandle;
     private int mMVPMatrixHandle, mPositionHandle, mColorHandle;
@@ -26,12 +25,12 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     private float[] mVMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
 
-    private final int mBytesPerFloat = 4;
-    private final int mStrideBytes = 7 * mBytesPerFloat;	
-    private final int mPositionOffset = 0;
-    private final int mPositionDataSize = 3;
-    private final int mColorOffset = 3;
-    private final int mColorDataSize = 4;
+    private static final int mBytesPerFloat = 4;
+    private static final int mStrideBytes = 7 * mBytesPerFloat;	
+    private static final int mPositionOffset = 0;
+    private static final int mPositionDataSize = 3;
+    private static final int mColorOffset = 3;
+    private static final int mColorDataSize = 4;
 
     private MultisampleConfigChooser mConfigChooser;
     
@@ -51,7 +50,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         + "{                              \n"
         // Pass the color through to the fragment shader.
         + "   v_Color = a_Color;          \n"    
-        // It will be interpolated across the triangle.
+        // It will be interpolated across the surface.
         // gl_Position is a special variable used to store the final position.
         + "   gl_Position = u_MVPMatrix   \n"
         // Multiply the vertex by the matrix to get the final point in
@@ -64,7 +63,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         "precision mediump float;       \n"
         // precision in the fragment shader.
         // This is the color from the vertex shader interpolated across the
-        // triangle per fragment.
+        // surface per fragment.
         + "varying vec4 v_Color;          \n"     
         // The entry point for our fragment shader.
         + "void main()                    \n"     
@@ -84,27 +83,33 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public MultisampleConfigChooser getConfigChooser() {
+        /**
+         * Enable multisampling (antialiasing)
+         */
         return mConfigChooser;
     }
     
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
+        /**
+         * Mostly shaders initialization
+         */
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-
-        // initialize the triangle vertex array
-        initShapes();
-
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
-        
-        programHandle = GLES20.glCreateProgram();             // create empty OpenGL Program
-        GLES20.glAttachShader(programHandle, vertexShader);   // add the vertex shader to program
-        GLES20.glAttachShader(programHandle, fragmentShader); // add the fragment shader to program
+
+        // create empty OpenGL Program
+        programHandle = GLES20.glCreateProgram();
+        // add the vertex shader to program
+        GLES20.glAttachShader(programHandle, vertexShader);
+        // add the fragment shader to program
+        GLES20.glAttachShader(programHandle, fragmentShader);
         // Bind attributes
         GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
         GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
-        GLES20.glLinkProgram(programHandle);                  // creates OpenGL program executables
+        // creates OpenGL program executables
+        GLES20.glLinkProgram(programHandle);
         
         // get handle to the vertex shader's a_Position member
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");        
@@ -167,12 +172,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
                           lookX, lookY, lookZ,
                           upX, upY, upZ);
                    
-        // Do a complete rotation every 10 seconds.
-        /*long time = SystemClock.uptimeMillis() % 10000L;
-        float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
-        */
         Matrix.setIdentityM(mModelMatrix, 0);
-        //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
         // This multiplies the view matrix by the model matrix,
         // and stores the result in the MVP matrix
         // (which currently contains model * view).
@@ -183,10 +183,18 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // (which now contains model * view * projection).
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
     
-        drawSegments(triangleBuffer, 5);
+        // draw all shapes from the sheet
+        for (Shape sh: sheet.getShapes()) {
+            sh.draw(this);
+        }
+        // draw last segment
+        
     }
 
-    private void drawSegments(FloatBuffer buffer, int nPoints) {
+    public void drawSegments(FloatBuffer buffer, int nPoints) {
+        /**
+         * Draw segments from given FloatBuffer
+         */
         buffer.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize,
                                      GLES20.GL_FLOAT, false,
@@ -207,26 +215,21 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     }
     
     private int loadShader(int type, String shaderCode) {
-        // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
-        // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+        /**
+         * Create a vertex shader type (GLES20.GL_VERTEX_SHADER)
+         * or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
+         */
         int shader = GLES20.glCreateShader(type); 
         // add the source code to the shader and compile it
         GLES20.glShaderSource(shader, shaderCode);
         GLES20.glCompileShader(shader);
         return shader;
     }
-    
-    private void initShapes() {
-        PointF points[] = {
-            new PointF( 200.0f, 200.0f),
-            new PointF( 200.0f, 400.0f),
-            new PointF( 400.0f, 400.0f),
-            new PointF( 400.0f, 200.0f),
-            new PointF( 200.0f, 400.0f),};
-        triangleBuffer = createBuffer(points);
-    }
 
-    private FloatBuffer createBuffer(PointF[] points) {
+    public static FloatBuffer createBuffer(PointF[] points) {
+        /**
+         * Create FloatBuffer for drawing points
+         */
         float data[] = new float[points.length * 7];
         for (int pi = 0; pi < points.length; pi++) {
             PointF p = points[pi];
@@ -239,7 +242,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             data[i+5] = 0.0f; // b
             data[i+6] = 1.0f; // alpha
         }
-        // initialize vertex Buffer for triangle  
         ByteBuffer vbb = ByteBuffer.allocateDirect(data.length * mBytesPerFloat); 
         // use the device hardware's native byte order
         // create a floating point buffer from the ByteBuffer

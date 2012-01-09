@@ -20,6 +20,10 @@ public class ErasePoint extends Shape {
         canvas.drawCircle(p.x, p.y, sheet.toScreen(radius), sheet.whiteFillPaint);
     }
 
+    public void draw(OpenGLRenderer renderer) {
+        // TODO
+    }
+
     @Override
     public PointF[] getPoints() {
         PointF[] points = new PointF[1];
