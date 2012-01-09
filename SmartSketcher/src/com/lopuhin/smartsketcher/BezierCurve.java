@@ -177,9 +177,11 @@ public class BezierCurve extends Shape {
         }
         return new Fn() {
             public float value(final float c) {
-                // fitting error - squared max distance from approximating curve to points array
-                final PointF trP1 = new PointF(trP0.x + c * trTangents[0].x, trP0.y + c * trTangents[0].y);
-                final PointF trP2 = new PointF(trP3.x + c * trTangents[1].x, trP3.y + c * trTangents[1].y);
+                // fitting error - squared max distance of approximating curve to points array
+                final PointF trP1 = new PointF(trP0.x + c * trTangents[0].x,
+                                               trP0.y + c * trTangents[0].y);
+                final PointF trP2 = new PointF(trP3.x + c * trTangents[1].x,
+                                               trP3.y + c * trTangents[1].y);
                 final PointF[] controlPoints = {trP0, trP1, trP2, trP3};
                 float maxDst = 0.0f;
                 int closestIndex = 1;
@@ -191,8 +193,8 @@ public class BezierCurve extends Shape {
                         if (p.x > curvePoint.x) {
                             final PointF prevP = trPoints.get(i-1);
                             final float t = (curvePoint.x - prevP.x) / (p.x - prevP.x); 
-                            final float minDst = Math.abs(
-                                                          curvePoint.y - (t * p.y + (1 - t) * prevP.y));
+                            final float minDst =
+                                Math.abs(curvePoint.y - (t * p.y + (1 - t) * prevP.y));
                             if (minDst > maxDst) {
                                 maxDst = minDst;
                             }
@@ -206,27 +208,32 @@ public class BezierCurve extends Shape {
         };
     }
 
-    private static PointF[] findTangents(final PointF p0, final PointF p3, 
-                                         final int startIndex, final int endIndex, final ArrayList<PointF> pointsList) {
+    private static PointF[]
+        findTangents(final PointF p0, final PointF p3, 
+                     final int startIndex, final int endIndex,
+                     final ArrayList<PointF> pointsList) {
         // find two tangent vectors - one at p0, another at p3,
         // using points on both sides of control points
         // TODO translate points to local coordinate system (to calculate fitting error faster)
         final int nTangentPoints = 10; // TODO - choose depending on distance!
         final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
-        PointF t1 = findTangent(
-                                p0, startIndex + 1, Math.min(pointsList.size()- 1, startIndex + nTangentPoints), pointsList);
+        PointF t1 = findTangent(p0, startIndex + 1,
+                                Math.min(pointsList.size()- 1, startIndex + nTangentPoints),
+                                pointsList);
         if (startIndex > 0) { // use points on the both sides of p0
-            final PointF t1Outer = findTangent(
-                                               p0, Math.max(0, startIndex - nTangentPoints), startIndex - 1, pointsList);
+            final PointF t1Outer = findTangent(p0, Math.max(0, startIndex - nTangentPoints),
+                                               startIndex - 1, pointsList);
             t1.x -= t1Outer.x;
             t1.y -= t1Outer.y;
         }
         final PointF tangent1 = normalized(t1, tangentNorm);
-        PointF t2 = findTangent(
-                                p3, Math.max(0, endIndex - nTangentPoints), endIndex - 1, pointsList);
+        PointF t2 = findTangent(p3, Math.max(0, endIndex - nTangentPoints),
+                                endIndex - 1, pointsList);
         if (endIndex < pointsList.size() - 1) { // use points on the both sides of p3
-            final PointF t2Outer = findTangent(
-                                               p3, endIndex + 1, Math.min(pointsList.size() - 1, endIndex + nTangentPoints), pointsList);
+            final PointF t2Outer =
+                findTangent(p3, endIndex + 1,
+                            Math.min(pointsList.size() - 1, endIndex + nTangentPoints),
+                            pointsList);
             t2.x -= t2Outer.x;
             t2.y -= t2Outer.y;
         }
@@ -236,8 +243,9 @@ public class BezierCurve extends Shape {
         return new PointF[]{tangent1, tangent2};
     }
 
-    private static PointF findTangent(final PointF at, 
-                                      final int startIndex, final int endIndex, final ArrayList<PointF> points) {
+    private static PointF
+        findTangent(final PointF at, final int startIndex, final int endIndex,
+                    final ArrayList<PointF> points) {
         // tangent vector at point at, approximated using points from startIndex to endIndex
         PointF tangent = new PointF();
         for (int i = startIndex; i <= endIndex; i++ ) {
