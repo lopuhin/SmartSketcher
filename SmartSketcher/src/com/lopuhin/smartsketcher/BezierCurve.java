@@ -142,10 +142,11 @@ public class BezierCurve extends Shape {
          */
         int nSegments = 20;
         PointF[] segPoints = new PointF[nSegments];
-        float t = 0.0f, delta = 1.0f / nSegments;
-        for (int i = 0; i < nSegments; i++, t += delta) {
+        float t = 0.0f, delta = 1.0f / (nSegments - 1);
+        for (int i = 0; i < nSegments - 1; i++, t += delta) {
             segPoints[i] = curvePoint(points, t);
         }
+        segPoints[nSegments - 1] = curvePoint(points, 1.0f);
         return segPoints;
     }
 
@@ -214,7 +215,8 @@ public class BezierCurve extends Shape {
                      final ArrayList<PointF> pointsList) {
         // find two tangent vectors - one at p0, another at p3,
         // using points on both sides of control points
-        // TODO translate points to local coordinate system (to calculate fitting error faster)
+        // TODO translate points to local coordinate system
+        // (to calculate fitting error faster)
         final int nTangentPoints = 10; // TODO - choose depending on distance!
         final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
         PointF t1 = findTangent(p0, startIndex + 1,
