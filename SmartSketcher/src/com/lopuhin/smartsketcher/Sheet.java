@@ -169,6 +169,10 @@ public class Sheet {
     }
      
     public PointF getViewPos() {
+        /**
+         * Upper left corner of the screen
+         * in sheet coordinates
+         */
         return new PointF(viewPos.x, viewPos.y);
     }
      

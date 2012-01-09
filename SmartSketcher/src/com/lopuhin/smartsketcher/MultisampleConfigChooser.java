@@ -19,7 +19,6 @@ public class MultisampleConfigChooser implements GLSurfaceView.EGLConfigChooser 
 
     static private final String TAG = "MultisampleConfigChooser";
 
-    @Override
     public EGLConfig chooseConfig(EGL10 egl, EGLDisplay display) {
         mValue = new int[1];
 

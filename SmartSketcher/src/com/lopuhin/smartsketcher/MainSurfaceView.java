@@ -50,10 +50,6 @@ public class MainSurfaceView extends GLSurfaceView
          * Init: create empty sheet if _sheet is null, or load existing
          */
         super(context);
-        setEGLContextClientVersion(2); // OpenGL ES 2.0 context
-        final OpenGLRenderer renderer = new OpenGLRenderer();
-        setEGLConfigChooser(renderer.getConfigChooser());
-        setRenderer(renderer);
 
         mode = IDLE_MODE;
         instrument = DRAW_INSTRUMENT;
@@ -65,6 +61,12 @@ public class MainSurfaceView extends GLSurfaceView
             sheet = _sheet;
         else
             sheet = new Sheet(dbAdapter, true);
+        
+        setEGLContextClientVersion(2); // OpenGL ES 2.0 context
+        final OpenGLRenderer renderer = new OpenGLRenderer(sheet);
+        setEGLConfigChooser(renderer.getConfigChooser());
+        setRenderer(renderer);
+        
         lastSegment = new ArrayList<PointF>();
         lastSegmentTimes = new ArrayList<Long>();
         lastEraseTrace = new ArrayList<PointF>();
@@ -84,7 +86,7 @@ public class MainSurfaceView extends GLSurfaceView
          * Drawing mode can use only one instrument: drawing or erazing.
          * Here we change modes and feed touch data to approriate places
          */
-        if (mainSurfaceViewThread != null) {
+        //if (mainSurfaceViewThread != null) {
             final PointF mainPoint = new PointF(event.getX(), event.getY());
             switch (event.getAction() & MotionEvent.ACTION_MASK) {
             case (MotionEvent.ACTION_DOWN) :
@@ -152,7 +154,7 @@ public class MainSurfaceView extends GLSurfaceView
                 mode = IDLE_MODE;
                 break;
             }
-        }
+        //}
         return true;
     }
 

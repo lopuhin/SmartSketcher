@@ -73,8 +73,14 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         + "   gl_FragColor = v_Color;     \n"    
         + "}                              \n";
 
-    OpenGLRenderer() {
+    private Sheet sheet;
+    private int width, height;
+    
+    OpenGLRenderer(Sheet sheet) {
         mConfigChooser = new MultisampleConfigChooser();
+        this.sheet = sheet;
+        width = 0;
+        height = 0;
     }
 
     public MultisampleConfigChooser getConfigChooser() {
@@ -85,26 +91,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // Set the background frame color
         GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
-        // Position the eye behind the origin.
-        final float eyeX = 0.0f;
-        final float eyeY = 0.0f;
-        final float eyeZ = 1.5f;
-
-        // We are looking toward the distance
-        final float lookX = 0.0f;
-        final float lookY = 0.0f;
-        final float lookZ = -5.0f;
-
-        // Set our up vector. This is where our head would be pointing
-        // were we holding the camera.
-        final float upX = 0.0f;
-        final float upY = 1.0f;
-        final float upZ = 0.0f;
-
-        Matrix.setLookAtM(mVMatrix, 0,
-                          eyeX, eyeY, eyeZ,
-                          lookX, lookY, lookZ,
-                          upX, upY, upZ);
 
         // initialize the triangle vertex array
         initShapes();
@@ -131,38 +117,76 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     
     public void onSurfaceChanged(GL10 unused, int width, int height) {
         GLES20.glViewport(0, 0, width, height);
-
-        Log.d(TAG, "width " + width + "height " + height);
+        this.width = width;
+        this.height = height;
+        Log.d(TAG, "width " + width + " height " + height);
         
-        // Create a new perspective projection matrix. The height will stay the same
-        // while the width will vary as per aspect ratio.
-        final float ratio = (float) width / height;
-        final float left = -ratio;
-        final float right = ratio;
-        final float bottom = -1.0f;
-        final float top = 1.0f;
-        final float near = 1.0f;
-        final float far = 10.0f;
-
-        Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
     }
 
     public void onDrawFrame(GL10 unused) {
     
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-                 
+        
+        final PointF ul, lr; // upper left and lower right
+        ul = sheet.getViewPos();
+        lr = sheet.toSheet(new PointF(width, height));
+        
+        Log.d(TAG, "ul " + ul.x + " " + ul.y + 
+              " lr " + lr.x + " " + lr.y);
+        
+        // Create a new perspective projection matrix
+        // final float ratio = (float) width / height;
+        final float left = ul.x;
+        final float right = lr.x;
+        final float bottom = lr.y;
+        final float top = ul.y;
+        final float near = 50.0f;
+        final float far = 1000.0f; // TODO - use ortho
+
+        Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
+    
+        // Position the eye behind the origin.
+        final float eyeX = 0.0f;
+        final float eyeY = 0.0f;
+        final float eyeZ = 100.0f;
+
+        // We are looking toward the distance
+        final float lookX = 0.0f;
+        final float lookY = 0.0f;
+        final float lookZ = -5.0f;
+
+        // Set our up vector. This is where our head would be pointing
+        // were we holding the camera.
+        final float upX = 0.0f;
+        final float upY = 1.0f;
+        final float upZ = 0.0f;
+
+        Matrix.setLookAtM(mVMatrix, 0,
+                          eyeX, eyeY, eyeZ,
+                          lookX, lookY, lookZ,
+                          upX, upY, upZ);
+                   
         // Do a complete rotation every 10 seconds.
-        long time = SystemClock.uptimeMillis() % 10000L;
+        /*long time = SystemClock.uptimeMillis() % 10000L;
         float angleInDegrees = (360.0f / 10000.0f) * ((int) time);
-        
+        */
         Matrix.setIdentityM(mModelMatrix, 0);
-        Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
+        //Matrix.rotateM(mModelMatrix, 0, angleInDegrees, 0.0f, 0.0f, 1.0f);        
+        // This multiplies the view matrix by the model matrix,
+        // and stores the result in the MVP matrix
+        // (which currently contains model * view).
+        Matrix.multiplyMM(mMVPMatrix, 0, mVMatrix, 0, mModelMatrix, 0);
         
-        drawSegments(triangleBuffer, 3);
+        // This multiplies the modelview matrix by the projection matrix,
+        // and stores the result in the MVP matrix
+        // (which now contains model * view * projection).
+        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
+    
+        drawSegments(triangleBuffer, 5);
     }
 
-    private void drawSegments(FloatBuffer buffer, int nSegments) {
+    private void drawSegments(FloatBuffer buffer, int nPoints) {
         buffer.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize,
                                      GLES20.GL_FLOAT, false,
@@ -176,19 +200,9 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
                                      mStrideBytes, buffer);        
         
         GLES20.glEnableVertexAttribArray(mColorHandle);
-        
-        // This multiplies the view matrix by the model matrix,
-        // and stores the result in the MVP matrix
-        // (which currently contains model * view).
-        Matrix.multiplyMM(mMVPMatrix, 0, mVMatrix, 0, mModelMatrix, 0);
-        
-        // This multiplies the modelview matrix by the projection matrix,
-        // and stores the result in the MVP matrix
-        // (which now contains model * view * projection).
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
-
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, nSegments);
+        
+        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, nPoints);
 
     }
     
@@ -204,9 +218,11 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     
     private void initShapes() {
         PointF points[] = {
-            new PointF(-0.5f, -0.25f),
-            new PointF( 0.5f, -0.25f),
-            new PointF( 0.0f,  0.559016994f)};
+            new PointF( 200.0f, 200.0f),
+            new PointF( 200.0f, 400.0f),
+            new PointF( 400.0f, 400.0f),
+            new PointF( 400.0f, 200.0f),
+            new PointF( 200.0f, 400.0f),};
         triangleBuffer = createBuffer(points);
     }
 

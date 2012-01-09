@@ -31,7 +31,6 @@ public class SmoothLastSegment implements IAction {
         }        
     }
         
-    @Override
     public void doAction(Sheet sheet) {
         /**
          * Spawn smooth thread
@@ -40,7 +39,6 @@ public class SmoothLastSegment implements IAction {
         thread.start();
     }
 
-    @Override
     public void undoAction(Sheet sheet) {
         if (thread != null) {
             thread.addShapes = false;
