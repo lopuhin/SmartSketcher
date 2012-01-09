@@ -203,20 +203,15 @@ public class Sheet {
         isDirty = false;
     }
 
-    public ArrayList<Shape> getShapes() {
-        /**
-         * Return a copy of shapes
-         */
-        ArrayList<Shape> shapesCopy = new ArrayList<Shape>();
+    public void draw(OpenGLRenderer renderer) {
+        final ArrayList<Shape> shapesCopy;
         synchronized (shapes) {
-            for (Shape sh: shapes) {
-                shapesCopy.add(sh);
-            }
+            shapesCopy = (ArrayList<Shape>) shapes.clone();
         }
-        return shapesCopy;
+        for (Shape sh: shapesCopy) {
+            sh.draw(renderer);
+        }
     }
-
-    //public 
     
     public void setDirty() {
         isDirty = true;

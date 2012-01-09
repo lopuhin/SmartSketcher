@@ -1,6 +1,7 @@
 package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
+import java.nio.FloatBuffer;
 
 import android.util.FloatMath;
 import android.util.Log;
@@ -63,7 +64,7 @@ public class MainSurfaceView extends GLSurfaceView
             sheet = new Sheet(dbAdapter, true);
         
         setEGLContextClientVersion(2); // OpenGL ES 2.0 context
-        final OpenGLRenderer renderer = new OpenGLRenderer(sheet);
+        final OpenGLRenderer renderer = new OpenGLRenderer(this);
         setEGLConfigChooser(renderer.getConfigChooser());
         setRenderer(renderer);
         
@@ -217,8 +218,34 @@ public class MainSurfaceView extends GLSurfaceView
             mainSurfaceViewThread.onWindowResize(w, h);
     }
     */
+
+    public void draw(OpenGLRenderer renderer) {
+        sheet.draw(renderer);
+        drawLastSegment(renderer);
+    }
     
-    private float touchSpacing(MotionEvent event) {
+    private void drawLastSegment(OpenGLRenderer renderer) {
+        /**
+         * Draw lastSegment, using OpenGL renderer
+         */
+        final PointF[] points;
+        // TODO - cache pointsBuffer
+        synchronized (lastSegment) {
+            points = new PointF[lastSegment.size()];
+            int i = 0;
+            for (PointF p: lastSegment) {
+                // TODO - do online, not in drawing
+                points[i] = sheet.toSheet(p);
+                i++;
+            }
+        }
+        if (points.length > 0) {
+            FloatBuffer pointsBuffer = OpenGLRenderer.createBuffer(points);
+            renderer.drawSegments(pointsBuffer, points.length);
+        }
+    }
+    
+    private static float touchSpacing(MotionEvent event) {
         /**
          * Distance between two touch points
          */
@@ -227,7 +254,7 @@ public class MainSurfaceView extends GLSurfaceView
         return FloatMath.sqrt(x * x + y * y);
     }
         
-    private PointF touchCenter(MotionEvent event) {
+    private static PointF touchCenter(MotionEvent event) {
         /**
          * Center of two touch points
          */
@@ -263,7 +290,7 @@ public class MainSurfaceView extends GLSurfaceView
     private void eraseAt(PointF p) {
         lastEraseTrace.add(p);
     }
-        
+    
     private void finishSegment() {
         /**
          * Add smoothed lastSegment to sheet, as the user stopped drawing.

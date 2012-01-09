@@ -72,12 +72,12 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         + "   gl_FragColor = v_Color;     \n"    
         + "}                              \n";
 
-    private Sheet sheet;
+    private MainSurfaceView mainSurfaceView;
     private int width, height;
     
-    OpenGLRenderer(Sheet sheet) {
+    OpenGLRenderer(MainSurfaceView mainSurfaceView) {
         mConfigChooser = new MultisampleConfigChooser();
-        this.sheet = sheet;
+        this.mainSurfaceView = mainSurfaceView;
         width = 0;
         height = 0;
     }
@@ -133,6 +133,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // Redraw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
         
+        final Sheet sheet = mainSurfaceView.getSheet();
         final PointF ul, lr; // upper left and lower right
         ul = sheet.getViewPos();
         lr = sheet.toSheet(new PointF(width, height));
@@ -183,12 +184,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // (which now contains model * view * projection).
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
     
-        // draw all shapes from the sheet
-        for (Shape sh: sheet.getShapes()) {
-            sh.draw(this);
-        }
-        // draw last segment
-        
+        mainSurfaceView.draw(this);
     }
 
     public void drawSegments(FloatBuffer buffer, int nPoints) {
