@@ -12,6 +12,8 @@ import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 
 
 public class FileHelper {
@@ -92,14 +94,16 @@ public class FileHelper {
              */
             Sheet sheet = mainSurfaceView.getSheet();
             File file = getPreviewFileBySheetId(sheet.getId());
+            FileOutputStream fos;
             try {
-                FileOutputStream fos = new FileOutputStream(file);
-                sheet.savePreviewToFile(fos,
-                                        mainSurfaceView.getMeasuredWidth(),
-                                        mainSurfaceView.getMeasuredHeight());
-                notifyMediaScanner(file);
+                fos = new FileOutputStream(file);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
+            }
+            Bitmap bitmap = mainSurfaceView.makeScreenshot();
+            if (bitmap != null) {
+                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                notifyMediaScanner(file);
             }
         }
     }

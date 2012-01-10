@@ -3,6 +3,7 @@ package com.lopuhin.smartsketcher;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.nio.ShortBuffer;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -13,6 +14,7 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.graphics.PointF;
+import android.graphics.Bitmap;
 
 
 public class OpenGLRenderer implements GLSurfaceView.Renderer {
@@ -74,12 +76,15 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     private MainSurfaceView mainSurfaceView;
     private int width, height;
+    private boolean screenshot;
+    private Bitmap lastScreenshot;
     
     OpenGLRenderer(MainSurfaceView mainSurfaceView) {
         mConfigChooser = new MultisampleConfigChooser();
         this.mainSurfaceView = mainSurfaceView;
-        width = 0;
-        height = 0;
+        width = mainSurfaceView.getMeasuredWidth();
+        height = mainSurfaceView.getMeasuredHeight();
+        screenshot = false;
     }
 
     public MultisampleConfigChooser getConfigChooser() {
@@ -128,7 +133,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         
     }
 
-    public void onDrawFrame(GL10 unused) {
+    public void onDrawFrame(GL10 gl) {
         /**
          * Called on every frame redraw
          */
@@ -161,6 +166,45 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mMVPMatrix, 0);
     
         mainSurfaceView.draw(this);
+
+        if (screenshot) {
+            makeScreenshot(gl);
+            screenshot = false;
+        }
+    }
+
+    public void setScreenshot() {
+        screenshot = true;
+    }
+
+    public Bitmap getLastScreenshot() {
+        return lastScreenshot;
+    }
+    
+    private void makeScreenshot(GL10 gl) {
+        int screenshotSize = width * height;
+        ByteBuffer bb = ByteBuffer.allocateDirect(screenshotSize * 4);
+        bb.order(ByteOrder.nativeOrder());
+        gl.glReadPixels(0, 0, width, height, GL10.GL_RGBA, GL10.GL_UNSIGNED_BYTE, bb);
+        int pixelsBuffer[] = new int[screenshotSize];
+        bb.asIntBuffer().get(pixelsBuffer);
+        bb = null;
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);
+        bitmap.setPixels(pixelsBuffer, screenshotSize-width, -width, 0, 0, width, height);
+        pixelsBuffer = null;
+
+        short sBuffer[] = new short[screenshotSize];
+        ShortBuffer sb = ShortBuffer.wrap(sBuffer);
+        bitmap.copyPixelsToBuffer(sb);
+
+        //Making created bitmap (from OpenGL points) compatible with Android bitmap
+        for (int i = 0; i < screenshotSize; ++i) {                  
+            short v = sBuffer[i];
+            sBuffer[i] = (short) (((v&0x1f) << 11) | (v&0x7e0) | ((v&0xf800) >> 11));
+        }
+        sb.rewind();
+        bitmap.copyPixelsFromBuffer(sb);
+        lastScreenshot = bitmap;
     }
 
     public void drawSegments(FloatBuffer buffer, int nPoints) {

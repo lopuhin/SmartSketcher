@@ -43,7 +43,8 @@ public class MainSurfaceView extends GLSurfaceView
     private ArrayList<PointF> lastEraseTrace;
     private int lastSegmentDirtyIndex, lastEraseTraceDirtyIndex;
     private boolean finishErasing;
-        
+    private OpenGLRenderer renderer;
+    
     private final static String TAG = "MainSurfaceView";
 
     MainSurfaceView(Context context, DBAdapter dbAdapter, Sheet _sheet) {
@@ -64,7 +65,7 @@ public class MainSurfaceView extends GLSurfaceView
             sheet = new Sheet(dbAdapter, true);
         
         setEGLContextClientVersion(2); // OpenGL ES 2.0 context
-        final OpenGLRenderer renderer = new OpenGLRenderer(this);
+        renderer = new OpenGLRenderer(this);
         setEGLConfigChooser(renderer.getConfigChooser());
         setRenderer(renderer);
         
@@ -243,6 +244,12 @@ public class MainSurfaceView extends GLSurfaceView
             FloatBuffer pointsBuffer = OpenGLRenderer.createBuffer(points);
             renderer.drawSegments(pointsBuffer, points.length);
         }
+    }
+
+    public Bitmap makeScreenshot() {
+        renderer.setScreenshot();
+        requestRender();
+        return renderer.getLastScreenshot();
     }
     
     private static float touchSpacing(MotionEvent event) {
@@ -438,7 +445,7 @@ public class MainSurfaceView extends GLSurfaceView
                 }
             }
         }
-                
+        
         public void requestExitAndWait() {
             /**
              * Mark this thread as complete and combine into the main application thread.
