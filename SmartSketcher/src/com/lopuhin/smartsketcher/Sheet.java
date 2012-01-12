@@ -55,30 +55,6 @@ public class Sheet {
         return dbAdapter.getCurrentSheetId();
     }
     
-    public void savePreviewToFile(FileOutputStream fos,
-                                  final int previewW,
-                                  final int previewH) {
-        /**
-         * Render preview to file, using default viewZoom and viewPos
-         */
-        final PointF prevViewPos = getViewPos();
-        final float prevViewZoom = getViewZoom();
-        try {
-            Bitmap bitmap = Bitmap.createBitmap(previewW, previewH, Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bitmap);
-            setViewPos(new PointF(0.0f, 0.0f));
-            setViewZoom(1.0f);
-            draw(canvas); 
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-        } catch (Exception e) {
-            Log.e(TAG, "error saving preview", e);
-            throw new RuntimeException(e);
-        } finally {
-            setViewPos(prevViewPos);
-            setViewZoom(prevViewZoom);
-        }
-    }
-
     public void addShape(final Shape shape, Boolean save) {
         /**
          * Add shape to sheet, save if save is true.
@@ -177,7 +153,6 @@ public class Sheet {
     }
      
     public void setViewPos(PointF viewPos) {
-        Log.d(TAG, "setViewPos " + viewPos.x + " " + viewPos.y);
         this.viewPos = new PointF(viewPos.x, viewPos.y);
         setDirty();
     }
@@ -187,23 +162,14 @@ public class Sheet {
     }
      
     public void setViewZoom(float viewZoom) {
-        Log.d(TAG, "setViewZoom " + viewZoom);
         this.viewZoom = viewZoom;
         setDirty();
     }
-     
-    public void draw(Canvas canvas) {
-        canvas.drawRGB(255, 255, 255);
-        // draw shapes
-        synchronized (shapes) {
-            for (Shape sh: shapes) {
-                sh.draw(canvas, paint, this);
-            }     
-        }
-        isDirty = false;
-    }
 
     public void draw(OpenGLRenderer renderer) {
+        /**
+         * Draw all shapes on the sheet
+         */
         final ArrayList<Shape> shapesCopy;
         synchronized (shapes) {
             shapesCopy = (ArrayList<Shape>) shapes.clone();

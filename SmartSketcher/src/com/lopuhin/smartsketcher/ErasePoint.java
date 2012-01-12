@@ -14,12 +14,6 @@ public class ErasePoint extends Shape {
         this.radius = radius; 
     }
 	
-    @Override
-    public void draw(Canvas canvas, Paint paint, Sheet sheet) {
-        PointF p = sheet.toScreen(point);
-        canvas.drawCircle(p.x, p.y, sheet.toScreen(radius), sheet.whiteFillPaint);
-    }
-
     public void draw(OpenGLRenderer renderer) {
         // TODO
     }

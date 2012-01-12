@@ -38,9 +38,8 @@ public class SmartSketcher extends Activity {
         
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
-        Sheet sheet = dbAdapter.loadLastSheet();
 
-        mainSurfaceView = new MainSurfaceView(this, dbAdapter, sheet);
+        mainSurfaceView = new MainSurfaceView(this, dbAdapter);
         layout.addView(mainSurfaceView);
 
         fileHelper = new FileHelper(mainSurfaceView);
@@ -77,6 +76,9 @@ public class SmartSketcher extends Activity {
     
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+        /**
+         * Disable or enable menu items
+         */
         super.onPrepareOptionsMenu(menu);
         MenuItem undoItem = menu.findItem(UNDO_ITEM);
         undoItem.setEnabled(mainSurfaceView.getSheet().canUndo());
@@ -91,10 +93,12 @@ public class SmartSketcher extends Activity {
 
         return true;
     }
-
     
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        /**
+         * Handle menu items
+         */
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
         case (UNDO_ITEM) : 
@@ -110,11 +114,9 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
             return true;
         case (CLEAR_ITEM) :
-            mainSurfaceView.setDefaultInstrument();
             mainSurfaceView.clearSheet();
             return true;
         case (NEW_ITEM) :
-            mainSurfaceView.setDefaultInstrument();
             mainSurfaceView.clearSheet();	
             return true;
         case (OPEN_ITEM) :
@@ -127,24 +129,17 @@ public class SmartSketcher extends Activity {
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        /**
+         * Handle opening of saved sheet via OpenSheetActivity
+         */
         if (resultCode == RESULT_OK && requestCode == OPEN_SHEET_RESULT) {
             long sheetId = data.getLongExtra("sheetId", -1);
-            Log.d(TAG, "sheetId " + sheetId);
+            Log.d(TAG, "opening sheetId " + sheetId);
             if (sheetId != -1) {
                 mainSurfaceView.setSheet(dbAdapter.loadSheet(sheetId));
             }
         }
-        mainSurfaceView.setDefaultInstrument();
-        mainSurfaceView.getSheet().setDirty();
     }
-        
-    /*private String getPath(Uri uri) {
-        String[] projection = {MediaStore.Images.Media.DATA};
-        Cursor cursor = managedQuery(uri, projection, null, null, null);
-        int column_index = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATA);
-        cursor.moveToFirst();
-        return cursor.getString(column_index);
-        }*/
 
 }
 

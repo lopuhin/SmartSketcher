@@ -77,45 +77,6 @@ public class BezierCurve extends Shape {
     }
 
     @Override
-    public void draw(Canvas canvas, Paint paint, final Sheet sheet) {
-
-        if (Config.DEBUG) {
-            // draw endpoints and control points of bezier curve
-            final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-            pointPaint.setColor(Color.GREEN);
-            pointPaint.setStrokeWidth(5.0f);
-                
-            PointF startPoint = sheet.toScreen(points[0]);
-            PointF endPoint = sheet.toScreen(points[points.length - 1]);
-            canvas.drawPoint(startPoint.x, startPoint.y, pointPaint);
-            canvas.drawPoint(endPoint.x, endPoint.y, pointPaint);
-                        
-            pointPaint.setStrokeWidth(1.0f);
-            PointF prevControlPoint = null;
-            int idx = 0;
-            for (PointF currPoint: points) {
-                currPoint = sheet.toScreen(currPoint);
-                if (prevControlPoint != null && idx != 1) {
-                    canvas.drawLine(prevControlPoint.x, prevControlPoint.y,
-                                    currPoint.x, currPoint.y, pointPaint);
-                    idx += 1;
-                }
-                prevControlPoint = currPoint;
-            }
-        }
-                
-        PointF prevPoint = null;
-        // TODO - decide how many steps to use depending on the scale
-        for (float t = 0; t <= 1.01; t += 0.05) {
-            PointF currPoint = sheet.toScreen(curvePoint(points, t));
-            if (prevPoint != null) {
-                canvas.drawLine(prevPoint.x, prevPoint.y, currPoint.x, currPoint.y, paint);
-            }
-            prevPoint = currPoint;
-        }        
-    }
-
-    @Override
     public PointF[] getPoints() {
         return points;
     }

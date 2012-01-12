@@ -53,24 +53,6 @@ public class Curve extends Shape {
     }
     
     @Override
-    public void draw(Canvas canvas, Paint paint, Sheet sheet) {
-        PointF prevPoint = null;
-        for (PointF p: points) {
-            p = sheet.toScreen(p);
-            if (Config.DEBUG) {
-                final Paint pointPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-                pointPaint.setColor(Color.RED);
-                pointPaint.setStrokeWidth(3.0f);
-                canvas.drawPoint(p.x, p.y, pointPaint);
-            }
-            if (prevPoint != null) {
-                canvas.drawLine(prevPoint.x, prevPoint.y, p.x, p.y, paint);
-            }
-            prevPoint = p;
-        }        
-    }
-
-    @Override
     public PointF[] getPoints() {
         return points;
     }

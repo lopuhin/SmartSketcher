@@ -7,8 +7,6 @@ import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.opengl.GLSurfaceView;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -16,52 +14,44 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 
 
-public class MainSurfaceView extends GLSurfaceView
-    implements SurfaceHolder.Callback {
+public class MainSurfaceView extends GLSurfaceView {
     /**
      * Handles user interaction with touch screen, manages drawing thread,
      * adds shapes to sheet.
      */
         
-    private int mode, instrument;
-    private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
     public final static int DRAW_INSTRUMENT = 0, ERASE_INSTRUMENT = 1;
+
+    private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
     private final static float SMALL_TOUCH_SPACING = 1.0f;
+    
+    private int mode, instrument;
+
     // initial configuration, when user starts dragging with two fingers
     private float prevTouchSpacing, prevViewZoom;
     private PointF prevTouchCenter, prevViewPos;
-        
     private float eraserRadius;
-        
-    private SurfaceHolder holder;
-    private MainSurfaceViewThread mainSurfaceViewThread;
-    private boolean hasSurface;
         
     private Sheet sheet;
     private ArrayList<PointF> lastSegment;
     private ArrayList<Long> lastSegmentTimes;
     private ArrayList<PointF> lastEraseTrace;
-    private int lastSegmentDirtyIndex, lastEraseTraceDirtyIndex;
-    private boolean finishErasing;
     private OpenGLRenderer renderer;
+    private boolean finishErasing;
     
     private final static String TAG = "MainSurfaceView";
 
-    MainSurfaceView(Context context, DBAdapter dbAdapter, Sheet _sheet) {
+    MainSurfaceView(Context context, DBAdapter dbAdapter) {
         /**
-         * Init: create empty sheet if _sheet is null, or load existing
+         * Init: load last sheet, or create new one, if there is not last one
          */
         super(context);
 
         mode = IDLE_MODE;
         instrument = DRAW_INSTRUMENT;
-        // Create a new SurfaceHolder and assign this class as its callback.
-        /*holder = getHolder();
-          holder.addCallback(this);*/
-        hasSurface = false;
-        if (_sheet != null)
-            sheet = _sheet;
-        else
+
+        sheet = dbAdapter.loadLastSheet();
+        if (sheet == null)
             sheet = new Sheet(dbAdapter, true);
         
         setEGLContextClientVersion(2); // OpenGL ES 2.0 context
@@ -72,9 +62,8 @@ public class MainSurfaceView extends GLSurfaceView
         lastSegment = new ArrayList<PointF>();
         lastSegmentTimes = new ArrayList<Long>();
         lastEraseTrace = new ArrayList<PointF>();
-        lastSegmentDirtyIndex = 0;
-        lastEraseTraceDirtyIndex= -1;
         finishErasing = false;
+
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
         eraserRadius = 30.0f; // TODO - load from resources
@@ -123,8 +112,7 @@ public class MainSurfaceView extends GLSurfaceView
                 final float dZoom = touchSpacing / prevTouchSpacing;
                 sheet.setViewZoom(prevViewZoom * dZoom);
                 final PointF touchCenter = touchCenter(event);
-                sheet.setViewPos(
-                                 new PointF(prevViewPos.x +
+                sheet.setViewPos(new PointF(prevViewPos.x +
                                             (prevTouchCenter.x - touchCenter.x / dZoom) /
                                             sheet.getViewZoom(),
                                             prevViewPos.y +
@@ -158,35 +146,6 @@ public class MainSurfaceView extends GLSurfaceView
         return true;
     }
 
-    @Override
-    public void onPause() {
-        /**
-         *  Kill the graphics update thread
-         */
-        super.onPause();
-        /*
-        if (mainSurfaceViewThread != null) {
-            mainSurfaceViewThread.requestExitAndWait();
-            mainSurfaceViewThread = null;
-            }*/
-    }
-
-    @Override
-    public void onResume() {
-        /**
-         * Create and start the graphics update thread.
-         */
-        super.onResume();
-        sheet.setDirty();
-
-        /*
-        if (mainSurfaceViewThread == null) {
-            mainSurfaceViewThread = new MainSurfaceViewThread();
-            if (hasSurface == true)
-                mainSurfaceViewThread.start();
-                } */       
-    }
-        
     public int getInstrument() {
         return instrument;
     }
@@ -199,28 +158,10 @@ public class MainSurfaceView extends GLSurfaceView
         instrument = DRAW_INSTRUMENT;
     }
 
-    /*
-    public void surfaceCreated(SurfaceHolder holder) {
-        hasSurface = true;
-        if (mainSurfaceViewThread == null) {
-            onResume(); // FIXME
-        } else {
-            mainSurfaceViewThread.start();
-        }
-    }
-        
-    public void surfaceDestroyed(SurfaceHolder holder) {
-        hasSurface = false;
-        onPause();
-    }
-
-    public void surfaceChanged(SurfaceHolder holder, int format, int w, int h) {
-        if (mainSurfaceViewThread != null)        
-            mainSurfaceViewThread.onWindowResize(w, h);
-    }
-    */
-
     public void draw(OpenGLRenderer renderer) {
+        /**
+         * Draw everything
+         */
         sheet.draw(renderer);
         drawLastSegment(renderer);
     }
@@ -247,11 +188,30 @@ public class MainSurfaceView extends GLSurfaceView
     }
 
     public Bitmap makeScreenshot() {
+        /**
+         * Return screenshot of current view as a bitmap
+         */
         renderer.setScreenshot();
         requestRender();
         return renderer.getLastScreenshot();
     }
     
+    public Sheet getSheet() {
+        return sheet;
+    }
+        
+    public void setSheet(Sheet sheet) {
+        if (sheet != null) {
+            this.sheet = sheet;
+        }
+        setDefaultInstrument();
+    }
+        
+    public void clearSheet() {
+        sheet = new Sheet(sheet.getDBAdapter(), true);
+        setDefaultInstrument();
+    }
+
     private static float touchSpacing(MotionEvent event) {
         /**
          * Distance between two touch points
@@ -269,20 +229,6 @@ public class MainSurfaceView extends GLSurfaceView
                           (event.getY(0) + event.getY(1)) / 2.0f);
     }
  
-    public Sheet getSheet() {
-        return sheet;
-    }
-        
-    public void setSheet(Sheet sheet) {
-        if (sheet != null) {
-            this.sheet = sheet;
-        }
-    }
-        
-    public void clearSheet() {
-        sheet = new Sheet(sheet.getDBAdapter(), true);
-    }
-
     private void addPoint(PointF p) {
         /**
          * Add point to last segment (the one that is beeing drawn)
@@ -306,7 +252,6 @@ public class MainSurfaceView extends GLSurfaceView
             SmoothLastSegment action = new SmoothLastSegment(lastSegment, lastSegmentTimes);
             lastSegment.clear();
             lastSegmentTimes.clear();
-            lastSegmentDirtyIndex = 0;
             sheet.doAction(action);
         }
     }
@@ -318,7 +263,6 @@ public class MainSurfaceView extends GLSurfaceView
         synchronized (lastSegment) {
             lastSegment.clear();
             lastSegmentTimes.clear();
-            lastSegmentDirtyIndex = 0;
         }
     }
         
@@ -338,132 +282,7 @@ public class MainSurfaceView extends GLSurfaceView
     private void discardErasing() {
         synchronized (lastEraseTrace) {
             lastEraseTrace.clear();
-            lastEraseTraceDirtyIndex = -1;
         }
     }
 
-    
-    class MainSurfaceViewThread extends Thread {
-        /**
-         * Drawing thread
-         */
-        private boolean done;
-                
-        Bitmap sheetBitmap;
-        Canvas sheetCanvas;
-                
-        MainSurfaceViewThread() {
-            super();
-            done = false;
-        }
-                
-        @Override
-        public void run() {
-            SurfaceHolder surfaceHolder = holder;
-            while (!done) {
-                boolean needDrawing = sheet.isDirty;
-                if (!needDrawing) {
-                    synchronized (lastSegment) {
-                        needDrawing = lastSegment.size() > lastSegmentDirtyIndex + 1;
-                    }
-                    if (!needDrawing) {
-                        synchronized (lastEraseTrace) {
-                            needDrawing = lastEraseTrace.size() >
-                                lastEraseTraceDirtyIndex + 1
-                                || finishErasing;
-                        }
-                    }
-                }
-                if (needDrawing) {
-                    // Lock the surface and return the canvas to draw onto.
-                    final long startTime = System.nanoTime();
-                    Canvas canvas = surfaceHolder.lockCanvas();
-                    draw(canvas);
-                    surfaceHolder.unlockCanvasAndPost(canvas);
-                    final long drawTime = System.nanoTime() - startTime;
-                    Log.d(TAG, "drawing took " + drawTime);
-                } else {
-                    try {
-                        // FIXME
-                        MainSurfaceViewThread.sleep(50);
-                    } catch (InterruptedException e) { }
-                }
-            }
-        }
-
-        public void draw(Canvas canvas) {
-            /**
-             * Redraw entire view here
-             */
-            if (sheet.isDirty) {
-                // FIXME???
-                // draw sheet to bitmap, and post this bitmap on every redraw
-                if (sheetCanvas == null) {
-                    initSheetBuffer(canvas.getWidth(), canvas.getHeight());
-                }
-                sheet.draw(sheetCanvas);
-            }
-            canvas.drawBitmap(sheetBitmap, 0, 0, null);
-            synchronized (lastSegment) {
-                final int size = lastSegment.size();
-                PointF prevPoint = null, currPoint;
-                for (int i = 1; i < size; i++) {
-                    currPoint = lastSegment.get(i);
-                    if (prevPoint == null) prevPoint = lastSegment.get(i - 1);
-                    canvas.drawLine(prevPoint.x, prevPoint.y,
-                                    currPoint.x, currPoint.y, sheet.paint);
-                    prevPoint = currPoint;
-                }
-                lastSegmentDirtyIndex = size - 1;
-            }
-            synchronized (lastEraseTrace) {
-                final int size = lastEraseTrace.size();
-                PointF currPoint = null;
-                for (int i = 0; i < size; i++) {
-                    currPoint = lastEraseTrace.get(i);
-                    canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius,
-                                      sheet.whiteFillPaint);
-                }
-                if (currPoint != null) {
-                    Paint paint;
-                    if (finishErasing) {
-                        paint = sheet.whiteFillPaint;
-                        ArrayList<Shape> shapes = new ArrayList<Shape>();
-                        for (final PointF p: lastEraseTrace) {
-                            shapes.add(new ErasePoint(sheet.toSheet(p),
-                                                      sheet.toSheet(eraserRadius)));
-                        } 
-                        sheet.doAction(new AddShapes(shapes));
-                        lastEraseTrace.clear();
-                        lastEraseTraceDirtyIndex = -1;
-                        finishErasing = false;
-                    } else {
-                        paint = sheet.paint;
-                        lastEraseTraceDirtyIndex = size - 1;
-                    }
-                    canvas.drawCircle(currPoint.x, currPoint.y, eraserRadius, paint);
-                }
-            }
-        }
-        
-        public void requestExitAndWait() {
-            /**
-             * Mark this thread as complete and combine into the main application thread.
-             */
-            done = true;
-            try {
-                join();
-            } catch (InterruptedException ex) { }
-        }
-                
-        public void onWindowResize(int w, int h) {
-            initSheetBuffer(w, h);
-        }
-                
-        private void initSheetBuffer(int w, int h) {
-            sheetBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
-            sheetCanvas = new Canvas(sheetBitmap);
-        }
-    }
-    
 }
