@@ -63,4 +63,5 @@
     CLOSED: [2012-01-14 Sat 22:59]
 *** DONE Saving preview
     CLOSED: [2012-01-14 Sat 22:59]
-*** TODO Hanging after big erasing
+*** DONE Hanging after big erasing
+    CLOSED: [2012-01-14 Sat 23:39]

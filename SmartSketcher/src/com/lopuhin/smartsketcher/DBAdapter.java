@@ -6,13 +6,14 @@ import java.util.Iterator;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.graphics.PointF;
+import android.util.Log;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.graphics.PointF;
-import android.util.Log;
+import android.database.DatabaseUtils.InsertHelper;
 
 
 public class DBAdapter {
@@ -181,16 +182,24 @@ public class DBAdapter {
         shapeValues.put(SHAPE_NAME, shape.getClass().getName());
         shapeValues.put(SHAPE_THICKNESS, shape.getThickness());
         long shape_id = db.insert(SHAPES_TABLE, null, shapeValues);
-        // TODO - insert in one query
-        Log.d(TAG, "Inserting points " + shape.getPoints().length);
-        for (PointF point: shape.getPoints()) {
-            if (!Float.isNaN(point.x) && !Float.isNaN(point.y)) {
-                ContentValues pointValues = new ContentValues();
-                pointValues.put(SHAPE_ID, shape_id);
-                pointValues.put(POINT_X, point.x);
-                pointValues.put(POINT_Y, point.y);
-                db.insert(POINTS_TABLE, null, pointValues);
+        Log.d(TAG, "Inserting points (" + shape.getPoints().length + ") of " +
+              shape.getClass().getName());
+        InsertHelper ih = new InsertHelper(db, POINTS_TABLE);
+        db.beginTransaction();
+        try {
+            ContentValues pointValues = null;
+            for (PointF point: shape.getPoints()) {
+                if (!Float.isNaN(point.x) && !Float.isNaN(point.y)) {
+                    pointValues = new ContentValues();
+                    pointValues.put(SHAPE_ID, shape_id);
+                    pointValues.put(POINT_X, point.x);
+                    pointValues.put(POINT_Y, point.y);
+                    ih.insert(pointValues);
+                }
             }
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
         }
         Log.d(TAG, "Done inserting points");
     }
