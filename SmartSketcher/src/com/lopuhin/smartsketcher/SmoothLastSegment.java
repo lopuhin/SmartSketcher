@@ -62,7 +62,7 @@ public class SmoothLastSegment implements IAction {
         SmoothingThread(Sheet sheet, SmoothLastSegment action) {
             super();
             synchronized (sheet) {
-                tempCurve = Curve.approximated(lastSegment, sheet, true);
+                tempCurve = new Curve(lastSegment, true);
                 sheet.addShape(tempCurve);
             }
             this.sheet = sheet;
@@ -74,7 +74,7 @@ public class SmoothLastSegment implements IAction {
         public void run() {
             // TODO - maybe interrupt somewhere here?
             ArrayList<Shape> shapes = BezierCurveSet.approximated(
-                lastSegment, lastSegmentTimes, sheet);
+                lastSegment, lastSegmentTimes);
             if (addShapes) {
                 synchronized (sheet) {
                     sheet.doAction(new AddShapes(shapes));

@@ -1,5 +1,6 @@
 package com.lopuhin.smartsketcher;
 
+import java.util.ArrayList;
 import java.nio.FloatBuffer;
 
 import android.graphics.Canvas;
@@ -12,7 +13,6 @@ public class EraseTrace extends Shape {
     /**
      * A trace of an eraser
      */
-    
     private PointF[] points;
     private FloatBuffer pointsBuffer;
     private float thickness;
@@ -25,16 +25,16 @@ public class EraseTrace extends Shape {
     }
 	
     public void draw(OpenGLRenderer renderer) {
-        renderer.drawPoints(pointsBuffer, points.length);
+        renderer.drawSegments(pointsBuffer, points.length);
     }
 
     @Override
     public PointF[] getPoints() {
-        return new PointF[]{point};
+        return points;
     }
 
     @Override
     public float getThickness() {
-        return radius;
+        return thickness;
     }
 }

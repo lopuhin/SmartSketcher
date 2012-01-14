@@ -42,18 +42,16 @@ public class BezierCurve extends Shape {
         renderer.drawSegments(pointsBuffer, pointsBufferSize);
     }
 
-    public static BezierCurve approximated(final ArrayList<PointF> pointsList,
-                                           final Sheet sheet) {
+    public static BezierCurve approximated(final ArrayList<PointF> pointsList) {
         /**
          * Creating approximation of pointsList with cubic Bezier curve
          */
-        return approximated(pointsList, 0, pointsList.size() - 1, sheet);
+        return approximated(pointsList, 0, pointsList.size() - 1);
     }
         
     public static BezierCurve
         approximated(final ArrayList<PointF> pointsList,
-                     final int startIndex,
-                     final int endIndex, final Sheet sheet) {
+                     final int startIndex, final int endIndex) {
         /**
          * Creating approximation of pointsList from startIndex to endIndex
          * with cubic Bezier curve
@@ -68,9 +66,6 @@ public class BezierCurve extends Shape {
         Log.d(TAG, "solution: c = " + c);
         p[1] = new PointF(p[0].x + c * tangents[0].x, p[0].y + c * tangents[0].y);
         p[2] = new PointF(p[3].x + c * tangents[1].x, p[3].y + c * tangents[1].y);
-        for (int i = 0; i < p.length; i++) {
-            p[i] = sheet.toSheet(p[i]);
-        }
         BezierCurve curve = new BezierCurve(p);
         curve.fittingError = fitting_fn.value(c); // TODO - normalize by length?
         return curve;

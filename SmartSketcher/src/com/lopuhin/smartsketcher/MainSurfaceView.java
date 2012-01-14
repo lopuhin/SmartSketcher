@@ -184,16 +184,15 @@ public class MainSurfaceView extends GLSurfaceView {
         /**
          * Draw erase trace (with edges for the last point)
          */
-        final PointF[] points;
+        EraseTrace eraseTrace = null;
         synchronized (lastEraseTrace) {
-            points = lastEraseTrace.toArray(new PointF[lastEraseTrace.size()]);
+            if (lastEraseTrace.size() > 0)
+                // TODO - cache
+                eraseTrace = new EraseTrace(lastEraseTrace, eraserRadius);
         }
-        if (points.length > 0) {
-            FloatBuffer pointsBuffer =
-                OpenGLRenderer.createBuffer(points, Sheet.BACKGROUND_COLOR);
-            renderer.drawPoints(pointsBuffer, points.length);
-            // draw eraser edges (a circle) around last point
-            PointF lastPoint = points[points.length - 1];
+        if (eraseTrace != null) {
+            eraseTrace.draw(renderer);
+            // TODO draw eraser edges (a circle) around last point
         }
     }
 
@@ -285,11 +284,10 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0) {
-                ArrayList<Shape> erasePoints = new ArrayList<Shape>();
-                for (PointF p: lastEraseTrace) {
-                    erasePoints.add(new ErasePoint(p, eraserRadius));
-                }
-                sheet.doAction(new AddShapes(erasePoints));
+                ArrayList<Shape> t = new ArrayList<Shape>();
+                t.add(new EraseTrace(lastEraseTrace, eraserRadius));
+                sheet.doAction(new AddShapes(t));
+                lastEraseTrace.clear();
             }
         }
     }

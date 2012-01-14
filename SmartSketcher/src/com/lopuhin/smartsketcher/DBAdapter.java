@@ -244,10 +244,11 @@ public class DBAdapter {
             return new Curve(points, false);
         } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.BezierCurve")) {
             return new BezierCurve(points);
-        } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.ErasePoint")) {
-            return new ErasePoint(points.get(0), shapeInfo.thickness);
+        } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.ErasePoint") ||
+                   shapeInfo.name.equals("com.lopuhin.smartsketcher.EraseTrace")) {
+            return new EraseTrace(points, shapeInfo.thickness);
         } else {
-            throw new RuntimeException();
+            throw new RuntimeException("Unknown shape name: " + shapeInfo.name);
         }
     }
     
