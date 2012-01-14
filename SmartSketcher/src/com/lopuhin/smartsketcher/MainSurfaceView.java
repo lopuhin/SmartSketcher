@@ -37,7 +37,6 @@ public class MainSurfaceView extends GLSurfaceView {
     private ArrayList<Long> lastSegmentTimes;
     private ArrayList<PointF> lastEraseTrace;
     private OpenGLRenderer renderer;
-    private boolean finishErasing;
     
     private final static String TAG = "MainSurfaceView";
 
@@ -62,7 +61,6 @@ public class MainSurfaceView extends GLSurfaceView {
         lastSegment = new ArrayList<PointF>();
         lastSegmentTimes = new ArrayList<Long>();
         lastEraseTrace = new ArrayList<PointF>();
-        finishErasing = false;
 
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
@@ -253,6 +251,9 @@ public class MainSurfaceView extends GLSurfaceView {
     }
         
     private void eraseAt(PointF p) {
+        /**
+         * Add point to last erase trace (the one that is beeing used for erasing)
+         */
         lastEraseTrace.add(sheet.toSheet(p));
     }
     
@@ -280,13 +281,15 @@ public class MainSurfaceView extends GLSurfaceView {
         
     private void finishErasing() {
         /**
-         * real erasing finishing is done in drawing thread,
-         * to erase the outline of eraser
+         * Add erase points to sheet
          */
         synchronized (lastEraseTrace) {
-            final int size = lastEraseTrace.size();
-            if (size > 0) {
-                finishErasing = true;
+            if (lastEraseTrace.size() > 0) {
+                ArrayList<Shape> erasePoints = new ArrayList<Shape>();
+                for (PointF p: lastEraseTrace) {
+                    erasePoints.add(new ErasePoint(p, eraserRadius));
+                }
+                sheet.doAction(new AddShapes(erasePoints));
             }
         }
     }
