@@ -3,12 +3,11 @@ package com.lopuhin.smartsketcher;
 import java.util.ArrayList;
 import java.nio.FloatBuffer;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
 import android.util.FloatMath;
 import android.util.Log;
+import android.opengl.GLES20;
 
 
 public class BezierCurve extends Shape {
@@ -39,7 +38,7 @@ public class BezierCurve extends Shape {
     }
     
     public void draw(OpenGLRenderer renderer) {
-        renderer.drawSegments(pointsBuffer, pointsBufferSize);
+        renderer.drawArray(pointsBuffer, pointsBufferSize, GLES20.GL_LINE_STRIP);
     }
 
     public static BezierCurve approximated(final ArrayList<PointF> pointsList) {

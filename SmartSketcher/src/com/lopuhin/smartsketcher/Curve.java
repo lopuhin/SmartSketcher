@@ -3,10 +3,9 @@ package com.lopuhin.smartsketcher;
 import java.util.ArrayList;
 import java.nio.FloatBuffer;
 
-import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
+import android.opengl.GLES20;
 
 
 public class Curve extends Shape {
@@ -30,7 +29,7 @@ public class Curve extends Shape {
     }
 
     public void draw(OpenGLRenderer renderer) {
-        renderer.drawSegments(pointsBuffer, points.length);
+        renderer.drawArray(pointsBuffer, points.length, GLES20.GL_LINE_STRIP);
     }
     
     @Override

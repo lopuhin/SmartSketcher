@@ -52,6 +52,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // gl_Position is a special variable used to store the final position.
         + "  gl_Position = u_MVPMatrix " // Multiply the vertex by the matrix
         + "    * a_Position; \n" // to get the final point in normalized screen coordinates.
+        + "  gl_PointSize = 10.0; \n" // for debugging
         + "} \n";
 
     private final String fragmentShaderCode =
@@ -205,20 +206,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         lastScreenshot = bitmap;
     }
 
-    public void drawSegments(FloatBuffer buffer, int nPoints) {
-        /**
-         * Draw segments from given FloatBuffer
-         */
-        drawArray(buffer, nPoints, GLES20.GL_LINE_STRIP);
-    }
-
-    public void drawPoints(FloatBuffer buffer, int nPoints) {
-        /**
-         * Draw points from given FloatBuffer
-         */
-        drawArray(buffer, nPoints, GLES20.GL_POINTS);
-    }
-    
     public void drawArray(FloatBuffer buffer, int nPoints, int instrument) {
         /**
          * Draw with specified instrument (GLES20.GL_* constant) from given FloatBuffer
@@ -283,5 +270,13 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         return color / 255.0f;
     }
 
+    private void checkGlError(String op) {
+        int error;
+        while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
+            String errorText = op + ": glError " + error;
+            Log.e(TAG, errorText);
+            throw new RuntimeException(errorText);
+        }
+    }
 }
  

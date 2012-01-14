@@ -169,14 +169,14 @@ public class MainSurfaceView extends GLSurfaceView {
         /**
          * Draw lastSegment, using OpenGL renderer
          */
-        final PointF[] points;
+        Curve curve = null;
         synchronized (lastSegment) {
-            points = lastSegment.toArray(new PointF[lastSegment.size()]);
+            if (lastSegment.size() > 0)
+                // TODO - cache?
+                curve = new Curve(lastSegment, true);
         }
-        if (points.length > 0) {
-            FloatBuffer pointsBuffer =
-                OpenGLRenderer.createBuffer(points, Shape.DEFAULT_COLOR);
-            renderer.drawSegments(pointsBuffer, points.length);
+        if (curve != null) {
+            curve.draw(renderer);
         }
     }
 
@@ -187,7 +187,7 @@ public class MainSurfaceView extends GLSurfaceView {
         EraseTrace eraseTrace = null;
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0)
-                // TODO - cache
+                // TODO - cache?
                 eraseTrace = new EraseTrace(lastEraseTrace, eraserRadius);
         }
         if (eraseTrace != null) {

@@ -3,8 +3,7 @@ package com.lopuhin.smartsketcher;
 import java.util.ArrayList;
 import java.nio.FloatBuffer;
 
-import android.graphics.Canvas;
-import android.graphics.Paint;
+import android.opengl.GLES20;
 import android.graphics.PointF;
 import android.graphics.Color;
 
@@ -20,12 +19,15 @@ public class EraseTrace extends Shape {
     EraseTrace(final ArrayList<PointF> points, final float thickness) {
         this.points = points.toArray(new PointF[points.size()]);
         this.thickness = thickness;
-        pointsBuffer = OpenGLRenderer.createBuffer(this.points,
-                                                   Color.RED);
+        pointsBuffer =
+            OpenGLRenderer.createBuffer(this.points, Color.RED);
     }
 	
     public void draw(OpenGLRenderer renderer) {
-        renderer.drawSegments(pointsBuffer, points.length);
+        renderer.drawArray(pointsBuffer, points.length, GLES20.GL_LINE_STRIP);
+        //renderer.drawArray(pointsBuffer, points.length, GLES20.GL_TRIANGLE_STRIP);
+        if (Config.DEBUG)
+            renderer.drawArray(pointsBuffer, points.length, GLES20.GL_POINTS);
     }
 
     @Override
