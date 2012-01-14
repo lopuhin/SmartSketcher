@@ -62,7 +62,7 @@ public class FileHelper {
     
     private static File getSDDir() {
         String path = Environment.getExternalStorageDirectory()
-            .getAbsolutePath() + "/android/com.lopuhin.smartsketcher/";
+            .getAbsolutePath() + "/android/data/com.lopuhin.smartsketcher/";
         File file = new File(path);
         if (!file.exists()) {
             file.mkdirs();
