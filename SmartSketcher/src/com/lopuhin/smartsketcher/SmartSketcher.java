@@ -120,6 +120,7 @@ public class SmartSketcher extends Activity {
             mainSurfaceView.clearSheet();
             return true;
         case (NEW_ITEM) :
+            fileHelper.savePreview();
             mainSurfaceView.clearSheet();	
             return true;
         case (OPEN_ITEM) :

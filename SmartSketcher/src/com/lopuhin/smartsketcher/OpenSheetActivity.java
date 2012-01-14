@@ -40,8 +40,9 @@ public class OpenSheetActivity extends Activity {
         gallery.setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView parent, View v, int position, long id) {
                     Intent result = new Intent();
-                    Log.d(TAG, "sheetId " + id);
-                    result.putExtra("sheetId", id);
+                    Long sheetId = sheetIds.get(position);
+                    Log.d(TAG, "sheetId " + sheetId);
+                    result.putExtra("sheetId", sheetId);
                     setResult(RESULT_OK, result);
                     finish();
                 }
