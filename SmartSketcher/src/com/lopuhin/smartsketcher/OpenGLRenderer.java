@@ -42,7 +42,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     private final String vertexShaderCode =
         // A constant representing the combined model/view/projection matrix.
         "  uniform mat4 u_MVPMatrix; \n"
-        //+ "uniform float u_Thickness; \n"// 
         + "attribute vec4 a_Position; \n"// Per-vertex position information we will pass in.
         + "attribute vec4 a_Color; \n"   // Per-vertex color information we will pass in.
         + "varying vec4 v_Color; \n" // This will be passed into the fragment shader.
@@ -53,7 +52,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // gl_Position is a special variable used to store the final position.
         + "  gl_Position = u_MVPMatrix " // Multiply the vertex by the matrix
         + "    * a_Position; \n" // to get the final point in normalized screen coordinates.
-        + "  gl_PointSize = 30.0f; \n" // TODO - use u_Thickness
+        + "  gl_PointSize = 30.0; \n"
         + "} \n";
 
     private final String fragmentShaderCode =
@@ -240,7 +239,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glEnableVertexAttribArray(mColorHandle);
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
         
-        GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, nPoints);
+        GLES20.glDrawArrays(instrument, 0, nPoints);
     }
     
     private int loadShader(int type, String shaderCode) {
