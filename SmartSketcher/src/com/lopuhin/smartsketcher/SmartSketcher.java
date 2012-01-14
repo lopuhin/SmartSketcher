@@ -12,6 +12,9 @@ import android.widget.LinearLayout;
 
 
 public class SmartSketcher extends Activity {
+    /**
+     * Main activity. Handles menu, opening activity
+     */
     private MainSurfaceView mainSurfaceView;
     private DBAdapter dbAdapter;
     private FileHelper fileHelper;

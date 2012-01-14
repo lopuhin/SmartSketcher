@@ -15,6 +15,7 @@ import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 import android.graphics.PointF;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 
 
 public class OpenGLRenderer implements GLSurfaceView.Renderer {
@@ -40,30 +41,25 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
 
     private final String vertexShaderCode =
         // A constant representing the combined model/view/projection matrix.
-        "uniform mat4 u_MVPMatrix;      \n"
-        // Per-vertex position information we will pass in.
-        + "attribute vec4 a_Position;     \n"
-        // Per-vertex color information we will pass in.
-        + "attribute vec4 a_Color;        \n"     
-        // This will be passed into the fragment shader.
-        + "varying vec4 v_Color;          \n"     
-        // The entry point for our vertex shader.
-        + "void main()                    \n"     
-        + "{                              \n"
-        // Pass the color through to the fragment shader.
-        + "   v_Color = a_Color;          \n"    
+        "  uniform mat4 u_MVPMatrix; \n"
+        //+ "uniform float u_Thickness; \n"// 
+        + "attribute vec4 a_Position; \n"// Per-vertex position information we will pass in.
+        + "attribute vec4 a_Color; \n"   // Per-vertex color information we will pass in.
+        + "varying vec4 v_Color; \n" // This will be passed into the fragment shader.
+        + "void main() \n" // The entry point for our vertex shader.
+        + "{ \n"
+        + "  v_Color = a_Color; \n" // Pass the color through to the fragment shader.
         // It will be interpolated across the surface.
         // gl_Position is a special variable used to store the final position.
-        + "   gl_Position = u_MVPMatrix   \n"
-        // Multiply the vertex by the matrix to get the final point in
-        // normalized screen coordinates.
-        + "               * a_Position;   \n"     
-        + "}                              \n";    
+        + "  gl_Position = u_MVPMatrix " // Multiply the vertex by the matrix
+        + "    * a_Position; \n" // to get the final point in normalized screen coordinates.
+        + "  gl_PointSize = 30.0f; \n" // TODO - use u_Thickness
+        + "} \n";
 
     private final String fragmentShaderCode =
         // Set the default precision to medium. We don't need as high of a
-        "precision mediump float;       \n"
         // precision in the fragment shader.
+        "precision mediump float;       \n"
         // This is the color from the vertex shader interpolated across the
         // surface per fragment.
         + "varying vec4 v_Color;          \n"     
@@ -99,7 +95,11 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
          * Mostly shaders initialization
          */
         // Set the background frame color
-        GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+        int c = Sheet.BACKGROUND_COLOR;
+        GLES20.glClearColor(glColor(Color.red(c)),
+                            glColor(Color.green(c)),
+                            glColor(Color.blue(c)),
+                            glColor(Color.alpha(c)));
 
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -211,6 +211,20 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         /**
          * Draw segments from given FloatBuffer
          */
+        drawArray(buffer, nPoints, GLES20.GL_LINE_STRIP);
+    }
+
+    public void drawPoints(FloatBuffer buffer, int nPoints) {
+        /**
+         * Draw points from given FloatBuffer
+         */
+        drawArray(buffer, nPoints, GLES20.GL_POINTS);
+    }
+    
+    public void drawArray(FloatBuffer buffer, int nPoints, int instrument) {
+        /**
+         * Draw with specified instrument (GLES20.GL_* constant) from given FloatBuffer
+         */
         buffer.position(mPositionOffset);
         GLES20.glVertexAttribPointer(mPositionHandle, mPositionDataSize,
                                      GLES20.GL_FLOAT, false,
@@ -227,7 +241,6 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mMVPMatrix, 0);
         
         GLES20.glDrawArrays(GLES20.GL_LINE_STRIP, 0, nPoints);
-
     }
     
     private int loadShader(int type, String shaderCode) {
@@ -242,9 +255,9 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         return shader;
     }
 
-    public static FloatBuffer createBuffer(PointF[] points) {
+    public static FloatBuffer createBuffer(PointF[] points, int color) {
         /**
-         * Create FloatBuffer for drawing points
+         * Create FloatBuffer for drawing points with specified color
          */
         float data[] = new float[points.length * 7];
         for (int pi = 0; pi < points.length; pi++) {
@@ -253,10 +266,10 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             data[i+0] = p.x;  // x
             data[i+1] = p.y;  // y
             data[i+2] = 0.0f; // z
-            data[i+3] = 0.0f; // r
-            data[i+4] = 0.0f; // g
-            data[i+5] = 0.0f; // b
-            data[i+6] = 1.0f; // alpha
+            data[i+3] = glColor(Color.red(color));
+            data[i+4] = glColor(Color.green(color));
+            data[i+5] = glColor(Color.blue(color));
+            data[i+6] = glColor(Color.alpha(color));
         }
         ByteBuffer vbb = ByteBuffer.allocateDirect(data.length * mBytesPerFloat); 
         // use the device hardware's native byte order
@@ -266,6 +279,10 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         // set the buffer to read the first coordinate
         buffer.put(data).position(0);
         return buffer;
+    }
+
+    private static float glColor(int color) {
+        return color / 255.0f;
     }
 
 }

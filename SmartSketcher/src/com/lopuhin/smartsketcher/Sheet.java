@@ -6,9 +6,7 @@ import java.util.ArrayList;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.PointF;
-import android.graphics.Paint.Style;
 import android.util.Log;
 
 
@@ -16,8 +14,9 @@ public class Sheet {
     /**
      * Holds shapes, view position and zoom. Persists itself to database
      */
-    public boolean isDirty;
-    public Paint paint, whiteFillPaint;
+    public final static int BACKGROUND_COLOR = Color.WHITE;
+    
+    public boolean isDirty; // not used?
      
     private float viewZoom;  // zoom of the visible screen
     private PointF viewPos; // upper left corner of the visible screen
@@ -29,20 +28,14 @@ public class Sheet {
     private final static String TAG = "Sheet";
     
     Sheet(DBAdapter _dbAdapter, Boolean isNew) {
-        dbAdapter = _dbAdapter;
         shapes = new ArrayList<Shape>();
         doneActions = new ArrayList<IAction>();
         undoneActions = new ArrayList<IAction>();
         isDirty = true;
         viewZoom = 1.0f;
         viewPos = new PointF(0.0f, 0.0f);
-          
-        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        paint.setColor(Color.BLACK);
-        paint.setStyle(Style.STROKE);
-        paint.setStrokeWidth(1.0f);
-        whiteFillPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
-        whiteFillPaint.setColor(Color.WHITE);
+
+        dbAdapter = _dbAdapter;
         if (isNew)
             dbAdapter.newSheet(this);
     }

@@ -20,7 +20,7 @@ public class Curve extends Shape {
     Curve(PointF[] _points, Boolean _isTransient) {
         isTransient = _isTransient;
         points = _points;
-        pointsBuffer = OpenGLRenderer.createBuffer(points);
+        pointsBuffer = OpenGLRenderer.createBuffer(points, DEFAULT_COLOR);
     }
 
     Curve(ArrayList<PointF> pointsList, Boolean _isTransient) {
@@ -31,7 +31,7 @@ public class Curve extends Shape {
             points[i] = p;
             i += 1;
         }
-        pointsBuffer = OpenGLRenderer.createBuffer(points);
+        pointsBuffer = OpenGLRenderer.createBuffer(points, DEFAULT_COLOR);
     }
     
     public static Curve

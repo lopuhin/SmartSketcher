@@ -164,6 +164,7 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         sheet.draw(renderer);
         drawLastSegment(renderer);
+        drawLastEraseTrace(renderer);
     }
     
     private void drawLastSegment(OpenGLRenderer renderer) {
@@ -171,7 +172,6 @@ public class MainSurfaceView extends GLSurfaceView {
          * Draw lastSegment, using OpenGL renderer
          */
         final PointF[] points;
-        // TODO - cache pointsBuffer
         synchronized (lastSegment) {
             points = new PointF[lastSegment.size()];
             int i = 0;
@@ -182,8 +182,32 @@ public class MainSurfaceView extends GLSurfaceView {
             }
         }
         if (points.length > 0) {
-            FloatBuffer pointsBuffer = OpenGLRenderer.createBuffer(points);
+            FloatBuffer pointsBuffer =
+                OpenGLRenderer.createBuffer(points, Shape.DEFAULT_COLOR);
             renderer.drawSegments(pointsBuffer, points.length);
+        }
+    }
+
+    private void drawLastEraseTrace(OpenGLRenderer renderer) {
+        /**
+         * Draw erase trace (with edges for the last point)
+         */
+        final PointF[] points;
+        synchronized (lastEraseTrace) {
+            points = new PointF[lastEraseTrace.size()];
+            int i = 0;
+            for (PointF p: lastEraseTrace) {
+                // TODO - do online, not in drawing
+                points[i] = sheet.toSheet(p);
+                i++;
+            }
+        }
+        if (points.length > 0) {
+            FloatBuffer pointsBuffer =
+                OpenGLRenderer.createBuffer(points, Sheet.BACKGROUND_COLOR);
+            renderer.drawPoints(pointsBuffer, points.length);
+            // draw eraser edges (a circle) around last point
+            PointF lastPoint = points[points.length - 1];
         }
     }
 

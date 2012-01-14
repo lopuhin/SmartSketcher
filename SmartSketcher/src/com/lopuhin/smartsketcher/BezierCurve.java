@@ -93,7 +93,7 @@ public class BezierCurve extends Shape {
 
     private void initBuffer() {
         final PointF[] segPoints = toSegments();
-        pointsBuffer = OpenGLRenderer.createBuffer(segPoints);
+        pointsBuffer = OpenGLRenderer.createBuffer(segPoints, DEFAULT_COLOR);
         pointsBufferSize = segPoints.length;
     }
 

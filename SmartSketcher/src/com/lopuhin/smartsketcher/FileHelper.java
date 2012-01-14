@@ -36,7 +36,6 @@ public class FileHelper {
          */
         String parent = getSDDir().getAbsolutePath();
         String expectedPath = parent + "/" + PREVIEW_FILENAME_RE;
-        Log.d(TAG, "preview " + previewPath + " " + expectedPath);
         if (previewPath.matches(expectedPath)) {
             Pattern p = Pattern.compile(expectedPath);
             Matcher m = p.matcher(previewPath);
