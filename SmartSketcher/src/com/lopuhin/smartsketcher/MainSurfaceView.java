@@ -64,7 +64,7 @@ public class MainSurfaceView extends GLSurfaceView {
 
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
-        eraserRadius = 30.0f; // TODO - load from resources
+        eraserRadius = 60.0f; // TODO - load from resources
     }
         
     @Override
@@ -187,8 +187,8 @@ public class MainSurfaceView extends GLSurfaceView {
         EraseTrace eraseTrace = null;
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0)
-                // TODO - cache?
-                eraseTrace = new EraseTrace(lastEraseTrace, eraserRadius);
+                // TODO - cache? or build incrementaly?
+                eraseTrace = new EraseTrace(lastEraseTrace, sheet.toSheet(eraserRadius));
         }
         if (eraseTrace != null) {
             eraseTrace.draw(renderer);
@@ -285,7 +285,7 @@ public class MainSurfaceView extends GLSurfaceView {
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0) {
                 ArrayList<Shape> t = new ArrayList<Shape>();
-                t.add(new EraseTrace(lastEraseTrace, eraserRadius));
+                t.add(new EraseTrace(lastEraseTrace, sheet.toSheet(eraserRadius)));
                 sheet.doAction(new AddShapes(t));
                 lastEraseTrace.clear();
             }
