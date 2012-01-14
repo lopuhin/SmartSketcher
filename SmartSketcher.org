@@ -58,7 +58,8 @@
 ** TODO Smoothing - faster and more smooth
 ** TODO Discard small oscillating zooms
    Do not zoom, when really you are just moving the sheet without zooming
-** TODO Release
+** DONE 0.3 Release
+   CLOSED: [2012-01-14 Sat 23:56]
 *** DONE Opening sketches
     CLOSED: [2012-01-14 Sat 22:59]
 *** DONE Saving preview
