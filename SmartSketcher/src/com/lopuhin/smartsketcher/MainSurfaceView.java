@@ -173,13 +173,7 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         final PointF[] points;
         synchronized (lastSegment) {
-            points = new PointF[lastSegment.size()];
-            int i = 0;
-            for (PointF p: lastSegment) {
-                // TODO - do online, not in drawing
-                points[i] = sheet.toSheet(p);
-                i++;
-            }
+            points = lastSegment.toArray(new PointF[lastSegment.size()]);
         }
         if (points.length > 0) {
             FloatBuffer pointsBuffer =
@@ -194,13 +188,7 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         final PointF[] points;
         synchronized (lastEraseTrace) {
-            points = new PointF[lastEraseTrace.size()];
-            int i = 0;
-            for (PointF p: lastEraseTrace) {
-                // TODO - do online, not in drawing
-                points[i] = sheet.toSheet(p);
-                i++;
-            }
+            points = lastEraseTrace.toArray(new PointF[lastEraseTrace.size()]);
         }
         if (points.length > 0) {
             FloatBuffer pointsBuffer =
@@ -259,13 +247,13 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         final long t = System.currentTimeMillis();
         synchronized (lastSegment) {
-            lastSegment.add(p);
+            lastSegment.add(sheet.toSheet(p));
             lastSegmentTimes.add(t);
         }
     }
         
     private void eraseAt(PointF p) {
-        lastEraseTrace.add(p);
+        lastEraseTrace.add(sheet.toSheet(p));
     }
     
     private void finishSegment() {
