@@ -5,7 +5,6 @@ import java.nio.FloatBuffer;
 
 import android.graphics.Color;
 import android.graphics.PointF;
-import android.util.FloatMath;
 import android.util.Log;
 import android.opengl.GLES20;
 

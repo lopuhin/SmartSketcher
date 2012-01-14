@@ -1,5 +1,9 @@
 package com.lopuhin.smartsketcher;
 
+import android.graphics.PointF;
+import android.util.FloatMath;
+
+
 class Vector {
     public static PointF translated(PointF point, PointF shift, float cos, float sin) {
         /**
