@@ -101,19 +101,26 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
                             glColor(Color.alpha(c)));
 
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
+        checkGLError("load vertex shader");
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
+        checkGLError("load fragment shader");
 
         // create empty OpenGL Program
         programHandle = GLES20.glCreateProgram();
         // add the vertex shader to program
         GLES20.glAttachShader(programHandle, vertexShader);
+        checkGLError("attach vertex shader");
         // add the fragment shader to program
         GLES20.glAttachShader(programHandle, fragmentShader);
+        checkGLError("attach fragment shader");
         // Bind attributes
         GLES20.glBindAttribLocation(programHandle, 0, "a_Position");
+        checkGLError("bind position attribute");
         GLES20.glBindAttribLocation(programHandle, 1, "a_Color");
+        checkGLError("bind color attribute");
         // creates OpenGL program executables
         GLES20.glLinkProgram(programHandle);
+        checkGLError("link program");
         
         // get handle to the vertex shader's a_Position member
         mMVPMatrixHandle = GLES20.glGetUniformLocation(programHandle, "u_MVPMatrix");        
@@ -270,7 +277,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         return color / 255.0f;
     }
 
-    private void checkGlError(String op) {
+    private void checkGLError(String op) {
         int error;
         while ((error = GLES20.glGetError()) != GLES20.GL_NO_ERROR) {
             String errorText = op + ": glError " + error;

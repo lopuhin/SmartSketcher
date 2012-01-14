@@ -58,3 +58,7 @@
 ** TODO Smoothing - faster and more smooth
 ** TODO Discard small oscillating zooms
    Do not zoom, when really you are just moving the sheet without zooming
+** TODO Release
+*** Opening sketches
+*** Saving preview
+*** Hanging after big erasing
