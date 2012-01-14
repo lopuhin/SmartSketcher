@@ -105,11 +105,6 @@ public class BezierCurve extends Shape {
         return segPoints;
     }
 
-    private static PointF translated(PointF point, PointF shift, float cos, float sin) {
-        PointF p = new PointF(point.x + shift.x, point.y + shift.y);
-        return new PointF(p.x * cos + p.y * sin, -p.x * sin + p.y * cos);
-    }
-        
     private static Fn getFittingFn(final PointF p0, final PointF p3, final PointF[] tangents,
                                    final int startIndex, final int endIndex,
                                    final ArrayList<PointF> pointsList) {
@@ -119,17 +114,17 @@ public class BezierCurve extends Shape {
         // Translating all to coordinate system, where p0 and p3 lie on x-axis
         final PointF shift = new PointF(-p0.x, -p0.y);
         final PointF zero = new PointF();
-        final float d = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
+        final float d = Vector.norm(new PointF(p0.x - p3.x, p0.y - p3.y));
         final float cos = (p3.x - p0.x) / d;
         final float sin = (p3.y - p0.y) / d;
         final PointF[] trTangents = new PointF[]{
-            translated(tangents[0], zero, cos, sin),
-            translated(tangents[1], zero, cos, sin)};
-        final PointF trP0 = translated(p0, shift, cos, sin);
-        final PointF trP3 = translated(p3, shift, cos, sin);
+            Vector.translated(tangents[0], zero, cos, sin),
+            Vector.translated(tangents[1], zero, cos, sin)};
+        final PointF trP0 = Vector.translated(p0, shift, cos, sin);
+        final PointF trP3 = Vector.translated(p3, shift, cos, sin);
         final ArrayList<PointF> trPoints = new ArrayList<PointF>();
         for (PointF p: pointsList) {
-            trPoints.add(translated(p, shift, cos, sin));
+            trPoints.add(Vector.translated(p, shift, cos, sin));
         }
         return new Fn() {
             public float value(final float c) {
@@ -173,7 +168,7 @@ public class BezierCurve extends Shape {
         // TODO translate points to local coordinate system
         // (to calculate fitting error faster)
         final int nTangentPoints = 10; // TODO - choose depending on distance!
-        final float tangentNorm = norm(new PointF(p0.x - p3.x, p0.y - p3.y));
+        final float tangentNorm = Vector.norm(new PointF(p0.x - p3.x, p0.y - p3.y));
         PointF t1 = findTangent(p0, startIndex + 1,
                                 Math.min(pointsList.size()- 1, startIndex + nTangentPoints),
                                 pointsList);
@@ -183,7 +178,7 @@ public class BezierCurve extends Shape {
             t1.x -= t1Outer.x;
             t1.y -= t1Outer.y;
         }
-        final PointF tangent1 = normalized(t1, tangentNorm);
+        final PointF tangent1 = Vector.normalized(t1, tangentNorm);
         PointF t2 = findTangent(p3, Math.max(0, endIndex - nTangentPoints),
                                 endIndex - 1, pointsList);
         if (endIndex < pointsList.size() - 1) { // use points on the both sides of p3
@@ -194,7 +189,7 @@ public class BezierCurve extends Shape {
             t2.x -= t2Outer.x;
             t2.y -= t2Outer.y;
         }
-        final PointF tangent2 = normalized(t2, tangentNorm);
+        final PointF tangent2 = Vector.normalized(t2, tangentNorm);
         Log.d(TAG, "tangent1: " + tangent1.x + ", " + tangent1.y);
         Log.d(TAG, "tangent2: " + tangent2.x + ", " + tangent2.y);
         return new PointF[]{tangent1, tangent2};
@@ -208,11 +203,11 @@ public class BezierCurve extends Shape {
         for (int i = startIndex; i <= endIndex; i++ ) {
             final PointF p = points.get(i);
             // TODO - less weight for points farther away
-            final PointF v = normalized(new PointF(p.x - at.x, p.y - at.y), 1.0f);
+            final PointF v = Vector.normalized(new PointF(p.x - at.x, p.y - at.y), 1.0f);
             tangent.x += v.x;
             tangent.y += v.y;
         }
-        return normalized(tangent, 1.0f);
+        return Vector.normalized(tangent, 1.0f);
     }
         
     private static PointF curvePoint(final PointF[] points, final float t) {
@@ -227,20 +222,6 @@ public class BezierCurve extends Shape {
             i += 1;
         }
         return point;
-    }
-        
-    private static float norm(final PointF p) {
-        return FloatMath.sqrt(p.x * p.x + p.y * p.y);
-    }
-        
-    private static PointF normalized(final PointF p, final float newNorm) {
-        final float norm = norm(p);
-        if (norm < 0.0001f) {
-            return new PointF();
-        } else {
-            final float coef = newNorm / norm; 
-            return new PointF(p.x * coef, p.y * coef);
-        }
     }
         
     private static int factorial(final int n) {
