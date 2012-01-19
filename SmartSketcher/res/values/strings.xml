@@ -12,6 +12,10 @@
     <string name="newitem">New</string>
     <string name="draw">Draw</string>
     <string name="erase">Erase</string>
-    <string name="brush">Brush</string>
+    <string name="show_toolbar">Show toolbar</string>
+    <string name="hide_toolbar">Hide toolbar</string>
+    <string name="palette">Color &amp; width</string>
+    <string name="delete">Delete</string>
+    <string name="hand">Move</string>
     <dimen name="eraser_radius">30px</dimen>
 </resources>

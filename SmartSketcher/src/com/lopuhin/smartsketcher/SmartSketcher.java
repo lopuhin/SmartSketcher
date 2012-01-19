@@ -9,7 +9,10 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
+import android.widget.RelativeLayout;
 
 
 public class SmartSketcher extends Activity {
@@ -23,29 +26,34 @@ public class SmartSketcher extends Activity {
     private static String TAG = "SmartSketcher";
         
     static final private int
-        UNDO_ITEM = Menu.FIRST, 
-        REDO_ITEM = Menu.FIRST + 1,
-        NEW_ITEM = Menu.FIRST + 2,
-        OPEN_ITEM = Menu.FIRST + 3,
-        CLEAR_ITEM = Menu.FIRST + 4,
-        ERASE_ITEM = Menu.FIRST + 5,
-        DRAW_ITEM = Menu.FIRST + 6,
-        BRUSH_ITEM = Menu.FIRST + 7;
+        UNDO_ITEM = Menu.FIRST + 1, 
+        REDO_ITEM = Menu.FIRST + 2,
+        NEW_ITEM = Menu.FIRST + 3,
+        OPEN_ITEM = Menu.FIRST + 4,
+        CLEAR_ITEM = Menu.FIRST + 5,
+        ERASE_ITEM = Menu.FIRST + 6,
+        DRAW_ITEM = Menu.FIRST + 7,
+        HAND_ITEM = Menu.FIRST + 8,
+        SHOW_TOOLBAR_ITEM = Menu.FIRST + 9,
+        HIDE_TOOLBAR_ITEM = Menu.FIRST + 10,
+        PALETTE_ITEM = Menu.FIRST + 11,
+        DELETE_ITEM = Menu.FIRST + 12;
 
     static final private int OPEN_SHEET_RESULT = 1;
+    private boolean isToolbarVisible;
     
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
+        isToolbarVisible = true; // TODO - load from resources
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
-        LinearLayout layout = (LinearLayout)findViewById(R.id.mainLayout);
         
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
 
         mainSurfaceView = new MainSurfaceView(this, dbAdapter);
-        layout.addView(mainSurfaceView);
+        ((LinearLayout)findViewById(R.id.sketchContainer)).addView(mainSurfaceView);
 
         fileHelper = new FileHelper(mainSurfaceView);
     }
@@ -67,14 +75,18 @@ public class SmartSketcher extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo);
-        menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo);
-        menu.add(0, BRUSH_ITEM, Menu.NONE, R.string.brush);
-        menu.add(0, DRAW_ITEM, Menu.NONE, R.string.draw);
-        menu.add(0, ERASE_ITEM, Menu.NONE, R.string.erase);
-        menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
+        menu.add(0, HIDE_TOOLBAR_ITEM, Menu.NONE, R.string.hide_toolbar);
+      	menu.add(0, SHOW_TOOLBAR_ITEM, Menu.NONE, R.string.show_toolbar);
+        menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo).setIcon(R.drawable.undo);
+        menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo).setIcon(R.drawable.redo);
+        menu.add(0, DRAW_ITEM, Menu.NONE, R.string.draw).setIcon(R.drawable.marker);
+        menu.add(0, ERASE_ITEM, Menu.NONE, R.string.erase).setIcon(R.drawable.eraser);
+        menu.add(0, HAND_ITEM, Menu.NONE, R.string.hand).setIcon(R.drawable.hand);
+        menu.add(0, PALETTE_ITEM, Menu.NONE, R.string.palette).setIcon(R.drawable.palette);
         menu.add(0, CLEAR_ITEM, Menu.NONE, R.string.clear);
         menu.add(0, NEW_ITEM, Menu.NONE, R.string.newitem);
+        menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
+        menu.add(0, DELETE_ITEM, Menu.NONE, R.string.delete);
             
         return true;
     }
@@ -85,16 +97,25 @@ public class SmartSketcher extends Activity {
          * Disable or enable menu items
          */
         super.onPrepareOptionsMenu(menu);
-        MenuItem undoItem = menu.findItem(UNDO_ITEM);
-        undoItem.setEnabled(mainSurfaceView.getSheet().canUndo());
-        MenuItem redoItem = menu.findItem(REDO_ITEM);
-        redoItem.setEnabled(mainSurfaceView.getSheet().canRedo());
+        
+        menu.findItem(HIDE_TOOLBAR_ITEM).setVisible(isToolbarVisible);
+        menu.findItem(SHOW_TOOLBAR_ITEM).setVisible(!isToolbarVisible);
+        menu.findItem(UNDO_ITEM)
+        	.setEnabled(mainSurfaceView.getSheet().canUndo())
+        	.setVisible(!isToolbarVisible);
+        menu.findItem(REDO_ITEM)
+        	.setEnabled(mainSurfaceView.getSheet().canRedo())
+        	.setVisible(!isToolbarVisible);
             
         final int instrument = mainSurfaceView.getInstrument();
-        MenuItem drawItem = menu.findItem(DRAW_ITEM);
-        drawItem.setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT);
-        MenuItem eraseItem = menu.findItem(ERASE_ITEM);
-        eraseItem.setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT);
+        menu.findItem(DRAW_ITEM)
+        	.setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT)
+        	.setVisible(!isToolbarVisible);
+        menu.findItem(ERASE_ITEM)
+        	.setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT)
+        	.setVisible(!isToolbarVisible);
+        menu.findItem(HAND_ITEM).setVisible(!isToolbarVisible);
+        menu.findItem(PALETTE_ITEM).setVisible(!isToolbarVisible);
 
         return true;
     }
@@ -106,6 +127,16 @@ public class SmartSketcher extends Activity {
          */
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
+        case (SHOW_TOOLBAR_ITEM) :
+        	findViewById(R.id.buttonContainer)
+    			.startAnimation(AnimationUtils.loadAnimation(this, R.drawable.move_toolbar_in));
+         	isToolbarVisible = true;
+    		return true;
+        case (HIDE_TOOLBAR_ITEM) :
+        	findViewById(R.id.buttonContainer)
+        		.startAnimation(AnimationUtils.loadAnimation(this, R.drawable.move_toolbar_out));
+        	isToolbarVisible = false;
+        	return true;
         case (UNDO_ITEM) : 
             mainSurfaceView.getSheet().undo();
             return true;
