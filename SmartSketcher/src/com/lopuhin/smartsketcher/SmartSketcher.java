@@ -4,12 +4,15 @@ import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.res.Configuration;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.animation.Animation;
+import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -126,15 +129,32 @@ public class SmartSketcher extends Activity {
          * Handle menu items
          */
         super.onOptionsItemSelected(item);
+        final View buttonContainer = findViewById(R.id.buttonContainer);
         switch (item.getItemId()) {
         case (SHOW_TOOLBAR_ITEM) :
-        	findViewById(R.id.buttonContainer)
-    			.startAnimation(AnimationUtils.loadAnimation(this, R.drawable.move_toolbar_in));
+        	int animId;
+        	if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        		animId = R.drawable.move_toolbar_in_top;
+        	else
+        		animId = R.drawable.move_toolbar_in_left;
+        	buttonContainer.setVisibility(View.VISIBLE);
+        	buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
          	isToolbarVisible = true;
     		return true;
         case (HIDE_TOOLBAR_ITEM) :
-        	findViewById(R.id.buttonContainer)
-        		.startAnimation(AnimationUtils.loadAnimation(this, R.drawable.move_toolbar_out));
+        	if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
+        		animId = R.drawable.move_toolbar_out_top;
+        	else
+        		animId = R.drawable.move_toolbar_out_left;
+        	Animation animation = AnimationUtils.loadAnimation(this, animId);
+        	animation.setAnimationListener(new AnimationListener() {
+        		public void onAnimationEnd(Animation _animation) {
+        			buttonContainer.setVisibility(View.INVISIBLE);
+        		}
+        		public void onAnimationRepeat(Animation _animation) {}
+        		public void onAnimationStart(Animation _animation) {}
+        	});
+        	buttonContainer.startAnimation(animation);
         	isToolbarVisible = false;
         	return true;
         case (UNDO_ITEM) : 
