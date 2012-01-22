@@ -24,7 +24,7 @@ import android.widget.LinearLayout;
 
 
 public class SmartSketcher extends Activity 
-    implements OnSharedPreferenceChangeListener
+    implements OnSharedPreferenceChangeListener, Sheet.ShapesChangeListener
 {
     /**
      * Main activity. Handles menu, opening activity
@@ -51,7 +51,7 @@ public class SmartSketcher extends Activity
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
 
-        mainSurfaceView = new MainSurfaceView(this, dbAdapter, getThicknessPref());
+        mainSurfaceView = new MainSurfaceView(this, dbAdapter);
         ((LinearLayout)findViewById(R.id.sketchContainer)).addView(mainSurfaceView);
         ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
 
@@ -350,6 +350,10 @@ public class SmartSketcher extends Activity
         }
     }        
 
+    @Override
+    public void onShapesChanged(Sheet sheet) {
+        // TODO
+    }
 
 }
 

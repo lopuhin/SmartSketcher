@@ -5,7 +5,8 @@
 *** DONE Toolbar buttons should do actions
     CLOSED: [2012-01-22 Sun 16:53]
 *** TODO Activate/deactivate toolbar buttons    
-*** TODO Change description on the market
+*** DONE Change description on the market
+    CLOSED: [2012-01-23 Mon 00:01]
 ** TODO Undo on saved sheet (just remove last saved shapes)
 ** TODO Delete sketches
 ** TODO Smoothing should not depend on scale

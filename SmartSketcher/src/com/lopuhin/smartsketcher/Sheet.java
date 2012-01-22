@@ -26,6 +26,7 @@ public class Sheet {
     private ArrayList<Shape> shapes;
     private ArrayList<IAction> doneActions, undoneActions;
     private final static String TAG = "Sheet";
+    private ShapesChangeListener shapesChangeListener;
     
     Sheet(DBAdapter _dbAdapter, Boolean isNew) {
         shapes = new ArrayList<Shape>();
@@ -34,7 +35,8 @@ public class Sheet {
         isDirty = true;
         viewZoom = 1.0f;
         viewPos = new PointF(0.0f, 0.0f);
-
+        shapesChangeListener = null;
+        
         dbAdapter = _dbAdapter;
         if (isNew)
             dbAdapter.newSheet(this);
@@ -63,6 +65,8 @@ public class Sheet {
 
     public void addShape(final Shape shape) {
         addShape(shape, true);
+        if (shapesChangeListener != null)
+            shapesChangeListener.onShapesChanged(this);
     }
     
     public void removeShape(final Shape shape) {
@@ -81,8 +85,18 @@ public class Sheet {
         if (!shape.isTransient()) {
             dbAdapter.removeShape(shape);
         }
+        if (shapesChangeListener != null)
+            shapesChangeListener.onShapesChanged(this);
     }
-               
+
+    public interface ShapesChangeListener {
+        public abstract void onShapesChanged (Sheet sheet);
+    }
+    
+    public void setShapesChangeListener(ShapesChangeListener listener) {
+        shapesChangeListener = listener;
+    }
+    
     public void undo() {
         final int lastIdx = doneActions.size() - 1;
         if (lastIdx >= 0) {

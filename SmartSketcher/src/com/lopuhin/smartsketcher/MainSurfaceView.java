@@ -50,21 +50,24 @@ public class MainSurfaceView extends GLSurfaceView {
     private ArrayList<Long> lastSegmentTimes;
     private ArrayList<PointF> lastEraseTrace;
     private OpenGLRenderer renderer;
+    private SmartSketcher parentContext;
     
     private final static String TAG = "MainSurfaceView";
-
-    MainSurfaceView(Context context, DBAdapter dbAdapter, float thickness) {
+    
+    MainSurfaceView(SmartSketcher context, DBAdapter dbAdapter) {
         /**
          * Init: load last sheet, or create new one, if there is not last one
          */
         super(context);
 
+        parentContext = context;
         mode = IDLE_MODE;
         instrument = DRAW_INSTRUMENT;
 
         sheet = dbAdapter.loadLastSheet();
         if (sheet == null)
             sheet = new Sheet(dbAdapter, true);
+        sheet.setShapesChangeListener(parentContext);
         
         setEGLContextClientVersion(2); // OpenGL ES 2.0 context
         renderer = new OpenGLRenderer(this);
@@ -78,7 +81,7 @@ public class MainSurfaceView extends GLSurfaceView {
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
         eraserRadius = 60.0f; // TODO - load from app settings
-        currentThickness = thickness;
+        currentThickness = context.getThicknessPref();
     }
         
     @Override
@@ -242,6 +245,7 @@ public class MainSurfaceView extends GLSurfaceView {
             this.sheet = sheet;
         }
         setDefaultInstrument();
+        this.sheet.setShapesChangeListener(parentContext);
     }
         
     public void clearSheet() {
