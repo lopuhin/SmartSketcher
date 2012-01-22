@@ -3,6 +3,7 @@ package com.lopuhin.smartsketcher;
 import java.util.logging.Logger;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
@@ -38,6 +39,8 @@ public class SmartSketcher extends Activity
     static final private int
         OPEN_SHEET_RESULT = 1,
         SHOW_PREFERENCES_RESULT = 2;
+    static final private int
+        PALETTE_DIALOG = 1;
     
     @Override
     public void onCreate(Bundle bundle) {
@@ -271,7 +274,7 @@ public class SmartSketcher extends Activity
     }
 
     private void palettePressed() {
-        // TODO
+        showDialog(PALETTE_DIALOG);
     }
 
     private void setAllInstrumentsEnabled(boolean enabled) {
@@ -307,6 +310,27 @@ public class SmartSketcher extends Activity
                 .setThickness(prefs.getFloat(key, Preferences.THICKNESS_DEFAULT));
         }
     }
+
+    @Override
+    public Dialog onCreateDialog(int id) {
+        switch(id) {
+        case (PALETTE_DIALOG) :
+            Dialog paletteDialog = new Dialog(this);
+            paletteDialog.setTitle("TODO");
+            paletteDialog.setContentView(R.layout.palette_dialog);
+            return paletteDialog;
+        }
+        return null;
+    }
+
+    @Override
+    public void onPrepareDialog(int id, Dialog dialog) {
+        switch(id) {
+        case (PALETTE_DIALOG) :
+            // TODO - set thickness
+            break;
+        }
+    }        
 
 
 }

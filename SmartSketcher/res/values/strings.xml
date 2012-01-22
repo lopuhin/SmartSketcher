@@ -20,5 +20,10 @@
     <string name="preferences">Settings</string>
     <string name="toolbar_pref_title">Toolbar visibility</string>
     <string name="toolbar_pref_summary">Should toolbar with common actions be on the screen</string>
+    <string name="thickness">Curve thickness</string>
+    <string name="color">Curve color</string>
+    <string name="soon">Coming soon!</string>
+    <string name="ok">Ok</string>
+    <string name="cancel">Cancel</string>
     <dimen name="eraser_radius">30px</dimen>
 </resources>
