@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/mainLayout"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    >
+
+    <LinearLayout
+        android:id="@+id/sketchContainer"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" >
+    </LinearLayout>
+    
+    <LinearLayout
+        android:id="@+id/buttonContainer"
+        android:layout_alignLeft="@id/sketchContainer"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical" >
+
+        <ImageButton
+            android:id="@+id/undo"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/undo" />
+
+        <ImageButton
+            android:id="@+id/redo"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/redo" />
+
+        <ImageButton
+            android:id="@+id/marker"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/marker" />
+
+        <ImageButton
+            android:id="@+id/eraser"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/eraser" />
+
+        <ImageButton
+            android:id="@+id/hand"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/hand" />
+
+        <ImageButton
+            android:id="@+id/palette"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:src="@drawable/palette" />
+    </LinearLayout>
+
+</RelativeLayout>
