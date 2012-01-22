@@ -14,8 +14,8 @@ import android.view.Window;
 import android.view.animation.Animation;
 import android.view.animation.Animation.AnimationListener;
 import android.view.animation.AnimationUtils;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 
 
 public class SmartSketcher extends Activity {
@@ -57,8 +57,10 @@ public class SmartSketcher extends Activity {
 
         mainSurfaceView = new MainSurfaceView(this, dbAdapter);
         ((LinearLayout)findViewById(R.id.sketchContainer)).addView(mainSurfaceView);
+        ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
 
         fileHelper = new FileHelper(mainSurfaceView);
+        setupToolbar();
     }
     
     @Override
@@ -160,16 +162,16 @@ public class SmartSketcher extends Activity {
             isToolbarVisible = false;
             return true;
         case (UNDO_ITEM) : 
-            mainSurfaceView.getSheet().undo();
+            undo_pressed();
             return true;
         case (REDO_ITEM) :
-            mainSurfaceView.getSheet().redo();
+            redo_pressed();
             return true;
         case (DRAW_ITEM) :
-            mainSurfaceView.setInstrument(MainSurfaceView.DRAW_INSTRUMENT);
+            draw_pressed();
             return true;
         case (ERASE_ITEM) :
-            mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
+            erase_pressed();
             return true;
         case (CLEAR_ITEM) :
             mainSurfaceView.clearSheet();
@@ -187,6 +189,59 @@ public class SmartSketcher extends Activity {
         return false;
     }
 
+    private void setupToolbar() {
+        ((ImageButton)findViewById(R.id.undo))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        undo_pressed();
+                    }});
+        ((ImageButton)findViewById(R.id.redo))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        redo_pressed();
+                    }});
+        ((ImageButton)findViewById(R.id.marker))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        draw_pressed();
+                    }});
+        ((ImageButton)findViewById(R.id.eraser))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        erase_pressed();
+                    }});
+        ((ImageButton)findViewById(R.id.hand))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        // TODO
+                    }});
+        ((ImageButton)findViewById(R.id.palette))
+            .setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View unused) {
+                        // TODO
+                    }});
+    }
+
+    private void undo_pressed () {
+        mainSurfaceView.getSheet().undo();
+    }
+
+    private void redo_pressed () {
+        mainSurfaceView.getSheet().redo();
+    }
+
+    private void draw_pressed() {
+        mainSurfaceView.setInstrument(MainSurfaceView.DRAW_INSTRUMENT);
+        ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
+        ((ImageButton)findViewById(R.id.eraser)).setEnabled(true);
+    }
+
+    private void erase_pressed() {
+        mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
+        ((ImageButton)findViewById(R.id.eraser)).setEnabled(false);
+        ((ImageButton)findViewById(R.id.marker)).setEnabled(true);
+    }
+    
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         /**
          * Handle opening of saved sheet via OpenSheetActivity

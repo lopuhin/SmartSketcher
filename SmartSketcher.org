@@ -1,11 +1,13 @@
 * Smartsketcher
 ** TODO 0.3.1 Release
 *** TODO Toolbar visibility - in settings
-*** TODO Toolbar buttons should do actions
+*** DONE Toolbar buttons should do actions
+    CLOSED: [2012-01-22 Sun 16:53]
 *** TODO Activate/deactivate toolbar buttons    
+** TODO Undo on saved sheet (just remove last saved shapes)
 ** TODO Delete sketches
 ** TODO Smoothing should not depend on scale
-   Do it in screen coordinates, convert to sheet after
+   Do it in screen coordinates, convert to sheet after smoothing
 ** TODO Fix circles smoothing bug
    They just dissapear afer smoothing
 ** TODO Set sketches names (should be optional)
