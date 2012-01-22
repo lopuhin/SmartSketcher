@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -32,20 +33,6 @@ public class SmartSketcher extends Activity
     private FileHelper fileHelper;
     
     private static String TAG = "SmartSketcher";
-
-    // menu buttons
-    static final private int
-        UNDO_ITEM = Menu.FIRST + 1, 
-        REDO_ITEM = Menu.FIRST + 2,
-        NEW_ITEM = Menu.FIRST + 3,
-        OPEN_ITEM = Menu.FIRST + 4,
-        CLEAR_ITEM = Menu.FIRST + 5,
-        ERASE_ITEM = Menu.FIRST + 6,
-        DRAW_ITEM = Menu.FIRST + 7,
-        HAND_ITEM = Menu.FIRST + 8,
-        PALETTE_ITEM = Menu.FIRST + 11,
-        DELETE_ITEM = Menu.FIRST + 12,
-        PREFERENCES_ITEM = Menu.FIRST + 13;
 
     // activity results
     static final private int
@@ -89,19 +76,8 @@ public class SmartSketcher extends Activity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
-
-        menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo).setIcon(R.drawable.undo);
-        menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo).setIcon(R.drawable.redo);
-        menu.add(0, DRAW_ITEM, Menu.NONE, R.string.draw).setIcon(R.drawable.marker);
-        menu.add(0, ERASE_ITEM, Menu.NONE, R.string.erase).setIcon(R.drawable.eraser);
-        menu.add(0, HAND_ITEM, Menu.NONE, R.string.hand).setIcon(R.drawable.hand);
-        menu.add(0, PALETTE_ITEM, Menu.NONE, R.string.palette).setIcon(R.drawable.palette);
-        menu.add(0, CLEAR_ITEM, Menu.NONE, R.string.clear);
-        menu.add(0, NEW_ITEM, Menu.NONE, R.string.newitem);
-        menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
-        menu.add(0, DELETE_ITEM, Menu.NONE, R.string.delete);
-        menu.add(0, PREFERENCES_ITEM, Menu.NONE, R.string.preferences);
-            
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu, menu);
         return true;
     }
     
@@ -116,22 +92,22 @@ public class SmartSketcher extends Activity
             .getDefaultSharedPreferences(getApplicationContext());
 
         final boolean isToolbarVisible = prefs.getBoolean(Preferences.TOOLBAL_VISIBLE, true);
-        menu.findItem(UNDO_ITEM)
+        menu.findItem(R.id.undo)
             .setEnabled(mainSurfaceView.getSheet().canUndo())
             .setVisible(!isToolbarVisible);
-        menu.findItem(REDO_ITEM)
+        menu.findItem(R.id.redo)
             .setEnabled(mainSurfaceView.getSheet().canRedo())
             .setVisible(!isToolbarVisible);
             
         final int instrument = mainSurfaceView.getInstrument();
-        menu.findItem(DRAW_ITEM)
+        menu.findItem(R.id.draw)
             .setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT)
             .setVisible(!isToolbarVisible);
-        menu.findItem(ERASE_ITEM)
+        menu.findItem(R.id.erase)
             .setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT)
             .setVisible(!isToolbarVisible);
-        menu.findItem(HAND_ITEM).setVisible(!isToolbarVisible);
-        menu.findItem(PALETTE_ITEM).setVisible(!isToolbarVisible);
+        menu.findItem(R.id.hand).setVisible(!isToolbarVisible);
+        menu.findItem(R.id.palette).setVisible(!isToolbarVisible);
 
         return true;
     }
@@ -143,31 +119,31 @@ public class SmartSketcher extends Activity
          */
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
-        case (UNDO_ITEM) : 
+        case (R.id.undo) : 
             undo_pressed();
             return true;
-        case (REDO_ITEM) :
+        case (R.id.redo) :
             redo_pressed();
             return true;
-        case (DRAW_ITEM) :
+        case (R.id.draw) :
             draw_pressed();
             return true;
-        case (ERASE_ITEM) :
+        case (R.id.erase) :
             erase_pressed();
             return true;
-        case (CLEAR_ITEM) :
+        case (R.id.clear) :
             mainSurfaceView.clearSheet();
             return true;
-        case (NEW_ITEM) :
+        case (R.id.newitem) :
             fileHelper.savePreview();
             mainSurfaceView.clearSheet();	
             return true;
-        case (OPEN_ITEM) :
+        case (R.id.open) :
             fileHelper.savePreview();
             Intent intent = new Intent(SmartSketcher.this, OpenSheetActivity.class);
             startActivityForResult(intent, OPEN_SHEET_RESULT);
             return true;
-        case (PREFERENCES_ITEM) :
+        case (R.id.preferences) :
             startActivityForResult(new Intent(this, Preferences.class),
                                    SHOW_PREFERENCES_RESULT);
             return true;

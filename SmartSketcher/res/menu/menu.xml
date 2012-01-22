@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/undo"
+          android:icon="@drawable/undo"
+          android:title="@string/undo" />
+    <item android:id="@+id/redo"
+          android:icon="@drawable/redo"
+          android:title="@string/redo" />
+    <item android:id="@+id/draw"
+          android:icon="@drawable/marker"
+          android:title="@string/draw" />
+    <item android:id="@+id/erase"
+          android:icon="@drawable/eraser"
+          android:title="@string/erase" />
+    <item android:id="@+id/hand"
+          android:icon="@drawable/hand"
+          android:title="@string/hand" />
+    <item android:id="@+id/palette"
+          android:icon="@drawable/palette"
+          android:title="@string/palette" />
+    <item android:id="@+id/clear"
+          android:icon="@android:drawable/ic_menu_close_clear_cancel"
+          android:title="@string/clear" />
+    <item android:id="@+id/newitem"
+          android:icon="@android:drawable/ic_menu_add"
+          android:title="@string/newitem" />
+    <item android:id="@+id/open"
+          android:icon="@android:drawable/ic_menu_view"
+          android:title="@string/open" />
+    <item android:id="@+id/delete"
+          android:icon="@android:drawable/ic_menu_delete"
+          android:title="@string/delete" />
+    <item android:id="@+id/preferences"
+          android:icon="@android:drawable/ic_menu_preferences"
+          android:title="@string/preferences" />
+</menu>
