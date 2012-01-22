@@ -53,7 +53,7 @@ public class MainSurfaceView extends GLSurfaceView {
     
     private final static String TAG = "MainSurfaceView";
 
-    MainSurfaceView(Context context, DBAdapter dbAdapter) {
+    MainSurfaceView(Context context, DBAdapter dbAdapter, float thickness) {
         /**
          * Init: load last sheet, or create new one, if there is not last one
          */
@@ -78,9 +78,7 @@ public class MainSurfaceView extends GLSurfaceView {
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
         eraserRadius = 60.0f; // TODO - load from app settings
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        currentThickness = prefs.getFloat(Preferences.THICKNESS,
-                                          Preferences.THICKNESS_DEFAULT);
+        currentThickness = thickness;
     }
         
     @Override

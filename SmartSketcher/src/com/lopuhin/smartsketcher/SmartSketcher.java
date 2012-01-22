@@ -51,7 +51,7 @@ public class SmartSketcher extends Activity
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
 
-        mainSurfaceView = new MainSurfaceView(this, dbAdapter);
+        mainSurfaceView = new MainSurfaceView(this, dbAdapter, getThicknessPref());
         ((LinearLayout)findViewById(R.id.sketchContainer)).addView(mainSurfaceView);
         ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
 
@@ -274,7 +274,11 @@ public class SmartSketcher extends Activity
     }
 
     private void palettePressed() {
-        showDialog(PALETTE_DIALOG);
+        //showDialog(PALETTE_DIALOG);
+        // TODO
+        startActivityForResult(new Intent(this, Preferences.class),
+                               SHOW_PREFERENCES_RESULT);
+        
     }
 
     private void setAllInstrumentsEnabled(boolean enabled) {
@@ -306,11 +310,22 @@ public class SmartSketcher extends Activity
             else
                 hideToolbar();
         } else if (key.equals(Preferences.THICKNESS)) {
-            mainSurfaceView
-                .setThickness(prefs.getFloat(key, Preferences.THICKNESS_DEFAULT));
+            mainSurfaceView.setThickness(getThicknessPref(prefs));
         }
     }
 
+    public float getThicknessPref() {
+        return getThicknessPref(PreferenceManager
+                                .getDefaultSharedPreferences(getApplicationContext()));
+    }
+    
+    private float getThicknessPref(SharedPreferences prefs) {
+        return Float
+            .parseFloat(prefs.getString(Preferences.THICKNESS,
+                                        Float.toString(Preferences
+                                                       .THICKNESS_DEFAULT)));
+    }
+    
     @Override
     public Dialog onCreateDialog(int id) {
         switch(id) {
