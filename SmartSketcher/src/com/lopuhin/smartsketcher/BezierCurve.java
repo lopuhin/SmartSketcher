@@ -17,39 +17,44 @@ public class BezierCurve extends Shape {
 
     private FloatBuffer pointsBuffer;
     private int pointsBufferSize;
+    private float thickness;
+    private int drawMode;
     
     private final static String TAG = "BezierCurve";
     private float fittingError;
     
-    BezierCurve(final ArrayList<PointF> pointsList) {
+    BezierCurve(final ArrayList<PointF> pointsList, float thickness) {
         points = new PointF[pointsList.size()];
         int i = 0;
         for (PointF p: pointsList) {
             points[i] = p;
             i += 1;
         }
+        this.thickness = thickness;
         initBuffer();
     }
         
-    BezierCurve(final PointF[] pointsList) {
+    BezierCurve(final PointF[] pointsList, float thickness) {
         points = pointsList;
+        this.thickness = thickness;
         initBuffer();
     }
     
     public void draw(OpenGLRenderer renderer) {
-        renderer.drawArray(pointsBuffer, pointsBufferSize, GLES20.GL_LINE_STRIP);
+        renderer.drawArray(pointsBuffer, pointsBufferSize, drawMode);
     }
 
-    public static BezierCurve approximated(final ArrayList<PointF> pointsList) {
+    public static BezierCurve approximated(final ArrayList<PointF> pointsList,
+                                           float thickness) {
         /**
          * Creating approximation of pointsList with cubic Bezier curve
          */
-        return approximated(pointsList, 0, pointsList.size() - 1);
+        return approximated(pointsList, 0, pointsList.size() - 1, thickness);
     }
         
     public static BezierCurve
         approximated(final ArrayList<PointF> pointsList,
-                     final int startIndex, final int endIndex) {
+                     final int startIndex, final int endIndex, float thickness) {
         /**
          * Creating approximation of pointsList from startIndex to endIndex
          * with cubic Bezier curve
@@ -64,7 +69,7 @@ public class BezierCurve extends Shape {
         Log.d(TAG, "solution: c = " + c);
         p[1] = new PointF(p[0].x + c * tangents[0].x, p[0].y + c * tangents[0].y);
         p[2] = new PointF(p[3].x + c * tangents[1].x, p[3].y + c * tangents[1].y);
-        BezierCurve curve = new BezierCurve(p);
+        BezierCurve curve = new BezierCurve(p, thickness);
         curve.fittingError = fitting_fn.value(c); // TODO - normalize by length?
         return curve;
     }
@@ -76,7 +81,7 @@ public class BezierCurve extends Shape {
     
     @Override
     public float getThickness() {
-        return 1.0f; // TODO
+        return thickness;
     }
         
     public float getFittingError() {
@@ -86,8 +91,17 @@ public class BezierCurve extends Shape {
 
     private void initBuffer() {
         final PointF[] segPoints = toSegments();
-        pointsBuffer = OpenGLRenderer.createBuffer(segPoints, DEFAULT_COLOR);
-        pointsBufferSize = segPoints.length;
+        PointF[] bufferPoints = null;
+        if (hasThickness()) {
+            bufferPoints = Vector.createBoundary(segPoints, thickness);
+            drawMode = GLES20.GL_TRIANGLE_STRIP;
+        }
+        if (bufferPoints == null || bufferPoints.length < 4) {
+            bufferPoints = segPoints;
+            drawMode = GLES20.GL_LINE_STRIP;
+        }
+        pointsBuffer = OpenGLRenderer.createBuffer(bufferPoints, DEFAULT_COLOR);
+        pointsBufferSize = bufferPoints.length;
     }
 
     private PointF[] toSegments() {

@@ -250,9 +250,9 @@ public class DBAdapter {
          */
         Log.d(TAG, "createShape " + shapeInfo.name);
         if (shapeInfo.name.equals("com.lopuhin.smartsketcher.Curve")) {
-            return new Curve(points, false);
+            return new Curve(points, false, shapeInfo.thickness);
         } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.BezierCurve")) {
-            return new BezierCurve(points);
+            return new BezierCurve(points, shapeInfo.thickness);
         } else if (shapeInfo.name.equals("com.lopuhin.smartsketcher.ErasePoint") ||
                    shapeInfo.name.equals("com.lopuhin.smartsketcher.EraseTrace")) {
             return new EraseTrace(points, shapeInfo.thickness);

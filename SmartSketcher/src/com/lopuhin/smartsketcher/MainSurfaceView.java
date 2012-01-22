@@ -12,6 +12,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 
 
 public class MainSurfaceView extends GLSurfaceView {
@@ -41,7 +43,8 @@ public class MainSurfaceView extends GLSurfaceView {
     private PointF prevTouchCenter, prevViewPos;
     private PointF prevMovePos;
     private float eraserRadius;
-        
+    private float currentThickness;
+    
     private Sheet sheet;
     private ArrayList<PointF> lastSegment;
     private ArrayList<Long> lastSegmentTimes;
@@ -74,7 +77,10 @@ public class MainSurfaceView extends GLSurfaceView {
 
         //Resources res = getResources();
         //final float eraserRadius = res.getDimension(R.dimen.eraser_radius);
-        eraserRadius = 60.0f; // TODO - load from resources
+        eraserRadius = 60.0f; // TODO - load from app settings
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        currentThickness = prefs.getFloat(Preferences.THICKNESS,
+                                          Preferences.THICKNESS_DEFAULT);
     }
         
     @Override
@@ -184,6 +190,10 @@ public class MainSurfaceView extends GLSurfaceView {
         drawLastSegment(renderer);
         drawLastEraseTrace(renderer);
     }
+
+    public void setThickness(float thickness) {
+        currentThickness = thickness;
+    }
     
     private void drawLastSegment(OpenGLRenderer renderer) {
         /**
@@ -193,7 +203,7 @@ public class MainSurfaceView extends GLSurfaceView {
         synchronized (lastSegment) {
             if (lastSegment.size() > 0)
                 // TODO - cache?
-                curve = new Curve(lastSegment, true);
+                curve = new Curve(lastSegment, true, currentThickness);
         }
         if (curve != null) {
             curve.draw(renderer);
@@ -281,7 +291,8 @@ public class MainSurfaceView extends GLSurfaceView {
          * Add smoothed lastSegment to sheet, as the user stopped drawing.
          */ 
         synchronized (lastSegment) {
-            SmoothLastSegment action = new SmoothLastSegment(lastSegment, lastSegmentTimes);
+            SmoothLastSegment action = new SmoothLastSegment(lastSegment, lastSegmentTimes,
+                                                             currentThickness);
             lastSegment.clear();
             lastSegmentTimes.clear();
             sheet.doAction(action);

@@ -94,7 +94,9 @@ public class SmartSketcher extends Activity
         SharedPreferences prefs = PreferenceManager
             .getDefaultSharedPreferences(getApplicationContext());
 
-        final boolean isToolbarVisible = prefs.getBoolean(Preferences.TOOLBAL_VISIBLE, true);
+        final boolean isToolbarVisible = prefs
+            .getBoolean(Preferences.TOOLBAL_VISIBLE,
+                        Preferences.TOOLBAL_VISIBLE_DEFAULT);
         menu.findItem(R.id.undo)
             .setEnabled(mainSurfaceView.getSheet().canUndo())
             .setVisible(!isToolbarVisible);
@@ -296,10 +298,13 @@ public class SmartSketcher extends Activity
 
     public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
         if (key.equals(Preferences.TOOLBAL_VISIBLE)) {
-            if (prefs.getBoolean(key, true))
+            if (prefs.getBoolean(key, Preferences.TOOLBAL_VISIBLE_DEFAULT))
                 showToolbar();
             else
                 hideToolbar();
+        } else if (key.equals(Preferences.THICKNESS)) {
+            mainSurfaceView
+                .setThickness(prefs.getFloat(key, Preferences.THICKNESS_DEFAULT));
         }
     }
 

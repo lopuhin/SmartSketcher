@@ -22,7 +22,7 @@ public class EraseTrace extends Shape {
         this.thickness = thickness;
         this.points = points.toArray(new PointF[points.size()]);
         pointsBuffer = OpenGLRenderer.createBuffer(this.points, Sheet.BACKGROUND_COLOR);
-        PointF[] boundary = createBoundary(this.points, this.thickness);
+        PointF[] boundary = Vector.createBoundary(this.points, this.thickness);
         boundarySize = boundary.length;
         boundaryBuffer = OpenGLRenderer.createBuffer(boundary, Sheet.BACKGROUND_COLOR);
     }
@@ -45,27 +45,5 @@ public class EraseTrace extends Shape {
     @Override
     public float getThickness() {
         return thickness;
-    }
-
-    private static PointF[] createBoundary(final PointF[] points, final float thickness) {
-        /**
-         * Create the boundary of the erase trace
-         */
-        ArrayList<PointF> boundary = new ArrayList<PointF>();
-        PointF prev = null;
-        PointF v1 = null, v2 = null;
-        for (PointF curr: points) {
-            if (prev != null) {
-                final PointF conn = Vector.sub(curr, prev);
-                final PointF orth = Vector.normalized(Vector.orth(conn), thickness / 2.0f);
-                boundary.add(Vector.add(prev, orth));
-                boundary.add(Vector.sub(prev, orth));
-                // FIXME - maybe add only once for point?
-                boundary.add(Vector.add(curr, orth));
-                boundary.add(Vector.sub(curr, orth));
-            }
-            prev = curr;
-        }
-        return boundary.toArray(new PointF[boundary.size()]);
     }
 }

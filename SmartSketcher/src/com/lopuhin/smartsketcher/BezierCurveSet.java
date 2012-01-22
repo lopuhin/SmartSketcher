@@ -14,14 +14,15 @@ public class BezierCurveSet {
     
     public static ArrayList<Shape>
         approximated(final ArrayList<PointF> pointsList,
-                     final ArrayList<Long> pointsTimes) {
+                     final ArrayList<Long> pointsTimes,
+                     final float thickness) {
         ArrayList<Shape> curves = new ArrayList<Shape>();
         ArrayList<Integer> splitCurveIndices = splitCurveIndices(pointsList, pointsTimes);
         splitCurveIndices.add(pointsList.size() - 1);
         int prevIndex = 0;
         for (int index: splitCurveIndices) {
             Log.d(TAG,  "Fitting start");
-            for (Shape sh: recursiveSplitting(pointsList, prevIndex, index)) {
+            for (Shape sh: recursiveSplitting(pointsList, prevIndex, index, thickness)) {
                 curves.add(sh);
             }
             prevIndex = index;
@@ -31,23 +32,25 @@ public class BezierCurveSet {
     
     private static ArrayList<Shape>
         recursiveSplitting(final ArrayList<PointF> pointsList,
-                           final int startIndex,
-                           final int endIndex) {
+                           final int startIndex, final int endIndex,
+                           final float thickness) {
         /**
          * Return curves, approximating this part of points, splitting recursively
          */
         ArrayList<Shape> curves = new ArrayList<Shape>();
-        BezierCurve initialCurve = BezierCurve.approximated(
-            pointsList, startIndex, endIndex);
+        BezierCurve initialCurve = BezierCurve
+            .approximated(pointsList, startIndex, endIndex, thickness);
         Log.d(TAG, "Fitting from " + startIndex + " to " + endIndex + ": error: " + 
               initialCurve.getFittingError());
         if (initialCurve.getFittingError() > maxFittingError) {
             if (endIndex - startIndex > 4) {
                 final int midIndex = (endIndex + startIndex) / 2;
-                for (Shape sh: recursiveSplitting(pointsList, startIndex, midIndex)) {
+                for (Shape sh: recursiveSplitting(pointsList, startIndex, midIndex,
+                                                  thickness)) {
                     curves.add(sh);    
                 }
-                for (Shape sh: recursiveSplitting(pointsList, midIndex, endIndex)) {
+                for (Shape sh: recursiveSplitting(pointsList, midIndex, endIndex,
+                                                  thickness)) {
                     curves.add(sh);    
                 }
             } else { // add curve from segments
@@ -55,7 +58,7 @@ public class BezierCurveSet {
                 for (int i = startIndex; i <= endIndex; i++ ) {
                     points.add(pointsList.get(i));
                 }
-                curves.add(new Curve(points, false));
+                curves.add(new Curve(points, false, thickness));
             }
         } else {
             curves.add(initialCurve);
