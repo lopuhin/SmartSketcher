@@ -157,6 +157,9 @@ public class SmartSketcher extends Activity
             startActivityForResult(new Intent(this, Preferences.class),
                                    SHOW_PREFERENCES_RESULT);
             return true;
+        case (R.id.palette) :
+            palettePressed();
+            return true;
         }
         return false;
     }
