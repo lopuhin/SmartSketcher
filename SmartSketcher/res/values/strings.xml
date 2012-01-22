@@ -17,5 +17,8 @@
     <string name="palette">Color &amp; width</string>
     <string name="delete">Delete</string>
     <string name="hand">Move</string>
+    <string name="preferences">Settings</string>
+    <string name="toolbar_pref_title">Toolbar visibility</string>
+    <string name="toolbar_pref_summary">Should toolbar with common actions be on the screen</string>
     <dimen name="eraser_radius">30px</dimen>
 </resources>

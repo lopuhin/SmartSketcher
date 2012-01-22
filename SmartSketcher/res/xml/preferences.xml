@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen
+    xmlns:android="http://schemas.android.com/apk/res/android">
+  <CheckBoxPreference
+      android:key="TOOLBAL_VISIBLE"
+      android:title="@string/toolbar_pref_title"
+      android:summary="@string/toolbar_pref_summary"
+      android:defaultValue="true"
+      />
+</PreferenceScreen>

@@ -24,6 +24,10 @@
     <activity android:name=".OpenSheetActivity"
               android:label="@string/open">
     </activity>
-    
+
+    <activity android:name=".Preferences"
+              android:label="@string/preferences">
+    </activity>
+
   </application>
 </manifest>

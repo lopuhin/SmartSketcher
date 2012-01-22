@@ -4,8 +4,11 @@ import java.util.logging.Logger;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.content.res.Configuration;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -18,7 +21,9 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 
-public class SmartSketcher extends Activity {
+public class SmartSketcher extends Activity 
+    implements OnSharedPreferenceChangeListener
+{
     /**
      * Main activity. Handles menu, opening activity
      */
@@ -27,7 +32,8 @@ public class SmartSketcher extends Activity {
     private FileHelper fileHelper;
     
     private static String TAG = "SmartSketcher";
-        
+
+    // menu buttons
     static final private int
         UNDO_ITEM = Menu.FIRST + 1, 
         REDO_ITEM = Menu.FIRST + 2,
@@ -37,18 +43,18 @@ public class SmartSketcher extends Activity {
         ERASE_ITEM = Menu.FIRST + 6,
         DRAW_ITEM = Menu.FIRST + 7,
         HAND_ITEM = Menu.FIRST + 8,
-        SHOW_TOOLBAR_ITEM = Menu.FIRST + 9,
-        HIDE_TOOLBAR_ITEM = Menu.FIRST + 10,
         PALETTE_ITEM = Menu.FIRST + 11,
-        DELETE_ITEM = Menu.FIRST + 12;
+        DELETE_ITEM = Menu.FIRST + 12,
+        PREFERENCES_ITEM = Menu.FIRST + 13;
 
-    static final private int OPEN_SHEET_RESULT = 1;
-    private boolean isToolbarVisible;
+    // activity results
+    static final private int
+        OPEN_SHEET_RESULT = 1,
+        SHOW_PREFERENCES_RESULT = 2;
     
     @Override
     public void onCreate(Bundle bundle) {
         super.onCreate(bundle);
-        isToolbarVisible = true; // TODO - load from resources
         requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.main);
         
@@ -58,6 +64,10 @@ public class SmartSketcher extends Activity {
         mainSurfaceView = new MainSurfaceView(this, dbAdapter);
         ((LinearLayout)findViewById(R.id.sketchContainer)).addView(mainSurfaceView);
         ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
+
+        SharedPreferences prefs =
+            PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        prefs.registerOnSharedPreferenceChangeListener(this);
 
         fileHelper = new FileHelper(mainSurfaceView);
         setupToolbar();
@@ -80,8 +90,6 @@ public class SmartSketcher extends Activity {
     public boolean onCreateOptionsMenu(Menu menu) {
         super.onCreateOptionsMenu(menu);
 
-        menu.add(0, HIDE_TOOLBAR_ITEM, Menu.NONE, R.string.hide_toolbar);
-      	menu.add(0, SHOW_TOOLBAR_ITEM, Menu.NONE, R.string.show_toolbar);
         menu.add(0, UNDO_ITEM, Menu.NONE, R.string.undo).setIcon(R.drawable.undo);
         menu.add(0, REDO_ITEM, Menu.NONE, R.string.redo).setIcon(R.drawable.redo);
         menu.add(0, DRAW_ITEM, Menu.NONE, R.string.draw).setIcon(R.drawable.marker);
@@ -92,6 +100,7 @@ public class SmartSketcher extends Activity {
         menu.add(0, NEW_ITEM, Menu.NONE, R.string.newitem);
         menu.add(0, OPEN_ITEM, Menu.NONE, R.string.open);
         menu.add(0, DELETE_ITEM, Menu.NONE, R.string.delete);
+        menu.add(0, PREFERENCES_ITEM, Menu.NONE, R.string.preferences);
             
         return true;
     }
@@ -102,9 +111,11 @@ public class SmartSketcher extends Activity {
          * Disable or enable menu items
          */
         super.onPrepareOptionsMenu(menu);
-        
-        menu.findItem(HIDE_TOOLBAR_ITEM).setVisible(isToolbarVisible);
-        menu.findItem(SHOW_TOOLBAR_ITEM).setVisible(!isToolbarVisible);
+
+        SharedPreferences prefs = PreferenceManager
+            .getDefaultSharedPreferences(getApplicationContext());
+
+        final boolean isToolbarVisible = prefs.getBoolean(Preferences.TOOLBAL_VISIBLE, true);
         menu.findItem(UNDO_ITEM)
             .setEnabled(mainSurfaceView.getSheet().canUndo())
             .setVisible(!isToolbarVisible);
@@ -131,36 +142,7 @@ public class SmartSketcher extends Activity {
          * Handle menu items
          */
         super.onOptionsItemSelected(item);
-        final View buttonContainer = findViewById(R.id.buttonContainer);
         switch (item.getItemId()) {
-        case (SHOW_TOOLBAR_ITEM) :
-            int animId;
-            if (getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT)
-                animId = R.drawable.move_toolbar_in_top;
-            else
-                animId = R.drawable.move_toolbar_in_left;
-            buttonContainer.setVisibility(View.VISIBLE);
-            buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
-            isToolbarVisible = true;
-            return true;
-        case (HIDE_TOOLBAR_ITEM) :
-            if (getResources().getConfiguration().orientation ==
-                Configuration.ORIENTATION_PORTRAIT)
-                animId = R.drawable.move_toolbar_out_top;
-            else
-                animId = R.drawable.move_toolbar_out_left;
-            Animation animation = AnimationUtils.loadAnimation(this, animId);
-            animation.setAnimationListener(new AnimationListener() {
-                    public void onAnimationEnd(Animation _animation) {
-                        buttonContainer.setVisibility(View.INVISIBLE);
-                    }
-                    public void onAnimationRepeat(Animation _animation) {}
-                    public void onAnimationStart(Animation _animation) {}
-        	});
-            buttonContainer.startAnimation(animation);
-            isToolbarVisible = false;
-            return true;
         case (UNDO_ITEM) : 
             undo_pressed();
             return true;
@@ -184,6 +166,10 @@ public class SmartSketcher extends Activity {
             fileHelper.savePreview();
             Intent intent = new Intent(SmartSketcher.this, OpenSheetActivity.class);
             startActivityForResult(intent, OPEN_SHEET_RESULT);
+            return true;
+        case (PREFERENCES_ITEM) :
+            startActivityForResult(new Intent(this, Preferences.class),
+                                   SHOW_PREFERENCES_RESULT);
             return true;
         }
         return false;
@@ -222,6 +208,41 @@ public class SmartSketcher extends Activity {
                     }});
     }
 
+    private void hideToolbar() {
+    	int animId;
+    	final View buttonContainer = findViewById(R.id.buttonContainer);
+    	if (buttonContainer.getVisibility() == View.INVISIBLE)
+            return;
+        if (getResources().getConfiguration().orientation ==
+            Configuration.ORIENTATION_PORTRAIT)
+            animId = R.drawable.move_toolbar_out_top;
+        else
+            animId = R.drawable.move_toolbar_out_left;
+        Animation animation = AnimationUtils.loadAnimation(this, animId);
+        animation.setAnimationListener(new AnimationListener() {
+                public void onAnimationEnd(Animation _animation) {
+                    buttonContainer.setVisibility(View.INVISIBLE);
+                }
+                public void onAnimationRepeat(Animation _animation) {}
+                public void onAnimationStart(Animation _animation) {}
+            });
+        buttonContainer.startAnimation(animation);
+    }
+
+    private void showToolbar() {
+    	int animId;
+    	final View buttonContainer = findViewById(R.id.buttonContainer);
+    	if (buttonContainer.getVisibility() == View.VISIBLE)
+            return;
+        if (getResources().getConfiguration().orientation ==
+            Configuration.ORIENTATION_PORTRAIT)
+            animId = R.drawable.move_toolbar_in_top;
+        else
+            animId = R.drawable.move_toolbar_in_left;
+        buttonContainer.setVisibility(View.VISIBLE);
+        buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
+    }
+    
     private void undo_pressed () {
         mainSurfaceView.getSheet().undo();
     }
@@ -254,6 +275,16 @@ public class SmartSketcher extends Activity {
             }
         }
     }
+
+    public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+        if (key.equals(Preferences.TOOLBAL_VISIBLE)) {
+            if (prefs.getBoolean(key, true))
+                showToolbar();
+            else
+                hideToolbar();
+        }
+    }
+
 
 }
 
