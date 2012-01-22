@@ -127,16 +127,16 @@ public class SmartSketcher extends Activity
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
         case (R.id.undo) : 
-            undo_pressed();
+            undoPressed();
             return true;
         case (R.id.redo) :
-            redo_pressed();
+            redoPressed();
             return true;
         case (R.id.draw) :
-            draw_pressed();
+            drawPressed();
             return true;
         case (R.id.erase) :
-            erase_pressed();
+            erasePressed();
             return true;
         case (R.id.clear) :
             mainSurfaceView.clearSheet();
@@ -165,32 +165,32 @@ public class SmartSketcher extends Activity
         ((ImageButton)findViewById(R.id.undo))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        undo_pressed();
+                        undoPressed();
                     }});
         ((ImageButton)findViewById(R.id.redo))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        redo_pressed();
+                        redoPressed();
                     }});
         ((ImageButton)findViewById(R.id.marker))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        draw_pressed();
+                        drawPressed();
                     }});
         ((ImageButton)findViewById(R.id.eraser))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        erase_pressed();
+                        erasePressed();
                     }});
         ((ImageButton)findViewById(R.id.hand))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        hand_pressed();
+                        handPressed();
                     }});
         ((ImageButton)findViewById(R.id.palette))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        palette_pressed();
+                        palettePressed();
                     }});
     }
 
@@ -235,15 +235,15 @@ public class SmartSketcher extends Activity
         buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
     }
     
-    private void undo_pressed () {
+    private void undoPressed () {
         mainSurfaceView.getSheet().undo();
     }
 
-    private void redo_pressed () {
+    private void redoPressed () {
         mainSurfaceView.getSheet().redo();
     }
 
-    private void draw_pressed() {
+    private void drawPressed() {
         /**
          * Choose draw instrument
          */
@@ -252,7 +252,7 @@ public class SmartSketcher extends Activity
         setAllInstrumentsEnabled(true);
     }
 
-    private void erase_pressed() {
+    private void erasePressed() {
         /**
          * Choose eraser instrument
          */
@@ -261,7 +261,7 @@ public class SmartSketcher extends Activity
         setAllInstrumentsEnabled(true);
     }
 
-    private void hand_pressed() {
+    private void handPressed() {
         /**
          * Choose "hand" instrument - moving without drawing
          */
@@ -270,7 +270,7 @@ public class SmartSketcher extends Activity
         setAllInstrumentsEnabled(true);
     }
 
-    private void palette_pressed() {
+    private void palettePressed() {
         // TODO
     }
 
