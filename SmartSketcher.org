@@ -36,7 +36,8 @@
    Using [[http://en.wikipedia.org/wiki/B%C3%A9zier_curve][Bezier curves]], found an [[http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.83.9193&rep=rep1&type=pdf][article]] about curve approximation (saved to Dropbox)
    CLOSED: [2011-05-19 Thu 13:37]
 ** TODO Draw lines and arrows
-** TODO "Hand" tool - allows moving without drawing
+** DONE "Hand" tool - allows moving without drawing
+   CLOSED: [2012-01-22 Sun 18:11]
 ** DONE Pallete of instruments
    Start with curves, smoothed curves and eraser
    CLOSED: [2012-01-22 Sun 16:14]

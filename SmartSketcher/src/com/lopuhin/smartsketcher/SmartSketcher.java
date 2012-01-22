@@ -75,6 +75,9 @@ public class SmartSketcher extends Activity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        /**
+         * Load menu items from xml
+         */
         super.onCreateOptionsMenu(menu);
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu, menu);
@@ -106,7 +109,9 @@ public class SmartSketcher extends Activity
         menu.findItem(R.id.erase)
             .setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT)
             .setVisible(!isToolbarVisible);
-        menu.findItem(R.id.hand).setVisible(!isToolbarVisible);
+        menu.findItem(R.id.hand)
+            .setEnabled(instrument != MainSurfaceView.HAND_INSTRUMENT)
+            .setVisible(!isToolbarVisible);
         menu.findItem(R.id.palette).setVisible(!isToolbarVisible);
 
         return true;
@@ -115,7 +120,7 @@ public class SmartSketcher extends Activity
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         /**
-         * Handle menu items
+         * Handle menu item presses
          */
         super.onOptionsItemSelected(item);
         switch (item.getItemId()) {
@@ -152,6 +157,9 @@ public class SmartSketcher extends Activity
     }
 
     private void setupToolbar() {
+        /**
+         * Setup listeners on toolbar buttons
+         */
         ((ImageButton)findViewById(R.id.undo))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
@@ -175,16 +183,19 @@ public class SmartSketcher extends Activity
         ((ImageButton)findViewById(R.id.hand))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        // TODO
+                        hand_pressed();
                     }});
         ((ImageButton)findViewById(R.id.palette))
             .setOnClickListener(new View.OnClickListener() {
                     public void onClick(View unused) {
-                        // TODO
+                        palette_pressed();
                     }});
     }
 
     private void hideToolbar() {
+        /**
+         * Hide toolbar (slide it)
+         */
     	int animId;
     	final View buttonContainer = findViewById(R.id.buttonContainer);
     	if (buttonContainer.getVisibility() == View.INVISIBLE)
@@ -206,6 +217,9 @@ public class SmartSketcher extends Activity
     }
 
     private void showToolbar() {
+        /**
+         * Show toolbar (slide it)
+         */
     	int animId;
     	final View buttonContainer = findViewById(R.id.buttonContainer);
     	if (buttonContainer.getVisibility() == View.VISIBLE)
@@ -228,17 +242,45 @@ public class SmartSketcher extends Activity
     }
 
     private void draw_pressed() {
+        /**
+         * Choose draw instrument
+         */
         mainSurfaceView.setInstrument(MainSurfaceView.DRAW_INSTRUMENT);
         ((ImageButton)findViewById(R.id.marker)).setEnabled(false);
-        ((ImageButton)findViewById(R.id.eraser)).setEnabled(true);
+        setAllInstrumentsEnabled(true);
     }
 
     private void erase_pressed() {
+        /**
+         * Choose eraser instrument
+         */
         mainSurfaceView.setInstrument(MainSurfaceView.ERASE_INSTRUMENT);
         ((ImageButton)findViewById(R.id.eraser)).setEnabled(false);
-        ((ImageButton)findViewById(R.id.marker)).setEnabled(true);
+        setAllInstrumentsEnabled(true);
     }
-    
+
+    private void hand_pressed() {
+        /**
+         * Choose "hand" instrument - moving without drawing
+         */
+        mainSurfaceView.setInstrument(MainSurfaceView.HAND_INSTRUMENT);
+        ((ImageButton)findViewById(R.id.hand)).setEnabled(false);
+        setAllInstrumentsEnabled(true);
+    }
+
+    private void palette_pressed() {
+        // TODO
+    }
+
+    private void setAllInstrumentsEnabled(boolean enabled) {
+        /**
+         * Disable or enable all instruments on the toolbar
+         */
+        ((ImageButton)findViewById(R.id.hand)).setEnabled(enabled);
+        ((ImageButton)findViewById(R.id.eraser)).setEnabled(enabled);
+        ((ImageButton)findViewById(R.id.marker)).setEnabled(enabled);
+    }
+        
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         /**
          * Handle opening of saved sheet via OpenSheetActivity

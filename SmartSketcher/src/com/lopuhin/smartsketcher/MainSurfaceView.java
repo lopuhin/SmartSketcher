@@ -19,10 +19,19 @@ public class MainSurfaceView extends GLSurfaceView {
      * Handles user interaction with touch screen, manages drawing thread,
      * adds shapes to sheet.
      */
-        
-    public final static int DRAW_INSTRUMENT = 0, ERASE_INSTRUMENT = 1;
 
-    private final static int ZOOM_MODE = 0, DRAW_MODE = 1, IDLE_MODE = 2;
+    // instruments
+    public final static int
+        DRAW_INSTRUMENT = 0,
+        ERASE_INSTRUMENT = 1,
+        HAND_INSTRUMENT = 2;
+
+    // modes
+    private final static int
+        ZOOM_MODE = 0,
+        DRAW_MODE = 1,
+        IDLE_MODE = 2,
+        MOVE_MODE = 3;
     private final static float SMALL_TOUCH_SPACING = 1.0f;
     
     private int mode, instrument;
@@ -30,6 +39,7 @@ public class MainSurfaceView extends GLSurfaceView {
     // initial configuration, when user starts dragging with two fingers
     private float prevTouchSpacing, prevViewZoom;
     private PointF prevTouchCenter, prevViewPos;
+    private PointF prevMovePos;
     private float eraserRadius;
         
     private Sheet sheet;
@@ -78,11 +88,15 @@ public class MainSurfaceView extends GLSurfaceView {
         final PointF mainPoint = new PointF(event.getX(), event.getY());
         switch (event.getAction() & MotionEvent.ACTION_MASK) {
         case (MotionEvent.ACTION_DOWN) :
-            mode = DRAW_MODE;
             if (instrument == DRAW_INSTRUMENT) {
                 addPoint(mainPoint);
+                mode = DRAW_MODE;
             } else if (instrument == ERASE_INSTRUMENT) {
                 eraseAt(mainPoint);
+                mode = DRAW_MODE;
+            } else if (instrument == HAND_INSTRUMENT) {
+                mode = MOVE_MODE;
+                prevMovePos = mainPoint;
             }
             break;
         case (MotionEvent.ACTION_POINTER_DOWN) :
@@ -126,6 +140,12 @@ public class MainSurfaceView extends GLSurfaceView {
                 } else if (instrument == ERASE_INSTRUMENT) {
                     eraseAt(mainPoint);
                 }
+            } else if (mode == MOVE_MODE) {
+                final PointF c = sheet.getViewPos();
+                final float z = sheet.getViewZoom();
+                sheet.setViewPos(new PointF(c.x + (prevMovePos.x - mainPoint.x) / z,
+                                            c.y + (prevMovePos.y - mainPoint.y) / z));
+                prevMovePos = mainPoint;
             }
             break;
         case (MotionEvent.ACTION_UP) :
