@@ -104,19 +104,19 @@ public class SmartSketcher extends Activity {
         menu.findItem(HIDE_TOOLBAR_ITEM).setVisible(isToolbarVisible);
         menu.findItem(SHOW_TOOLBAR_ITEM).setVisible(!isToolbarVisible);
         menu.findItem(UNDO_ITEM)
-        	.setEnabled(mainSurfaceView.getSheet().canUndo())
-        	.setVisible(!isToolbarVisible);
+            .setEnabled(mainSurfaceView.getSheet().canUndo())
+            .setVisible(!isToolbarVisible);
         menu.findItem(REDO_ITEM)
-        	.setEnabled(mainSurfaceView.getSheet().canRedo())
-        	.setVisible(!isToolbarVisible);
+            .setEnabled(mainSurfaceView.getSheet().canRedo())
+            .setVisible(!isToolbarVisible);
             
         final int instrument = mainSurfaceView.getInstrument();
         menu.findItem(DRAW_ITEM)
-        	.setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT)
-        	.setVisible(!isToolbarVisible);
+            .setEnabled(instrument != MainSurfaceView.DRAW_INSTRUMENT)
+            .setVisible(!isToolbarVisible);
         menu.findItem(ERASE_ITEM)
-        	.setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT)
-        	.setVisible(!isToolbarVisible);
+            .setEnabled(instrument != MainSurfaceView.ERASE_INSTRUMENT)
+            .setVisible(!isToolbarVisible);
         menu.findItem(HAND_ITEM).setVisible(!isToolbarVisible);
         menu.findItem(PALETTE_ITEM).setVisible(!isToolbarVisible);
 
@@ -132,31 +132,33 @@ public class SmartSketcher extends Activity {
         final View buttonContainer = findViewById(R.id.buttonContainer);
         switch (item.getItemId()) {
         case (SHOW_TOOLBAR_ITEM) :
-        	int animId;
-        	if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-        		animId = R.drawable.move_toolbar_in_top;
-        	else
-        		animId = R.drawable.move_toolbar_in_left;
-        	buttonContainer.setVisibility(View.VISIBLE);
-        	buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
-         	isToolbarVisible = true;
-    		return true;
+            int animId;
+            if (getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT)
+                animId = R.drawable.move_toolbar_in_top;
+            else
+                animId = R.drawable.move_toolbar_in_left;
+            buttonContainer.setVisibility(View.VISIBLE);
+            buttonContainer.startAnimation(AnimationUtils.loadAnimation(this, animId));
+            isToolbarVisible = true;
+            return true;
         case (HIDE_TOOLBAR_ITEM) :
-        	if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_PORTRAIT)
-        		animId = R.drawable.move_toolbar_out_top;
-        	else
-        		animId = R.drawable.move_toolbar_out_left;
-        	Animation animation = AnimationUtils.loadAnimation(this, animId);
-        	animation.setAnimationListener(new AnimationListener() {
-        		public void onAnimationEnd(Animation _animation) {
-        			buttonContainer.setVisibility(View.INVISIBLE);
-        		}
-        		public void onAnimationRepeat(Animation _animation) {}
-        		public void onAnimationStart(Animation _animation) {}
+            if (getResources().getConfiguration().orientation ==
+                Configuration.ORIENTATION_PORTRAIT)
+                animId = R.drawable.move_toolbar_out_top;
+            else
+                animId = R.drawable.move_toolbar_out_left;
+            Animation animation = AnimationUtils.loadAnimation(this, animId);
+            animation.setAnimationListener(new AnimationListener() {
+                    public void onAnimationEnd(Animation _animation) {
+                        buttonContainer.setVisibility(View.INVISIBLE);
+                    }
+                    public void onAnimationRepeat(Animation _animation) {}
+                    public void onAnimationStart(Animation _animation) {}
         	});
-        	buttonContainer.startAnimation(animation);
-        	isToolbarVisible = false;
-        	return true;
+            buttonContainer.startAnimation(animation);
+            isToolbarVisible = false;
+            return true;
         case (UNDO_ITEM) : 
             mainSurfaceView.getSheet().undo();
             return true;
