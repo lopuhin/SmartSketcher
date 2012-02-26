@@ -61,12 +61,12 @@ public class Sheet {
         if (save && !shape.isTransient()) {
             dbAdapter.addShape(shape);
         }
+        if (shapesChangeListener != null)
+            shapesChangeListener.onShapesChanged(this);
     }
 
     public void addShape(final Shape shape) {
         addShape(shape, true);
-        if (shapesChangeListener != null)
-            shapesChangeListener.onShapesChanged(this);
     }
     
     public void removeShape(final Shape shape) {

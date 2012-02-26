@@ -12,7 +12,7 @@ import android.widget.BaseAdapter;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Gallery;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.util.Log;
@@ -28,16 +28,16 @@ public class OpenSheetActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.gallery);
+        setContentView(R.layout.open);
 
         dbAdapter = new DBAdapter(this);
         dbAdapter.open();
         sheetIds = dbAdapter.getSheetIds();
         
-        Gallery gallery = (Gallery) findViewById(R.id.gallery);
-        gallery.setAdapter(new ImageAdapter(this));
+        GridView gridView = (GridView) findViewById(R.id.openview);
+        gridView.setAdapter(new ImageAdapter(this));
 
-        gallery.setOnItemClickListener(new OnItemClickListener() {
+        gridView.setOnItemClickListener(new OnItemClickListener() {
                 public void onItemClick(AdapterView parent, View v, int position, long id) {
                     Intent result = new Intent();
                     Long sheetId = sheetIds.get(position);
@@ -75,21 +75,23 @@ public class OpenSheetActivity extends Activity {
         }
 
         public View getView(int position, View convertView, ViewGroup parent) {
-            ImageView imageView = new ImageView(mContext);
-
+            ImageView imageView;
+            final int size = 95, padding = 8;
+            if (convertView == null) {
+                imageView = new ImageView(mContext);
+                imageView.setLayoutParams(new GridView.LayoutParams(size, size));
+                imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                imageView.setPadding(padding, padding, padding, padding);
+            } else {
+                imageView = (ImageView) convertView;
+            }
             File previewFile = FileHelper.getPreviewFileBySheetId(sheetIds.get(position));
             if (previewFile.exists()) {
                 imageView.setImageURI(Uri.fromFile(previewFile));
             } else {
                 imageView.setImageResource(R.drawable.no_preview);
             }
-            //imageView.setLayoutParams(new Gallery.LayoutParams(300, 200));
-            imageView.setLayoutParams(
-                new Gallery.LayoutParams(Gallery.LayoutParams.FILL_PARENT,
-                                         Gallery.LayoutParams.FILL_PARENT));
-            imageView.setScaleType(ImageView.ScaleType.FIT_XY);
-            imageView.setBackgroundResource(mGalleryItemBackground);
-
+            //imageView.setBackgroundResource(mGalleryItemBackground);
             return imageView;
         }
     }
