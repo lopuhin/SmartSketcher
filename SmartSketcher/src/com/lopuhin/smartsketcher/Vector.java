@@ -55,23 +55,32 @@ class Vector {
     public static PointF[] createBoundary(final PointF[] points, final float thickness) {
         /**
          * Create the boundary of a line (as a PointF array).
-         Should be drawn with GL_TRIANGLE_STRIP to get a solid line
+         * Should be drawn with GL_TRIANGLE_STRIP to get a solid line
         */
         ArrayList<PointF> boundary = new ArrayList<PointF>();
-        PointF prev = null;
+        PointF prev = null, curr = null;
+        PointF conn = null, orth = null;
         PointF v1 = null, v2 = null;
-        for (PointF curr: points) {
+        for (PointF c: points) {
+            curr = c;
             if (prev != null) {
-                final PointF conn = Vector.sub(curr, prev);
-                final PointF orth = Vector.normalized(Vector.orth(conn), thickness / 2.0f);
+                conn = Vector.sub(curr, prev);
+                orth = Vector.normalized(Vector.orth(conn), thickness / 2.0f);
                 boundary.add(Vector.add(prev, orth));
                 boundary.add(Vector.sub(prev, orth));
-                // FIXME - maybe add only once for point?
+                // TODO - remove this points, add only at the end
+                // (sometimes produces strange line endings)
                 boundary.add(Vector.add(curr, orth));
                 boundary.add(Vector.sub(curr, orth));
             }
             prev = curr;
         }
+        /*
+        if (curr != null && orth != null) {
+            boundary.add(Vector.add(curr, orth));
+            boundary.add(Vector.sub(curr, orth));
+        }
+        */
         return boundary.toArray(new PointF[boundary.size()]);
     }
     
