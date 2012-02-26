@@ -91,9 +91,9 @@ public class OpenSheetActivity extends Activity {
             if (previewFile.exists()) {
                 imageView.setImageURI(Uri.fromFile(previewFile));
             } else {
-                imageView.setImageResource(R.drawable.no_preview_small);
+                //imageView.setImageResource(R.drawable.no_preview_small);
             }
-            //imageView.setBackgroundResource(mGalleryItemBackground);
+            imageView.setBackgroundResource(mGalleryItemBackground);
             return imageView;
         }
     }
