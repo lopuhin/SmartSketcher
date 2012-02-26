@@ -76,7 +76,7 @@ public class OpenSheetActivity extends Activity {
 
         public View getView(int position, View convertView, ViewGroup parent) {
             ImageView imageView;
-            final int size = 95, padding = 8;
+            final int size = 150, padding = 8;
             if (convertView == null) {
                 imageView = new ImageView(mContext);
                 imageView.setLayoutParams(new GridView.LayoutParams(size, size));
@@ -85,7 +85,7 @@ public class OpenSheetActivity extends Activity {
             } else {
                 imageView = (ImageView) convertView;
             }
-            File previewFile = FileHelper.getPreviewFileBySheetId(sheetIds.get(position));
+            File previewFile = FileHelper.getSmallPreviewFileBySheetId(sheetIds.get(position));
             if (previewFile.exists()) {
                 imageView.setImageURI(Uri.fromFile(previewFile));
             } else {

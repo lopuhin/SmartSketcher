@@ -13,13 +13,12 @@ import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 
 
 public class FileHelper {
     private static final String
-        PREVIEW_FILENAME_RE = "preview-(\\d+).png",
-        PREVIEW_FILENAME_PATTERN = "preview-%d.png";
+        PREVIEW_FILENAME_PATTERN = "preview-full-%d.png",
+        SMALL_PREVIEW_FILENAME_PATTERN = "preview-small-%d.png";
     
     private final MainSurfaceView mainSurfaceView;
     private final Context context;
@@ -30,25 +29,16 @@ public class FileHelper {
         this.context = mainSurfaceView.getContext();
     }
 
-    public static Long getSheetIdByPreviewPath(String previewPath) {
+    public static File getFullPreviewFileBySheetId(long sheetId) {
         /**
-         * Return sheet id, given a path to preview, or null - if filename is invalid.
+         * Return file, where preview should reside
          */
-        String parent = getSDDir().getAbsolutePath();
-        String expectedPath = parent + "/" + PREVIEW_FILENAME_RE;
-        if (previewPath.matches(expectedPath)) {
-            Pattern p = Pattern.compile(expectedPath);
-            Matcher m = p.matcher(previewPath);
-            if (m.find()) {
-                return Long.parseLong(m.group(1));
-            }
-        }
-        return null;
+        return new File(getSDDir(), String.format(PREVIEW_FILENAME_PATTERN, sheetId));
     }
 
-    public static File getPreviewFileBySheetId(long sheetId) {
+    public static File getSmallPreviewFileBySheetId(long sheetId) {
         /**
-         * Return file, where preview should live
+         * Return file, where small preview should reside
          */
         return new File(getSDDir(), String.format(PREVIEW_FILENAME_PATTERN, sheetId));
     }
@@ -89,20 +79,38 @@ public class FileHelper {
         @Override
         public void run() {
             /**
-             * Save preview to file (use current sheet id as postfix)
+             * Save small and full previews to files (use current sheet id as postfix)
              */
             Sheet sheet = mainSurfaceView.getSheet();
-            File file = getPreviewFileBySheetId(sheet.getId());
-            FileOutputStream fos;
+            long sheetId = sheet.getId();
+            final File fileFull = getFullPreviewFileBySheetId(sheetId),
+                  fileSmall = getSmallPreviewFileBySheetId(sheetId);
+            FileOutputStream fosFull, fosSmall;
             try {
-                fos = new FileOutputStream(file);
+                fosFull = new FileOutputStream(fileFull);
+                fosSmall = new FileOutputStream(fileSmall);
             } catch (FileNotFoundException e) {
                 throw new RuntimeException(e);
             }
-            Bitmap bitmap = mainSurfaceView.makeScreenshot();
-            if (bitmap != null) {
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                notifyMediaScanner(file);
+            Bitmap bitmapFull = mainSurfaceView.makeScreenshot();
+            if (bitmapFull != null) {
+                final int width = bitmapFull.getWidth(), height = bitmapFull.getHeight();
+                int smallWidth, smallHeight;
+                // TODO - load size from resources
+                int maxSize = 150; 
+                if (width > height) {
+                    smallWidth = maxSize;
+                    smallHeight = (int)((float)height * maxSize / width);
+                } else {
+                    smallHeight = maxSize;
+                    smallWidth = (int)((float)width * maxSize / height);
+                }
+                Bitmap bitmapSmall = Bitmap.createScaledBitmap(
+                        bitmapFull, smallWidth, smallHeight, true);
+                bitmapSmall.compress(Bitmap.CompressFormat.PNG, 100, fosSmall);
+                bitmapFull.compress(Bitmap.CompressFormat.PNG, 100, fosFull);
+                notifyMediaScanner(fileSmall);
+                notifyMediaScanner(fileFull);
             }
         }
     }
