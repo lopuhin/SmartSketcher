@@ -11,6 +11,7 @@ import android.content.res.TypedArray;
 import android.widget.BaseAdapter;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -28,6 +29,7 @@ public class OpenSheetActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         setContentView(R.layout.open);
 
         dbAdapter = new DBAdapter(this);
@@ -89,7 +91,7 @@ public class OpenSheetActivity extends Activity {
             if (previewFile.exists()) {
                 imageView.setImageURI(Uri.fromFile(previewFile));
             } else {
-                imageView.setImageResource(R.drawable.no_preview);
+                imageView.setImageResource(R.drawable.no_preview_small);
             }
             //imageView.setBackgroundResource(mGalleryItemBackground);
             return imageView;

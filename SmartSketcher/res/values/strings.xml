@@ -25,5 +25,8 @@
     <string name="soon">Coming soon!</string>
     <string name="ok">Ok</string>
     <string name="cancel">Cancel</string>
+    <string name="saving_preview">Saving preview...</string>
+    <string name="cant_save_preview">Can not save preview, maybe external
+      storage is not available</string>
     <dimen name="eraser_radius">30px</dimen>
 </resources>
