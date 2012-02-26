@@ -27,7 +27,7 @@ public class EraseTrace extends Shape {
         boundaryBuffer = OpenGLRenderer.createBuffer(boundary, Sheet.BACKGROUND_COLOR);
     }
 	
-    public void draw(OpenGLRenderer renderer) {
+    public void draw(OpenGLRenderer renderer, float unused) {
         if (Config.DEBUG) {
             renderer.drawArray(pointsBuffer, points.length, GLES20.GL_LINE_STRIP);
             renderer.drawArray(pointsBuffer, points.length, GLES20.GL_POINTS);

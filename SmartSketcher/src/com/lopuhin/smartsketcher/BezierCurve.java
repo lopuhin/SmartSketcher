@@ -1,7 +1,6 @@
 package com.lopuhin.smartsketcher;
 
 import java.util.ArrayList;
-import java.nio.FloatBuffer;
 
 import android.graphics.Color;
 import android.graphics.PointF;
@@ -9,17 +8,12 @@ import android.util.Log;
 import android.opengl.GLES20;
 
 
-public class BezierCurve extends Shape {
+public class BezierCurve extends AbstractCurve {
     /**
      * Bezier (smoothed) curve
      */
     private PointF[] points;
 
-    private FloatBuffer pointsBuffer;
-    private int pointsBufferSize;
-    private float thickness;
-    private int drawMode;
-    
     private final static String TAG = "BezierCurve";
     private float fittingError;
     
@@ -30,18 +24,14 @@ public class BezierCurve extends Shape {
             points[i] = p;
             i += 1;
         }
-        this.thickness = thickness;
-        initBuffer();
+        setThickness(thickness);
+        initBuffer(toSegments());
     }
         
     BezierCurve(final PointF[] pointsList, float thickness) {
         points = pointsList;
-        this.thickness = thickness;
-        initBuffer();
-    }
-    
-    public void draw(OpenGLRenderer renderer) {
-        renderer.drawArray(pointsBuffer, pointsBufferSize, drawMode);
+        setThickness(thickness);
+        initBuffer(toSegments());
     }
 
     public static BezierCurve approximated(final ArrayList<PointF> pointsList,
@@ -79,29 +69,9 @@ public class BezierCurve extends Shape {
         return points;
     }
     
-    @Override
-    public float getThickness() {
-        return thickness;
-    }
-        
     public float getFittingError() {
         // normalized fitting error
         return fittingError;
-    }
-
-    private void initBuffer() {
-        final PointF[] segPoints = toSegments();
-        PointF[] bufferPoints = null;
-        if (hasThickness()) {
-            bufferPoints = Vector.createBoundary(segPoints, thickness);
-            drawMode = GLES20.GL_TRIANGLE_STRIP;
-        }
-        if (bufferPoints == null || bufferPoints.length < 4) {
-            bufferPoints = segPoints;
-            drawMode = GLES20.GL_LINE_STRIP;
-        }
-        pointsBuffer = OpenGLRenderer.createBuffer(bufferPoints, DEFAULT_COLOR);
-        pointsBufferSize = bufferPoints.length;
     }
 
     private PointF[] toSegments() {

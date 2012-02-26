@@ -181,8 +181,9 @@ public class Sheet {
         synchronized (shapes) {
             shapesCopy = (ArrayList<Shape>) shapes.clone();
         }
+        float zoom = getViewZoom();
         for (Shape sh: shapesCopy) {
-            sh.draw(renderer);
+            sh.draw(renderer, zoom);
         }
     }
     

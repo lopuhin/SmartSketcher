@@ -123,24 +123,29 @@ public class MainSurfaceView extends GLSurfaceView {
             break;
         case (MotionEvent.ACTION_MOVE) :
             if (mode == ZOOM_MODE) {
-                float touchSpacing = touchSpacing(event);
-                if (touchSpacing < SMALL_TOUCH_SPACING)
-                    touchSpacing = prevTouchSpacing;
-                Log.d(TAG, "touchSpacing " + touchSpacing +
-                      " prevTouchSpacing " + prevTouchSpacing);
-                final float dZoom = touchSpacing / prevTouchSpacing;
-                sheet.setViewZoom(prevViewZoom * dZoom);
-                final PointF touchCenter = touchCenter(event);
-                sheet.setViewPos(new PointF(prevViewPos.x +
-                                            (prevTouchCenter.x - touchCenter.x / dZoom) /
-                                            sheet.getViewZoom(),
-                                            prevViewPos.y +
-                                            (prevTouchCenter.y - touchCenter.y / dZoom) /
-                                            sheet.getViewZoom()));
-                prevViewZoom = sheet.getViewZoom();
-                prevViewPos = sheet.getViewPos();
-                prevTouchSpacing = touchSpacing;
-                prevTouchCenter = touchCenter;
+                if (event.getPointerCount() != 2) {
+                    mode = IDLE_MODE;
+                } else {
+                    float touchSpacing = touchSpacing(event);
+                    if (touchSpacing < SMALL_TOUCH_SPACING)
+                        touchSpacing = prevTouchSpacing;
+                    Log.d(TAG, "touchSpacing " + touchSpacing +
+                        " prevTouchSpacing " + prevTouchSpacing);
+                    final float dZoom = touchSpacing / prevTouchSpacing;
+                    sheet.setViewZoom(prevViewZoom * dZoom);
+                    final PointF touchCenter = touchCenter(event);
+                    sheet.setViewPos(new PointF(
+                                prevViewPos.x +
+                                (prevTouchCenter.x - touchCenter.x / dZoom) /
+                                sheet.getViewZoom(),
+                                prevViewPos.y +
+                                (prevTouchCenter.y - touchCenter.y / dZoom) /
+                                sheet.getViewZoom()));
+                    prevViewZoom = sheet.getViewZoom();
+                    prevViewPos = sheet.getViewPos();
+                    prevTouchSpacing = touchSpacing;
+                    prevTouchCenter = touchCenter;
+                }
             } else if (mode == DRAW_MODE) {
                 if (instrument == DRAW_INSTRUMENT) {
                     addPoint(mainPoint);
@@ -207,7 +212,7 @@ public class MainSurfaceView extends GLSurfaceView {
                 curve = new Curve(lastSegment, true, currentThickness);
         }
         if (curve != null) {
-            curve.draw(renderer);
+            curve.draw(renderer, sheet.getViewZoom());
         }
     }
 
@@ -222,8 +227,7 @@ public class MainSurfaceView extends GLSurfaceView {
                 eraseTrace = new EraseTrace(lastEraseTrace, sheet.toSheet(eraserRadius));
         }
         if (eraseTrace != null) {
-            eraseTrace.draw(renderer);
-            // TODO draw eraser edges (a circle) around last point
+            eraseTrace.draw(renderer, sheet.getViewZoom());
         }
     }
 

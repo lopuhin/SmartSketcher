@@ -13,7 +13,7 @@ public abstract class Shape {
     	return false;
     }
 
-    public abstract void draw(OpenGLRenderer renderer);
+    public abstract void draw(OpenGLRenderer renderer, float zoom);
 
     public final static int DEFAULT_COLOR = Color.BLACK;
 
