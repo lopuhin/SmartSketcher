@@ -74,12 +74,21 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     private boolean screenshot;
     private Bitmap lastScreenshot;
     
+    private int framerate;
+    private long fpsTime;
+    private long frameTime;
+    private float avgFPS;
+
     OpenGLRenderer(MainSurfaceView mainSurfaceView) {
         mConfigChooser = new MultisampleConfigChooser();
         this.mainSurfaceView = mainSurfaceView;
         width = mainSurfaceView.getMeasuredWidth();
         height = mainSurfaceView.getMeasuredHeight();
         screenshot = false;
+
+        long t = SystemClock.uptimeMillis();
+        frameTime = t;
+        fpsTime = t;
     }
 
     public MultisampleConfigChooser getConfigChooser() {
@@ -177,6 +186,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             makeScreenshot(gl);
             screenshot = false;
         }
+        measureFPS();
     }
 
     public void setScreenshot() {
@@ -285,5 +295,23 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             throw new RuntimeException(errorText);
         }
     }
+
+    private void measureFPS() {
+        final long time = SystemClock.uptimeMillis();
+        if (time >= (frameTime + 1000.0f)) {
+            frameTime = time;
+            avgFPS += framerate;
+            framerate = 0;
+        }
+			
+        if (time >= (fpsTime + 3000.0f)) {
+            fpsTime = time;
+            avgFPS /= 3.0f;
+            Log.d(TAG, "fps: " + avgFPS);
+            avgFPS = 0.0f;
+        }
+        framerate++;
+    }
+
 }
  

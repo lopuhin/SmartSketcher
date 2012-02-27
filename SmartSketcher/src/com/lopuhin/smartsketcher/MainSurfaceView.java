@@ -207,9 +207,10 @@ public class MainSurfaceView extends GLSurfaceView {
          */
         Curve curve = null;
         synchronized (lastSegment) {
-            if (lastSegment.size() > 0)
-                // TODO - cache?
+            if (lastSegment.size() > 0) {
+                // TODO - build incrementaly?
                 curve = new Curve(lastSegment, true, currentThickness);
+            }
         }
         if (curve != null) {
             curve.draw(renderer, sheet.getViewZoom());
@@ -223,7 +224,7 @@ public class MainSurfaceView extends GLSurfaceView {
         EraseTrace eraseTrace = null;
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0)
-                // TODO - cache? or build incrementaly?
+                // TODO - build incrementaly?
                 eraseTrace = new EraseTrace(lastEraseTrace, sheet.toSheet(eraserRadius));
         }
         if (eraseTrace != null) {
