@@ -296,10 +296,10 @@ public class MainSurfaceView extends GLSurfaceView {
         synchronized (lastSegment) {
             SmoothLastSegment action = new SmoothLastSegment(lastSegment, lastSegmentTimes,
                                                              currentThickness);
+            sheet.doAction(action);
             lastSegment.clear();
             lastSegmentTimes.clear();
             lastSegmentCurve.clear();
-            sheet.doAction(action);
         }
     }
 
