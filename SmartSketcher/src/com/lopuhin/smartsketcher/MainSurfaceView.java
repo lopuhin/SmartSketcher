@@ -35,6 +35,7 @@ public class MainSurfaceView extends GLSurfaceView {
         IDLE_MODE = 2,
         MOVE_MODE = 3;
     private final static float SMALL_TOUCH_SPACING = 1.0f;
+    private final static int maxPoints = 1000;
     
     private int mode, instrument;
 
@@ -48,6 +49,7 @@ public class MainSurfaceView extends GLSurfaceView {
     private Sheet sheet;
     private ArrayList<PointF> lastSegment;
     private ArrayList<Long> lastSegmentTimes;
+    private IncCurve lastSegmentCurve;
     private ArrayList<PointF> lastEraseTrace;
     private OpenGLRenderer renderer;
     private SmartSketcher parentContext;
@@ -76,6 +78,7 @@ public class MainSurfaceView extends GLSurfaceView {
         
         lastSegment = new ArrayList<PointF>();
         lastSegmentTimes = new ArrayList<Long>();
+        lastSegmentCurve = new IncCurve(maxPoints);
         lastEraseTrace = new ArrayList<PointF>();
 
         //Resources res = getResources();
@@ -193,7 +196,7 @@ public class MainSurfaceView extends GLSurfaceView {
          * Draw everything
          */
         sheet.draw(renderer);
-        drawLastSegment(renderer);
+        lastSegmentCurve.draw(renderer, sheet.getViewZoom());
         drawLastEraseTrace(renderer);
     }
 
@@ -201,22 +204,6 @@ public class MainSurfaceView extends GLSurfaceView {
         currentThickness = thickness;
     }
     
-    private void drawLastSegment(OpenGLRenderer renderer) {
-        /**
-         * Draw lastSegment, using OpenGL renderer
-         */
-        Curve curve = null;
-        synchronized (lastSegment) {
-            if (lastSegment.size() > 0) {
-                // TODO - build incrementaly?
-                curve = new Curve(lastSegment, true, currentThickness);
-            }
-        }
-        if (curve != null) {
-            curve.draw(renderer, sheet.getViewZoom());
-        }
-    }
-
     private void drawLastEraseTrace(OpenGLRenderer renderer) {
         /**
          * Draw erase trace (with edges for the last point)
@@ -224,7 +211,7 @@ public class MainSurfaceView extends GLSurfaceView {
         EraseTrace eraseTrace = null;
         synchronized (lastEraseTrace) {
             if (lastEraseTrace.size() > 0)
-                // TODO - build incrementaly?
+                // TODO - build incrementaly!
                 eraseTrace = new EraseTrace(lastEraseTrace, sheet.toSheet(eraserRadius));
         }
         if (eraseTrace != null) {
@@ -280,9 +267,18 @@ public class MainSurfaceView extends GLSurfaceView {
          * Add point to last segment (the one that is beeing drawn)
          */
         final long t = System.currentTimeMillis();
+        final int size;
         synchronized (lastSegment) {
-            lastSegment.add(sheet.toSheet(p));
+            size = lastSegment.size();
+            final PointF sheetPoint = sheet.toSheet(p);
+            lastSegment.add(sheetPoint);
             lastSegmentTimes.add(t);
+            lastSegmentCurve.setThickness(currentThickness);
+            lastSegmentCurve.addPoint(sheetPoint);
+        }
+        if (size >= maxPoints - 1) {
+            finishSegment();
+            mode = IDLE_MODE;
         }
     }
         
@@ -302,6 +298,7 @@ public class MainSurfaceView extends GLSurfaceView {
                                                              currentThickness);
             lastSegment.clear();
             lastSegmentTimes.clear();
+            lastSegmentCurve.clear();
             sheet.doAction(action);
         }
     }

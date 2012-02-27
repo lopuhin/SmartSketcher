@@ -28,6 +28,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     private float[] mVMatrix = new float[16];
     private float[] mProjectionMatrix = new float[16];
 
+    private static final int mPointDataSize = 7;
     private static final int mBytesPerFloat = 4;
     private static final int mStrideBytes = 7 * mBytesPerFloat;	
     private static final int mPositionOffset = 0;
@@ -261,10 +262,39 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
         /**
          * Create FloatBuffer for drawing points with specified color
          */
+        final float[] data = pointsData(points, color);
+        FloatBuffer buffer = allocateBuffer(data.length);
+        buffer.put(data).position(0);
+        return buffer;
+    }
+
+    public static void addToBuffer(
+            FloatBuffer buffer, int pointIndex, PointF point, int color) {
+        /**
+         * Add point to buffer (buffer is assumed to be large enough)
+         */
+        final float[] data = pointsData(new PointF[]{point}, color);
+        buffer.position(pointIndex * mPointDataSize);
+        buffer.put(data).position(0); 
+    }
+
+    public static FloatBuffer allocateBuffer(int nPoints) {
+        /**
+         * Allocate empty float buffer of specified size
+         */
+        ByteBuffer vbb = ByteBuffer.allocateDirect(
+                nPoints * mPointDataSize * mBytesPerFloat); 
+        return vbb.order(ByteOrder.nativeOrder()).asFloatBuffer();
+    }
+
+    private static float[] pointsData(PointF[] points, int color) {
+        /**
+         * Return float array of points coordinates and colors
+         */
         float data[] = new float[points.length * 7];
         for (int pi = 0; pi < points.length; pi++) {
             PointF p = points[pi];
-            int i = pi * 7;
+            int i = pi * mPointDataSize;
             data[i+0] = p.x;  // x
             data[i+1] = p.y;  // y
             data[i+2] = 0.0f; // z
@@ -273,14 +303,7 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
             data[i+5] = glColor(Color.blue(color));
             data[i+6] = glColor(Color.alpha(color));
         }
-        ByteBuffer vbb = ByteBuffer.allocateDirect(data.length * mBytesPerFloat); 
-        // use the device hardware's native byte order
-        // create a floating point buffer from the ByteBuffer
-        FloatBuffer buffer = vbb.order(ByteOrder.nativeOrder()).asFloatBuffer();
-        // add the coordinates to the FloatBuffer
-        // set the buffer to read the first coordinate
-        buffer.put(data).position(0);
-        return buffer;
+        return data;
     }
 
     private static float glColor(int color) {

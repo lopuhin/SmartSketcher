@@ -11,7 +11,7 @@
       android:key="THICKNESS"
       android:title="@string/thickness"
       android:summary="@string/thickness"
-      android:defaultValue="3"
+      android:defaultValue="0"
       android:entries="@array/thickness_labels"
       android:entryValues="@array/thickness_values"
       android:persistent="true"

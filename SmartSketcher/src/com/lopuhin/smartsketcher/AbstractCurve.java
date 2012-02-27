@@ -11,11 +11,11 @@ public abstract class AbstractCurve extends Shape {
      * Common drawing stuff for all line-based shapes
      */
 
-    private float thickness;
-    private FloatBuffer thinPointsBuffer;
-    private int thinBufferSize;
-    private FloatBuffer thickPointsBuffer;
-    private int thickBufferSize;
+    protected float thickness;
+    protected FloatBuffer thinPointsBuffer;
+    protected int thinBufferSize;
+    protected FloatBuffer thickPointsBuffer;
+    protected int thickBufferSize;
 
     public void draw(OpenGLRenderer renderer, float zoom) {
         /**
@@ -25,7 +25,7 @@ public abstract class AbstractCurve extends Shape {
         if (thickPointsBuffer != null && thickBufferSize > 3 && 
                 hasThickness() && (getThickness() * zoom > 1.0f)) {
             renderer.drawArray(thickPointsBuffer, thickBufferSize, GLES20.GL_TRIANGLE_STRIP);
-        } else {
+        } else if (thinBufferSize > 0) {
             renderer.drawArray(thinPointsBuffer, thinBufferSize, GLES20.GL_LINE_STRIP);
         }
     }
