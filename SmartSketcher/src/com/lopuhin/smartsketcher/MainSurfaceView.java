@@ -310,6 +310,7 @@ public class MainSurfaceView extends GLSurfaceView {
         synchronized (lastSegment) {
             lastSegment.clear();
             lastSegmentTimes.clear();
+            lastSegmentCurve.clear();
         }
     }
         
