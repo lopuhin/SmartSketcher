@@ -269,11 +269,11 @@ public class OpenGLRenderer implements GLSurfaceView.Renderer {
     }
 
     public static void addToBuffer(
-            FloatBuffer buffer, int pointIndex, PointF point, int color) {
+            FloatBuffer buffer, int pointIndex, PointF[] points, int color) {
         /**
-         * Add point to buffer (buffer is assumed to be large enough)
+         * Add points to buffer (buffer is assumed to be large enough)
          */
-        final float[] data = pointsData(new PointF[]{point}, color);
+        final float[] data = pointsData(points, color);
         buffer.position(pointIndex * mPointDataSize);
         buffer.put(data).position(0); 
     }
