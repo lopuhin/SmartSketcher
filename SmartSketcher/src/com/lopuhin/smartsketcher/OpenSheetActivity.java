@@ -90,9 +90,7 @@ public class OpenSheetActivity extends Activity {
             File previewFile = FileHelper.getSmallPreviewFileBySheetId(sheetIds.get(position));
             if (previewFile.exists()) {
                 imageView.setImageURI(Uri.fromFile(previewFile));
-            } else {
-                //imageView.setImageResource(R.drawable.no_preview_small);
-            }
+            } 
             imageView.setBackgroundResource(mGalleryItemBackground);
             return imageView;
         }

@@ -73,7 +73,7 @@ public class SmartSketcher extends Activity
     protected void onPause() {
         super.onPause();
         mainSurfaceView.onPause();
-        fileHelper.savePreview();
+        //fileHelper.savePreview();
     }
 
     @Override

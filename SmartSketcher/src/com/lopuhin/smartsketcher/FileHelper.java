@@ -40,7 +40,7 @@ public class FileHelper {
         /**
          * Return file, where small preview should reside
          */
-        return new File(getSDDir(), String.format(PREVIEW_FILENAME_PATTERN, sheetId));
+        return new File(getSDDir(), String.format(SMALL_PREVIEW_FILENAME_PATTERN, sheetId));
     }
     
     public void savePreview() {
